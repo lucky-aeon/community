@@ -6,6 +6,7 @@ import (
 	"xhyovo.cn/community/utils"
 )
 
+// todo: feat login
 func Login(c *gin.Context) {
 
 	user := services.Login(c.Query("account"), c.Query("password"))
@@ -13,6 +14,7 @@ func Login(c *gin.Context) {
 	utils.Ok().Data(user).Res(c)
 }
 
+// todo: feat register
 func Register(c *gin.Context) {
-	services.
+	// services.
 }

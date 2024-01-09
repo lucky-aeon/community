@@ -11,7 +11,7 @@ import (
 
 var db gorm.DB
 
-func InitDb(dbconfig config.Db) {
+func InitDb(dbconfig config.DbConfig) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)%scharset=utf8mb4&parseTime=True&loc=Local",
 		dbconfig.Username, dbconfig.Password, dbconfig.Address, dbconfig.Database)
 	dbObject, err := gorm.Open(mysql.Open(dsn), &gorm.Config{

@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"xhyovo.cn/community/config"
+)
 
 func main() {
-	fmt.Println("Hello World")
+	// routers.InitRouter()
+	config.InitConfig()
 }

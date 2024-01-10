@@ -1,9 +1,9 @@
 package services
 
 import (
-	"xhyovo.cn/community/dao"
-	"xhyovo.cn/community/model"
-	"xhyovo.cn/community/utils"
+	"xhyovo.cn/community/pkg/utils"
+	"xhyovo.cn/community/server/dao"
+	"xhyovo.cn/community/server/model"
 )
 
 func GenerateCode() int {

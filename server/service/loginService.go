@@ -3,21 +3,21 @@ package services
 import (
 	"errors"
 
-	"xhyovo.cn/community/dao"
-	"xhyovo.cn/community/model"
+	"xhyovo.cn/community/server/dao"
+	"xhyovo.cn/community/server/model"
 )
 
-func Login(account, pswd string) model.User {
+func Login(account, pswd string) (model.User, error) {
 
 	user := &model.User{Account: account, Password: pswd}
 
 	user = dao.UserDao.QuerySingle(user)
 	if user == nil {
-		errors.New("登陆失败！账号或密码错误")
+		return *user, errors.New("登陆失败！账号或密码错误")
 
 	}
 
-	return *user
+	return *user, nil
 }
 
 func Register(account, pswd, name string, inviteCode int) error {
@@ -25,13 +25,13 @@ func Register(account, pswd, name string, inviteCode int) error {
 	// query code
 	code := dao.InviteCode.QuerySingle(&model.InviteCode{Code: inviteCode})
 	if code == nil {
-		errors.New("验证码不存在")
+		return errors.New("验证码不存在")
 	}
 
 	// query account
 	user := dao.UserDao.QuerySingle(&model.User{Account: account})
 	if user != nil {
-		errors.New("账户已存在,换一个吧")
+		return errors.New("账户已存在,换一个吧")
 	}
 
 	return nil

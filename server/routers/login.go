@@ -4,14 +4,14 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"xhyovo.cn/community/services"
-	"xhyovo.cn/community/utils"
+	"xhyovo.cn/community/pkg/utils"
+	services "xhyovo.cn/community/server/service"
 )
 
 // todo: feat login
 func Login(c *gin.Context) {
 
-	user := services.Login(c.Query("account"), c.Query("password"))
+	user, _ := services.Login(c.Query("account"), c.Query("password"))
 	user.Password = ""
 	utils.Ok().Data(user).Res(c)
 }

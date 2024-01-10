@@ -1,8 +1,6 @@
 package dao
 
-import (
-	"xhyovo.cn/community/config"
-)
+import "xhyovo.cn/community/server/config"
 
 // var db gorm.DB
 

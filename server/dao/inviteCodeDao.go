@@ -1,8 +1,6 @@
 package dao
 
-import (
-	"xhyovo.cn/community/model"
-)
+import "xhyovo.cn/community/server/model"
 
 var InviteCode inviteCode
 
@@ -18,5 +16,5 @@ func (*inviteCode) QuerySingle(code *model.InviteCode) *model.InviteCode {
 }
 
 func (*inviteCode) Del(code int) {
-	db.Delete(&model.InviteCode{}, code)
+	// db.Delete(&model.InviteCode{}, code)
 }

@@ -1,6 +1,6 @@
 package dao
 
-import "xhyovo.cn/community/model"
+import "xhyovo.cn/community/server/model"
 
 var UserDao userDao
 
@@ -25,6 +25,6 @@ func (*userDao) QueryList(user *model.User) []*model.User {
 
 func (*userDao) Create(user *model.User) int64 {
 
-	res := db.Create(user)
-	return res.RowsAffected
+	// res := db.Create(user)
+	return 1
 }

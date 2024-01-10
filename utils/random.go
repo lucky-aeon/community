@@ -3,9 +3,10 @@ package utils
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 )
 
-func GenerateCode(digits int) string {
+func GenerateCode(digits int) int {
 
 	code := ""
 	for i := 0; i < digits; i++ {
@@ -13,6 +14,6 @@ func GenerateCode(digits int) string {
 
 		code += fmt.Sprint(digit)
 	}
-
-	return code
+	num, _ := strconv.Atoi(code)
+	return num
 }

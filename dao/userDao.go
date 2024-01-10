@@ -7,7 +7,7 @@ var UserDao userDao
 type userDao struct {
 }
 
-func (u *userDao) QuerySingle(user *model.User) *model.User {
+func (*userDao) QuerySingle(user *model.User) *model.User {
 
 	userObject := new(model.User)
 	db.Where(user).Find(&userObject)
@@ -15,7 +15,7 @@ func (u *userDao) QuerySingle(user *model.User) *model.User {
 	return userObject
 }
 
-func (u *userDao) QueryList(user *model.User) []*model.User {
+func (*userDao) QueryList(user *model.User) []*model.User {
 
 	var users []*model.User
 	db.Where(user).Find(&users)
@@ -23,7 +23,7 @@ func (u *userDao) QueryList(user *model.User) []*model.User {
 	return users
 }
 
-func (u *userDao) Create(user *model.User) int64 {
+func (*userDao) Create(user *model.User) int64 {
 
 	res := db.Create(user)
 	return res.RowsAffected

@@ -1,6 +1,8 @@
 package routers
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/services"
 	"xhyovo.cn/community/utils"
@@ -16,5 +18,10 @@ func Login(c *gin.Context) {
 
 // todo: feat register
 func Register(c *gin.Context) {
-	// services.
+	code, err := strconv.Atoi(c.Query("inviteCode"))
+	if err != nil {
+		utils.Error().Msg("序列化邀请码失败,请检查邀请码是否为数字")
+	}
+	services.Register(c.Query("account"),
+		c.Query("password"), c.Query("name"), code)
 }

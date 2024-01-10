@@ -1,6 +1,8 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 // it's issue or answer
 type Article struct {
@@ -8,7 +10,6 @@ type Article struct {
 	Title       string
 	Description string
 	UserId      uint // The id of the author of this article
-	IssueId     uint // If issueId is not zero, it is an answer or it is a question
-	Solved      bool // The issue status is solved.
+	State       int  // state code see details:
 	Like        int
 }

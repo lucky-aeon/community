@@ -12,7 +12,7 @@ type inviteCode struct {
 func (*inviteCode) QuerySingle(code *model.InviteCode) *model.InviteCode {
 
 	o := new(model.InviteCode)
-	db.Where(&code).Find(&o)
+	// db.Where(&code).Find(&o)
 
 	return o
 }

@@ -3,7 +3,7 @@ package model
 import "time"
 
 type InviteCode struct {
-	ID        uint `gorm:"primarykey"`
+	ID        uint
 	Code      int
 	State     bool
 	CreatedAt time.Time

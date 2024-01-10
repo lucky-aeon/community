@@ -1,14 +1,24 @@
 package services
 
-func GenerateCode() int {
-	// 生成code
-	// code := utils.GenerateCode(8)
-	// 查询db中是否存在 循环
+import (
+	"xhyovo.cn/community/dao"
+	"xhyovo.cn/community/model"
+	"xhyovo.cn/community/utils"
+)
 
-	//返回code
-	return 0
+func GenerateCode() int {
+
+	codeObject := &model.InviteCode{}
+	// generate code
+	for codeObject == nil {
+		code := utils.GenerateCode(8)
+		codeObject = dao.InviteCode.QuerySingle(&model.InviteCode{Code: code})
+	}
+
+	return codeObject.Code
 }
 
-func DestoryCode() {
+func DestoryCode(code int) {
 
+	dao.InviteCode.Del(code)
 }

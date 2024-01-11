@@ -1,19 +1,35 @@
 package dao
 
-import "xhyovo.cn/community/server/config"
+import (
+	"database/sql"
+	"fmt"
+	"time"
 
-// var db gorm.DB
+	_ "github.com/go-sql-driver/mysql"
+	"xhyovo.cn/community/server/config"
+)
 
-func InitDb(dbconfig config.DbConfig) {
-	// dsn := fmt.Sprintf("%s:%s@tcp(%s)%scharset=utf8mb4&parseTime=True&loc=Local",
-	// 	dbconfig.Username, dbconfig.Password, dbconfig.Address, dbconfig.Database)
-	// dbObject, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+var DB *sql.DB
 
-	// 	NamingStrategy: schema.NamingStrategy{SingularTable: true},
-	// })
-	// if err != nil {
-	// 	panic(err.Error())
-	// }
-	// db = *dbObject
+func InitDb(config *config.DbConfig) {
 
+	d := "%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local"
+
+	dsn := fmt.Sprintf(d, config.Username, config.Password, config.Address, config.Database)
+	db, err := sql.Open("mysql", dsn)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// 配置 sql.DB 连接池参数
+	// ref: https://www.alexedwards.net/blog/configuring-sqldb
+	db.SetMaxOpenConns(25)                 // 设置最大的并发连接数（in-use + idle）
+	db.SetMaxIdleConns(25)                 // 设置最大的空闲连接数（idle）
+	db.SetConnMaxLifetime(5 * time.Minute) // 设置连接的最大生命周期
+
+	// 检查数据库连接
+	if err := db.Ping(); err != nil {
+		panic(err.Error())
+	}
+	DB = db
 }

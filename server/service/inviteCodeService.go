@@ -3,22 +3,21 @@ package services
 import (
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/dao"
-	"xhyovo.cn/community/server/model"
 )
 
 func GenerateCode() int {
 
-	codeObject := &model.InviteCode{}
+	var resCode int
 	// generate code
-	for codeObject == nil {
+	for resCode == 0 {
 		code := utils.GenerateCode(8)
-		codeObject = dao.InviteCode.QuerySingle(&model.InviteCode{Code: code})
+		resCode = dao.InviteCode.QueryCode(code)
 	}
 
-	return codeObject.Code
+	return resCode
 }
 
-func DestoryCode(code int) {
+func DestoryCode(code int) error {
 
-	dao.InviteCode.Del(code)
+	return dao.InviteCode.Del(code)
 }

@@ -8,6 +8,7 @@ import (
 )
 
 type AppConfig struct {
+	DbConfig DbConfig `yaml:"db"`
 }
 
 type DbConfig struct {

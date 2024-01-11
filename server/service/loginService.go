@@ -23,8 +23,7 @@ func Login(account, pswd string) (model.User, error) {
 func Register(account, pswd, name string, inviteCode int) error {
 
 	// query code
-	code := dao.InviteCode.QuerySingle(&model.InviteCode{Code: inviteCode})
-	if code == nil {
+	if !dao.InviteCode.Exist(inviteCode) {
 		return errors.New("验证码不存在")
 	}
 

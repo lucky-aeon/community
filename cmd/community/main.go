@@ -1,8 +1,6 @@
 package main
 
-import (
-	"xhyovo.cn/community/config"
-)
+import "xhyovo.cn/community/server/config"
 
 func main() {
 	// routers.InitRouter()

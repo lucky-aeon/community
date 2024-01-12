@@ -1,8 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"os"
+	"xhyovo.cn/community/server/dao"
 
 	"gopkg.in/yaml.v3"
 )
@@ -19,15 +19,18 @@ type DbConfig struct {
 }
 
 func InitConfig() {
-	config := AppConfig{}
+	config := &AppConfig{}
 
-	file, err := os.ReadFile("./config.yaml")
+	file, err := os.ReadFile("D:\\go_project\\community\\config.yaml")
 	if err != nil {
+
 		panic(err.Error)
+
 	}
 	err = yaml.Unmarshal(file, &config)
 	if err != nil {
 		panic(err.Error())
 	}
-	fmt.Println(config)
+	dao.InitDb(&config.DbConfig)
+
 }

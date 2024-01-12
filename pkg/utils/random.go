@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func GenerateCode(digits int) int {
+func GenerateCode(digits int) uint16 {
 
 	code := ""
 	for i := 0; i < digits; i++ {
@@ -15,5 +15,5 @@ func GenerateCode(digits int) int {
 		code += fmt.Sprint(digit)
 	}
 	num, _ := strconv.Atoi(code)
-	return num
+	return uint16(num)
 }

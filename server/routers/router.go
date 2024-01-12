@@ -7,7 +7,11 @@ import (
 // init router
 func InitRouter() {
 	r := gin.Default()
-	r.GET("/login", Login)
-	r.GET("/register", Register)
+
+	r.POST("/login", Login)
+	r.POST("/register", Register)
+	r.GET("/test", func(ctx *gin.Context) {
+		ctx.JSON(200, R.Ok().setMsg("ok"))
+	})
 	r.Run()
 }

@@ -5,33 +5,32 @@ import "github.com/gin-gonic/gin"
 var R r
 
 type r struct {
-	code int
-	data interface{}
-	msg  string
+	Code int
+	Data interface{}
+	Msg  string
 }
 
-func (r *r) Ok() *r {
-	r.code = 200
+func (*r) Ok() *r {
+
+	return &r{Code: 200}
+}
+
+func (*r) Error() *r {
+	return &r{Code: 500}
+}
+
+func (r *r) setData(any interface{}) *r {
+	r.Data = any
 	return r
 }
 
-func (r *r) Error() *r {
-	r.code = 500
-	return r
-}
-
-func (r *r) Data(any interface{}) *r {
-	r.data = any
-	return r
-}
-
-func (r *r) Msg(msg string) *r {
-	r.msg = msg
+func (r *r) setMsg(msg string) *r {
+	r.Msg = msg
 	return r
 }
 
 func (r *r) Res(c *gin.Context) {
 
-	c.PureJSON(r.code, r)
+	c.JSONP(r.Code, r)
 
 }

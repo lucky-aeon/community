@@ -1,5 +1,5 @@
 db:
   address: 127.0.0.1:3306
-  database: table
-  username: 123
+  database: community
+  username: root
   password: 123

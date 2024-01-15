@@ -9,14 +9,18 @@ var UserDao userDao
 type userDao struct {
 }
 
-func (*userDao) QueryUserByAccountAndPswd(account, pswd string) (*model.User, error) {
-	return nil, nil
+func (*userDao) QueryUser(user *model.User) *model.User {
+
+	db.Where(&user).Find(&user)
+	return user
 }
 
-func (*userDao) ExistUserByAccount(account string) bool {
-	return true
+func (*userDao) CreateUser(account, name, pswd string, ininviteCode uint16) uint {
+	user := model.User{Account: account, Name: name, Password: pswd, InviteCode: ininviteCode}
+	db.Create(user)
+	return user.ID
 }
 
-func (*userDao) CreateUser(account, name, pswd string, ininviteCode uint16) (int64, error) {
-	return 1, nil
+func (d *userDao) UpdateUser(id uint, username, pswd string) {
+	db.Model(&model.User{}).Where("id = ?", id).Update("name", username).Update("password", pswd)
 }

@@ -18,11 +18,11 @@ func GenerateCode() uint16 {
 	return code
 }
 
-func DestroyCode(code int) error {
+func DestroyCode(code int) {
 
-	return dao.InviteCode.Del(code)
+	dao.InviteCode.Del(code)
 }
 
-func SetState(code uint16) error {
-	return dao.InviteCode.SetState(code)
+func SetState(id uint16) {
+	dao.InviteCode.SetState(id)
 }

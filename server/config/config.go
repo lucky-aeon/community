@@ -1,10 +1,12 @@
 package config
 
+// 读取配置信息并且给各个配置类赋值
+
 import (
 	"os"
-	"xhyovo.cn/community/server/dao"
 
 	"gopkg.in/yaml.v3"
+	"xhyovo.cn/community/server/dao"
 )
 
 type AppConfig struct {
@@ -19,7 +21,7 @@ type DbConfig struct {
 }
 
 func InitConfig() {
-	config := &AppConfig{}
+	appConfig := &AppConfig{}
 
 	file, err := os.ReadFile("D:\\go_project\\community\\config.yaml")
 	if err != nil {
@@ -27,10 +29,11 @@ func InitConfig() {
 		panic(err.Error)
 
 	}
-	err = yaml.Unmarshal(file, &config)
+	err = yaml.Unmarshal(file, &appConfig)
 	if err != nil {
 		panic(err.Error())
 	}
-	dao.InitDb(&config.DbConfig)
+	db := appConfig.DbConfig
+	dao.Init(db.Username, db.Password, db.Address, db.Database)
 
 }

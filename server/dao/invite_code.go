@@ -5,7 +5,7 @@ var InviteCode inviteCode
 type inviteCode struct {
 }
 
-func (*inviteCode) SaveCode(code int) error {
+func (d *inviteCode) SaveCode(code int) error {
 
 	return nil
 }

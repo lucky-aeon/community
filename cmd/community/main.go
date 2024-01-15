@@ -1,8 +1,8 @@
 package main
 
 import (
+	"xhyovo.cn/community/cmd/community/routers"
 	"xhyovo.cn/community/server/config"
-	"xhyovo.cn/community/server/routers"
 )
 
 func main() {

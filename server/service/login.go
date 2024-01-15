@@ -10,10 +10,9 @@ import (
 
 func Login(account, pswd string) (*model.User, error) {
 
-	user, err := dao.UserDao.QueryUserByAccountAndPswd(account, pswd)
-	if err != nil {
-		return user, errors.New("登录失败！账号或密码错误")
-
+	user := dao.UserDao.QueryUser(&model.User{Account: account, Password: pswd})
+	if user.ID == 0 {
+		return nil, errors.New("登录失败！账号或密码错误")
 	}
 
 	return user, nil
@@ -30,21 +29,16 @@ func Register(account, pswd, name string, inviteCode uint16) error {
 		return errors.New("验证码不存在")
 	}
 
-	// query account
-	if dao.UserDao.ExistUserByAccount(account) {
+	// 查询账户
+	user := dao.UserDao.QueryUser(&model.User{Account: account})
+	if user.ID == 1 {
 		return errors.New("账户已存在,换一个吧")
 	}
 
-	// save
-	_, err := dao.UserDao.CreateUser(account, name, pswd, inviteCode)
-	if err != nil {
-		return err
-	}
-
-	// del code
-	if err = SetState(inviteCode); err != nil {
-		return err
-	}
+	// 保存用户
+	dao.UserDao.CreateUser(account, name, pswd, inviteCode)
+	// 修改code状态
+	SetState(inviteCode)
 
 	return nil
 }

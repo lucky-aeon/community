@@ -10,5 +10,5 @@ type User struct {
 	Name       string
 	Account    string
 	Password   string
-	InviteCode int
+	InviteCode uint16
 }

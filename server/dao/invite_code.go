@@ -1,26 +1,35 @@
 package dao
 
+import "xhyovo.cn/community/server/model"
+
 var InviteCode inviteCode
 
 type inviteCode struct {
 }
 
-func (d *inviteCode) SaveCode(code int) error {
+func (d *inviteCode) SaveCode(code uint16) {
 
-	return nil
+	db.Create(&model.InviteCode{Code: code, State: false})
+
 }
 
+// 是否存在code
 func (i *inviteCode) Exist(code uint16) bool {
 
-	return true
+	var count int64
+	object := &model.InviteCode{}
+	db.Where("code = ? and state = 0", code).Find(object).Count(&count)
+
+	return count == 1
 }
 
-func (*inviteCode) Del(code int) error {
+func (*inviteCode) Del(id int) {
 
-	return nil
+	db.Where("id = ?", id).Delete(&model.InviteCode{})
 }
 
-func (i *inviteCode) SetState(code uint16) error {
+func (i *inviteCode) SetState(id uint16) {
 
-	return nil
+	db.Model(&model.InviteCode{}).Where("id = ?", id).Update("state", 1)
+
 }

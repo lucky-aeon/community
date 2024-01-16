@@ -2,9 +2,8 @@ package routers
 
 import (
 	"fmt"
-	"strconv"
-
 	"github.com/gin-gonic/gin"
+	"strconv"
 	services "xhyovo.cn/community/server/service"
 )
 
@@ -26,6 +25,7 @@ func Register(c *gin.Context) {
 		R.Error().setMsg("序列化邀请码失败,请检查邀请码是否为数字").Res(c)
 		return
 	}
+
 	if err := services.Register(c.Query("account"),
 		c.Query("password"), c.Query("name"), uint16(code)); err != nil {
 		fmt.Printf(err.Error())

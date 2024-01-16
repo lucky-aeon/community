@@ -5,6 +5,8 @@ import (
 	"xhyovo.cn/community/server/dao"
 )
 
+var InviteCode dao.InviteCode
+
 func GenerateCode() uint16 {
 
 	var flag bool
@@ -12,7 +14,7 @@ func GenerateCode() uint16 {
 	// generate code
 	for flag {
 		code = utils.GenerateCode(8)
-		flag = dao.InviteCode.Exist(code)
+		flag = InviteCode.Exist(code)
 	}
 
 	return code
@@ -20,9 +22,9 @@ func GenerateCode() uint16 {
 
 func DestroyCode(code int) {
 
-	dao.InviteCode.Del(code)
+	InviteCode.Del(code)
 }
 
 func SetState(id uint16) {
-	dao.InviteCode.SetState(id)
+	InviteCode.SetState(id)
 }

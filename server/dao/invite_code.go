@@ -2,19 +2,17 @@ package dao
 
 import "xhyovo.cn/community/server/model"
 
-var InviteCode inviteCode
-
-type inviteCode struct {
+type InviteCode struct {
 }
 
-func (d *inviteCode) SaveCode(code uint16) {
+func (*InviteCode) SaveCode(code uint16) {
 
 	db.Create(&model.InviteCode{Code: code, State: false})
 
 }
 
 // 是否存在code
-func (i *inviteCode) Exist(code uint16) bool {
+func (*InviteCode) Exist(code uint16) bool {
 
 	var count int64
 	object := &model.InviteCode{}
@@ -23,12 +21,12 @@ func (i *inviteCode) Exist(code uint16) bool {
 	return count == 1
 }
 
-func (*inviteCode) Del(id int) {
+func (*InviteCode) Del(id int) {
 
 	db.Where("id = ?", id).Delete(&model.InviteCode{})
 }
 
-func (i *inviteCode) SetState(id uint16) {
+func (*InviteCode) SetState(id uint16) {
 
 	db.Model(&model.InviteCode{}).Where("id = ?", id).Update("state", 1)
 

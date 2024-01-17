@@ -47,8 +47,9 @@ func (*Kodo) GetToken() string {
 }
 
 // 删除
-func (*Kodo) Delete(fileKey string) error {
-	return getBucketManager().Delete(kodo.Bucket, fileKey)
+func (*Kodo) Delete(fileKey string) {
+	getBucketManager().Delete(kodo.Bucket, fileKey)
+
 }
 
 // 获取文件信息

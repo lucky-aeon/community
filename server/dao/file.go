@@ -2,37 +2,37 @@ package dao
 
 import (
 	"xhyovo.cn/community/server/model"
-	services "xhyovo.cn/community/server/service"
 )
-
-var kodo services.Kodo
 
 type File struct {
 }
 
-func (*File) Save(fileKey string) error {
-	// get fileInfo
-	info, err := kodo.GetFileInfo(fileKey)
-	if err != nil {
-		return err
-	}
-	db.Create(&model.File{FileKey: fileKey, Size: info.Fsize, Format: info.MimeType})
-	return nil
+func (*File) Save(file *model.File) {
+	db.Create(file)
 }
 
-func (*File) GetFileInfo(fileKey string) (*model.File, error) {
-	info, err := kodo.GetFileInfo(fileKey)
-	if err != nil {
-		return nil, err
-	}
-	fileInfo := &model.File{
-		FileKey: fileKey,
-		Size:    info.Fsize,
-		Format:  info.MimeType,
-	}
-	return fileInfo, nil
+func (*File) GetFileInfo(fileId, tenantId uint) *model.File {
+	fileInfo := &model.File{}
+	db.Where(&model.File{ID: fileId, TenantId: tenantId}).Find(fileInfo)
+
+	return fileInfo
 }
 
-func (*File) Del(fileKey string) {
-	db.Where("file_key = ?", fileKey).Delete(&model.File{})
+func (*File) Delete(userId, fileId, tenantId uint) {
+	db.Where("id = ? and user_id = ? and tenant_id = ?", fileId, userId, tenantId).Delete(&model.File{})
+}
+
+func (*File) Deletes(userId, businessId, tenantId uint) {
+	db.Where("business_id = ? and user_id = ? and tenant_id = ?", businessId, userId, tenantId).Delete(&model.File{})
+
+}
+
+func (*File) GetFileKeys(businessId uint) []string {
+	var files []model.File
+	db.Where("business_id = ?", businessId).Find(files)
+	var fileKeys []string
+	for _, file := range files {
+		fileKeys = append(fileKeys, file.FileKey)
+	}
+	return fileKeys
 }

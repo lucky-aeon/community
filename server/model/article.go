@@ -1,13 +1,12 @@
 package model
 
-import "time"
+import (
+	"gorm.io/gorm"
+)
 
 // it's issue or answer
 type Article struct {
-	ID          uint
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   time.Time
+	gorm.Model
 	Title       string
 	Description string
 	UserId      uint // The id of the author of this article

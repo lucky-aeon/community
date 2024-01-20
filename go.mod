@@ -3,6 +3,7 @@ module xhyovo.cn/community
 go 1.18
 
 require (
+	github.com/gin-contrib/sessions v0.0.5
 	github.com/gin-gonic/gin v1.9.1
 	github.com/qiniu/go-sdk/v7 v7.19.0
 	gopkg.in/yaml.v3 v3.0.1

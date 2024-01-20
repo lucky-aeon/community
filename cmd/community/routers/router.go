@@ -14,5 +14,7 @@ func InitRouter() {
 	r.POST("/login", Login)
 	r.POST("/register", Register)
 	r.GET("/test", GetInfo)
+	InitArticleRouter(r)
+	InitCommentRouter(r)
 	r.Run()
 }

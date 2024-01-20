@@ -8,9 +8,13 @@ import (
 	"xhyovo.cn/community/server/model"
 )
 
+var userDao dao.UserDao
+
+var code dao.InviteCode
+
 func Login(account, pswd string) (*model.User, error) {
 
-	user := dao.UserDao.QueryUser(&model.User{Account: account, Password: pswd})
+	user := userDao.QueryUser(&model.User{Account: account, Password: pswd})
 	if user.ID == 0 {
 		return nil, errors.New("登录失败！账号或密码错误")
 	}
@@ -25,18 +29,19 @@ func Register(account, pswd, name string, inviteCode uint16) error {
 	}
 
 	// query code
-	if !dao.InviteCode.Exist(inviteCode) {
+
+	if !code.Exist(inviteCode) {
 		return errors.New("验证码不存在")
 	}
 
 	// 查询账户
-	user := dao.UserDao.QueryUser(&model.User{Account: account})
+	user := userDao.QueryUser(&model.User{Account: account})
 	if user.ID == 1 {
 		return errors.New("账户已存在,换一个吧")
 	}
 
 	// 保存用户
-	dao.UserDao.CreateUser(account, name, pswd, inviteCode)
+	userDao.CreateUser(account, name, pswd, inviteCode)
 	// 修改code状态
 	SetState(inviteCode)
 

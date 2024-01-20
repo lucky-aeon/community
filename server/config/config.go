@@ -23,11 +23,9 @@ type DbConfig struct {
 func InitConfig() {
 	appConfig := &AppConfig{}
 
-	file, err := os.ReadFile("D:\\go_project\\community\\config.yaml")
+	file, err := os.ReadFile("D:\\go_project\\lucky-community-main\\cmd\\community\\config.yaml")
 	if err != nil {
-
 		panic(err.Error)
-
 	}
 	err = yaml.Unmarshal(file, &appConfig)
 	if err != nil {

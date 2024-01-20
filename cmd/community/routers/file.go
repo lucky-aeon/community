@@ -25,6 +25,7 @@ func GetUploadToken(ctx *gin.Context) {
 }
 
 func SaveFile(ctx *gin.Context) {
+
 	articleId := ctx.Query("articleId")
 	fileKey := ctx.Query("fileKey")
 	atoi, err := strconv.Atoi(articleId)

@@ -2,10 +2,7 @@ package services
 
 import (
 	"xhyovo.cn/community/pkg/utils"
-	"xhyovo.cn/community/server/dao"
 )
-
-var InviteCode dao.InviteCode
 
 func GenerateCode() uint16 {
 

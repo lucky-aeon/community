@@ -1,26 +1,22 @@
 package services
 
 import (
-	"xhyovo.cn/community/server/dao"
+	"xhyovo.cn/community/pkg/kodo"
 	"xhyovo.cn/community/server/model"
 )
 
-type File struct{}
-
-var file dao.File
-
-var k Kodo
+type FileService struct{}
 
 // save file
-func (*File) Save(userId, businessId uint, fileKey string) error {
+func (*FileService) Save(userId, businessId uint, fileKey string) error {
 
 	// get fileInfo
-	fileInfo, err := k.GetFileInfo(fileKey)
+	fileInfo, err := kodo.GetFileInfo(fileKey)
 	if err != nil {
 		return err
 	}
 
-	f := model.File{
+	f := model.Files{
 		FileKey:    fileKey,
 		Size:       fileInfo.Fsize,
 		Format:     fileInfo.MimeType,
@@ -34,27 +30,27 @@ func (*File) Save(userId, businessId uint, fileKey string) error {
 
 }
 
-func (*File) Delete(userId, fileId, tenantId uint) {
+func (*FileService) Delete(userId, fileId, tenantId uint) {
 
 	file.Delete(userId, fileId, tenantId)
 
 	// ignore err because this is not important
-	k.Delete(file.GetFileInfo(fileId, tenantId).FileKey)
+	kodo.Delete(file.GetFileInfo(fileId, tenantId).FileKey)
 
 }
 
-func (*File) Deletes(userId, businessId, tenantId uint) {
+func (*FileService) Deletes(userId, businessId, tenantId uint) {
 
 	// 获取所有文件的key
 	fileKeys := file.GetFileKeys(businessId)
 	file.Deletes(userId, businessId, tenantId)
 	for _, fileKey := range fileKeys {
-		go k.Delete(fileKey)
+		go kodo.Delete(fileKey)
 	}
 }
 
 // file get
-func (*File) GetFileKey(fileId, tenantId uint) string {
+func (*FileService) GetFileKey(fileId, tenantId uint) string {
 	return file.GetFileInfo(fileId, tenantId).FileKey
 
 }

@@ -2,9 +2,22 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"strconv"
+	context2 "xhyovo.cn/community/pkg/service_context"
+	"xhyovo.cn/community/pkg/utils"
 	services "xhyovo.cn/community/server/service"
 )
+
+type registerForm struct {
+	Code     int    `binding:"required" form:"code" msg:"code不能为空" `
+	Account  string `binding:"required" form:"account" msg:"账号不能为空"`
+	Name     string `binding:"required" form:"name" msg:"用户名不能为空"`
+	Password string `binding:"required" form:"password" msg:"密码不能为空"`
+}
+
+type loginForm struct {
+	Account  string `binding:"required" form:"account" msg:"账号不能为空"`
+	Password string `binding:"required" form:"password" msg:"密码不能为空"`
+}
 
 func InitLoginRegisterRouter(ctx *gin.Engine) {
 	group := ctx.Group("/community")
@@ -13,45 +26,38 @@ func InitLoginRegisterRouter(ctx *gin.Engine) {
 }
 
 func Login(c *gin.Context) {
-
-	user, err := services.Login(c.Query("account"), c.Query("password"))
+	context := context2.DataContext(c)
+	var form loginForm
+	if err := c.ShouldBind(&form); err != nil {
+		context.To("/login").WithError(utils.GetValidateErr(form, err)).Redirect()
+		return
+	}
+	user, err := services.Login(form.Account, form.Password)
 	if err != nil {
-		c.JSON(500, &R{
-			Code: 500,
-			Msg:  err.Error(),
-		})
+		context.To("/login").WithError(err).Redirect()
 		return
 	}
 	user.Password = ""
-	c.JSON(200, &R{
-		Code: 200,
-		Msg:  "登录成功",
-		Data: user,
-	})
-
+	context.SetAuth(user)
+	context.To("/").Redirect()
 }
 
 func Register(c *gin.Context) {
-	code, err := strconv.Atoi(c.Query("inviteCode"))
+	var form registerForm
+
+	context := context2.DataContext(c)
+	err := c.ShouldBind(&form)
+
 	if err != nil {
-		c.JSON(500, &R{
-			Code: 500,
-			Msg:  err.Error(),
-		})
+		context.To("/register").WithError(utils.GetValidateErr(form, err)).Redirect()
 		return
 	}
 
-	if err := services.Register(c.Query("account"),
-		c.Query("password"), c.Query("name"), uint16(code)); err != nil {
-		c.JSON(500, &R{
-			Code: 500,
-			Msg:  err.Error(),
-		})
+	err = services.Register(form.Account, form.Password, form.Name, uint16(form.Code))
+	if err != nil {
+		context.To("/register").WithError(err).Redirect()
 		return
 	}
-	c.JSONP(200, &R{
-		Code: 200,
-		Msg:  "注册成功,你可以成长了",
-	})
 
+	context.WithMsg("注册成功").To("/login").Redirect()
 }

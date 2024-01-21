@@ -2,23 +2,21 @@ package services
 
 import (
 	"errors"
-
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/dao"
 	"xhyovo.cn/community/server/model"
 )
 
-var userDao dao.UserDao
-
 var code dao.InviteCode
 
-func Login(account, pswd string) (*model.User, error) {
+func Login(account, pswd string) (*model.Users, error) {
 
-	user := userDao.QueryUser(&model.User{Account: account, Password: pswd})
+	user := userDao.QueryUser(&model.Users{Account: account, Password: pswd})
 	if user.ID == 0 {
 		return nil, errors.New("登录失败！账号或密码错误")
 	}
 
+	user.Avatar = utils.BuildFileUrl(user.Avatar)
 	return user, nil
 }
 
@@ -29,14 +27,13 @@ func Register(account, pswd, name string, inviteCode uint16) error {
 	}
 
 	// query code
-
 	if !code.Exist(inviteCode) {
 		return errors.New("验证码不存在")
 	}
 
 	// 查询账户
-	user := userDao.QueryUser(&model.User{Account: account})
-	if user.ID == 1 {
+	user := userDao.QueryUser(&model.Users{Account: account})
+	if user.ID > 0 {
 		return errors.New("账户已存在,换一个吧")
 	}
 

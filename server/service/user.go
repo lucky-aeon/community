@@ -1,24 +1,24 @@
 package services
 
 import (
-	"xhyovo.cn/community/server/dao"
+	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 )
-
-var UserDao dao.UserDao
 
 type UserService struct {
 }
 
 // get user information
-func (*UserService) GetUserById(id uint) *model.User {
+func (*UserService) GetUserById(id uint) *model.Users {
 
-	return UserDao.QueryUser(&model.User{ID: id})
+	user := UserDao.QueryUser(&model.Users{ID: id})
+	user.Avatar = utils.BuildFileUrl(user.Avatar)
+	return user
 }
 
 // update user information
-func (*UserService) UpdateUser(id uint, username, pswd string) {
+func (*UserService) UpdateUser(user *model.Users) {
 
-	UserDao.UpdateUser(id, username, pswd)
+	UserDao.UpdateUser(user)
 
 }

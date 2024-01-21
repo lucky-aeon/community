@@ -2,28 +2,35 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"xhyovo.cn/community/server/dao"
-	"xhyovo.cn/community/server/model"
+	"xhyovo.cn/community/cmd/community/middleware"
+	services "xhyovo.cn/community/server/service"
 )
 
 var (
-	articleDao = &dao.Article{}
+	article services.ArticleService
 )
 
 func InitArticleRouter(r *gin.Engine) {
-	r.GET("/articles", articleList)
-	r.POST("/articles", articleAdd)
-	r.DELETE("/articles", articleDeleted)
-	r.PUT("/articles", articleUpdate)
+	group := r.Group("/community/articles")
+	group.GET("/articles/:id", articleList)
+	group.GET("/articles/list", articleList)
+	group.GET("/articles/search", articleSearch)
+	group.POST("/articles/publish", articleAdd)
+	group.POST("/articles/update", articleUpdate)
+	group.POST("/articles/delete/:id", articleDeleted)
+	group.Use(middleware.Auth)
 }
 
-func articleList(c *gin.Context) {
-	result, err := articleDao.QueryList(&model.Article{}, c.GetInt("page"), c.GetInt("limit"))
-	if err != nil {
-		R.Error().setMsg("error querying articles").Res(c)
-		return
-	}
-	R.Ok().setData(result).Res(c)
+func articleList(ctx *gin.Context) {
+
+}
+
+func articleGet(c *gin.Context) {
+
+}
+
+func articleSearch(c *gin.Context) {
+
 }
 
 func articleAdd(c *gin.Context) {

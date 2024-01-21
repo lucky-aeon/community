@@ -10,34 +10,34 @@ import (
 type Article struct {
 }
 
-func (a *Article) QuerySingle(article *model.Article) (*model.Article, error) {
-	result := &model.Article{}
-	err := db.Model(article).Where(article).First(result).Error
+func (a *Article) QuerySingle(article *model.Articles) (*model.Articles, error) {
+	result := &model.Articles{}
+	err := model.Article().Model(article).Where(article).First(result).Error
 	return result, err
 }
 
-func (a *Article) QueryList(article *model.Article, page, limit int) (*[]model.Article, error) {
+func (a *Article) QueryList(article *model.Articles, page, limit int) ([]*model.Articles, error) {
 	if limit < 1 {
 		limit = 10
 	}
 	if page < 1 {
 		page = 1
 	}
-	userDb := db.Model(article).Where(article)
-	pageSize := int64(0)
-	articleList := &[]model.Article{}
-	userDb.Count(&pageSize)
+	userDb := model.Article().Model(article).Where(article)
 
-	if pageSize == 0 {
-		return articleList, userDb.Error
-	}
-
-	userDb.Offset((page - 1) * limit).Limit(limit).Find(articleList)
+	articleList := []*model.Articles{}
+	userDb.Offset((page - 1) * limit).Limit(limit).Find(&articleList)
 	return articleList, userDb.Error
 }
 
+func (a *Article) Count() int64 {
+	var count int64
+	model.Type().Count(&count)
+	return count
+}
+
 func (a *Article) Delete(articleId, userId uint) error {
-	return db.Model(&model.Article{}).Delete(&model.Article{
+	return model.Article().Model(&model.Articles{}).Delete(&model.Articles{
 		Model: gorm.Model{
 			ID: articleId,
 		},
@@ -45,15 +45,15 @@ func (a *Article) Delete(articleId, userId uint) error {
 	}).Error
 }
 
-func (a *Article) Create(article *model.Article) error {
+func (a *Article) Create(article *model.Articles) error {
 	article.CreatedAt = time.Now()
 	article.UpdatedAt = time.Now()
-	return db.Model(article).Create(article).Error
+	return model.Article().Model(article).Create(article).Error
 }
 
-func (a *Article) Update(article *model.Article) error {
+func (a *Article) Update(article *model.Articles) error {
 	article.UpdatedAt = time.Now()
-	return db.Model(article).Where(&model.Article{
+	return model.Article().Model(article).Where(&model.Articles{
 		Model: gorm.Model{
 			ID: article.ID,
 		},

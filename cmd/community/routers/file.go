@@ -3,12 +3,11 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"xhyovo.cn/community/pkg/kodo"
 	services "xhyovo.cn/community/server/service"
 )
 
-var file services.File
-
-var kodo services.Kodo
+var file services.FileService
 
 func InitFileRouter(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")

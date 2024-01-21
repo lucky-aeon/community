@@ -7,29 +7,29 @@ import (
 type File struct {
 }
 
-func (*File) Save(file *model.File) {
-	db.Create(file)
+func (*File) Save(file *model.Files) {
+	model.File().Create(file)
 }
 
-func (*File) GetFileInfo(fileId, tenantId uint) *model.File {
-	fileInfo := &model.File{}
-	db.Where(&model.File{ID: fileId, TenantId: tenantId}).Find(fileInfo)
+func (*File) GetFileInfo(fileId, tenantId uint) *model.Files {
+	fileInfo := &model.Files{}
+	model.File().Where(&model.Files{ID: fileId, TenantId: tenantId}).Find(fileInfo)
 
 	return fileInfo
 }
 
 func (*File) Delete(userId, fileId, tenantId uint) {
-	db.Where("id = ? and user_id = ? and tenant_id = ?", fileId, userId, tenantId).Delete(&model.File{})
+	model.File().Where("id = ? and user_id = ? and tenant_id = ?", fileId, userId, tenantId).Delete(&model.Files{})
 }
 
 func (*File) Deletes(userId, businessId, tenantId uint) {
-	db.Where("business_id = ? and user_id = ? and tenant_id = ?", businessId, userId, tenantId).Delete(&model.File{})
+	model.File().Where("business_id = ? and user_id = ? and tenant_id = ?", businessId, userId, tenantId).Delete(&model.Files{})
 
 }
 
 func (*File) GetFileKeys(businessId uint) []string {
-	var files []model.File
-	db.Where("business_id = ?", businessId).Find(files)
+	var files []model.Files
+	model.File().Where("business_id = ?", businessId).Find(files)
 	var fileKeys []string
 	for _, file := range files {
 		fileKeys = append(fileKeys, file.FileKey)

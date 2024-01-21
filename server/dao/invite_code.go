@@ -7,7 +7,7 @@ type InviteCode struct {
 
 func (*InviteCode) SaveCode(code uint16) {
 
-	db.Create(&model.InviteCode{Code: code, State: false})
+	model.InviteCode().Create(&model.InviteCodes{Code: code, State: false})
 
 }
 
@@ -15,19 +15,19 @@ func (*InviteCode) SaveCode(code uint16) {
 func (*InviteCode) Exist(code uint16) bool {
 
 	var count int64
-	object := &model.InviteCode{}
-	db.Where("code = ? and state = 0", code).Find(object).Count(&count)
+	object := &model.InviteCodes{}
+	model.InviteCode().Where("code = ? and state = 0", code).Find(object).Count(&count)
 
 	return count == 1
 }
 
 func (*InviteCode) Del(id int) {
 
-	db.Where("id = ?", id).Delete(&model.InviteCode{})
+	model.InviteCode().Where("id = ?", id).Delete(&model.InviteCodes{})
 }
 
 func (*InviteCode) SetState(id uint16) {
 
-	db.Model(&model.InviteCode{}).Where("id = ?", id).Update("state", 1)
+	model.InviteCode().Model(&model.InviteCodes{}).Where("code = ?", id).Update("state", 1)
 
 }

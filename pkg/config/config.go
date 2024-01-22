@@ -40,7 +40,8 @@ func Init() {
 	if err != nil {
 		panic(err.Error)
 	}
-	err = yaml.Unmarshal(file, &appConfig)
+	configData := os.ExpandEnv(string(file))
+	err = yaml.Unmarshal([]byte(configData), &appConfig)
 	if err != nil {
 		panic(err.Error())
 	}

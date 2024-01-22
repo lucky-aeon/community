@@ -35,7 +35,7 @@ func GetInstance() *AppConfig {
 func Init() {
 	appConfig := &AppConfig{}
 
-	file, err := os.ReadFile("D:\\go_project\\lucky-community-main\\cmd\\community\\config.yaml")
+	file, err := os.ReadFile("cmd/community/config.yaml")
 	if err != nil {
 		panic(err.Error)
 	}

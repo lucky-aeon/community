@@ -3,8 +3,9 @@ package config
 // 读取配置信息并且给各个配置类赋值
 
 import (
-	"gopkg.in/yaml.v3"
 	"os"
+
+	"gopkg.in/yaml.v3"
 )
 
 type AppConfig struct {

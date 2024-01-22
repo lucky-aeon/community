@@ -1,10 +1,11 @@
 package main
 
 import (
+	"log"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	"log"
 	"xhyovo.cn/community/cmd/community/routers"
 	"xhyovo.cn/community/pkg/config"
 	"xhyovo.cn/community/pkg/kodo"
@@ -16,8 +17,8 @@ func main() {
 
 	r := gin.Default()
 	r.SetFuncMap(utils.GlobalFunc())
-	r.Static("/assets", "./assets")
-	r.LoadHTMLGlob("./views/**/*")
+	r.Static("/assets", "assets")
+	r.LoadHTMLGlob("views/**/*")
 
 	store := cookie.NewStore([]byte("123456"))
 	// 添加 session

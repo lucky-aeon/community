@@ -3,3 +3,7 @@ db:
   database: community
   username: root
   password: 123
+kodo:
+  accessKey:
+  bucket:
+  secretKey:

@@ -22,10 +22,9 @@ DROP TABLE IF EXISTS `articles`;
 CREATE TABLE `articles` (
                             `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primarykey',
                             `title` varchar(50) DEFAULT NULL,
-                            `desc` varchar(5000) DEFAULT NULL,
+                            `desc` longtext DEFAULT NULL,
                             `user_id` int(11) NOT NULL,
-                            `issue_id` int(11) DEFAULT '0',
-                            `solved` tinyint(1) DEFAULT '0',
+                            `state` int(11) DEFAULT '0',
                             `like` int(11) DEFAULT '0',
                             `type` int(11) DEFAULT NULL,
                             `created_at` datetime DEFAULT NULL,
@@ -37,7 +36,7 @@ CREATE TABLE `articles` (
 -- ----------------------------
 -- Records of articles
 -- ----------------------------
-INSERT INTO `articles` VALUES ('1', 'Java', '内容', '3', '0', '0', '0', '0', '2024-01-21 23:02:14', '2024-01-21 23:02:17', null);
+INSERT INTO `articles` VALUES ('1', 'Java', '内容', '3', '0', '0', '0', '2024-01-21 23:02:14', '2024-01-21 23:02:17', null);
 
 -- ----------------------------
 -- Table structure for comments
@@ -147,6 +146,6 @@ CREATE TABLE `users` (
 -- ----------------------------
 INSERT INTO `users` VALUES ('1', '1', '1', '1', '1', null, 'https://t7.baidu.com/it/u=1595072465,3644073269&fm=193&f=GIF', '2024-01-12 23:36:52', '2024-01-12 23:36:52', null);
 INSERT INTO `users` VALUES ('2', '1', '2', '1', '2', null, 'https://t7.baidu.com/it/u=1595072465,3644073269&fm=193&f=GIF', '2024-01-12 23:37:26', '2024-01-12 23:37:26', null);
-INSERT INTO `users` VALUES ('3', 'xhy', 'xhy', '123', '123', '1234', '3/4356909a-14c1-4c55-a2c9-055096698444', '2024-01-21 12:14:39', '2024-01-21 20:17:56', '0000-00-00 00:00:00');
-INSERT INTO `users` VALUES ('5', 'xhy', 'xhy', '123', '123', null, 'https://t7.baidu.com/it/u=1595072465,3644073269&fm=193&f=GIF', '2024-01-21 12:19:14', '2024-01-21 12:19:14', '0000-00-00 00:00:00');
-INSERT INTO `users` VALUES ('6', 'xxxx', 'xxxx', '123', '123', null, 'https://t7.baidu.com/it/u=1595072465,3644073269&fm=193&f=GIF', '2024-01-21 12:22:34', '2024-01-21 12:22:34', '0000-00-00 00:00:00');
+INSERT INTO `users` VALUES ('3', 'xhy', 'xhy', '123', '123', '1234', '3/4356909a-14c1-4c55-a2c9-055096698444', '2024-01-21 12:14:39', '2024-01-21 20:17:56', null);
+INSERT INTO `users` VALUES ('5', 'xhy', 'xhy', '123', '123', null, 'https://t7.baidu.com/it/u=1595072465,3644073269&fm=193&f=GIF', '2024-01-21 12:19:14', '2024-01-21 12:19:14', null);
+INSERT INTO `users` VALUES ('6', 'xxxx', 'xxxx', '123', '123', null, 'https://t7.baidu.com/it/u=1595072465,3644073269&fm=193&f=GIF', '2024-01-21 12:22:34', '2024-01-21 12:22:34', null);

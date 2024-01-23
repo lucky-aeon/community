@@ -30,7 +30,7 @@ func main() {
 	kodo.Init(&config.GetInstance().KodoConfig)
 
 	routers.InitFrontedRouter(r)
-	err := r.Run()
+	err := r.Run("127.0.0.1:8080")
 	if err != nil {
 		log.Fatalln(err)
 	}

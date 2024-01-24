@@ -11,6 +11,5 @@ func InitFrontedRouter(r *gin.Engine) {
 	InitLoginRegisterRouter(r)
 	InitFileRouter(r)
 	InitUserRouters(r)
-	InitViewsRouters(r)
 	InitArticleRouter(r)
 }

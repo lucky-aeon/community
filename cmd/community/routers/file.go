@@ -1,9 +1,11 @@
 package routers
 
 import (
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/kodo"
+	"xhyovo.cn/community/pkg/result"
 	services "xhyovo.cn/community/server/service"
 )
 
@@ -17,10 +19,7 @@ func InitFileRouter(ctx *gin.Engine) {
 
 // 获取上传token
 func GetUploadToken(ctx *gin.Context) {
-	ctx.JSON(200, &R{
-		Code: 200,
-		Data: kodo.GetToken(),
-	})
+	result.Ok(kodo.GetToken(), "").Json(ctx)
 }
 
 func SaveFile(ctx *gin.Context) {
@@ -29,20 +28,14 @@ func SaveFile(ctx *gin.Context) {
 	fileKey := ctx.Query("fileKey")
 	atoi, err := strconv.Atoi(articleId)
 	if err != nil {
-		ctx.JSON(500, &R{
-			Code: 500,
-			Msg:  "序列化文章id失败,请检查是否为数字",
-		})
+		result.Err("序列化文章id失败,请检查是否为数字").Json(ctx)
 		return
 	}
 	// todo get userId
 
 	err = file.Save(0, uint(atoi), fileKey)
 	if err != nil {
-		ctx.JSON(500, &R{
-			Code: 500,
-			Msg:  "在我们空间中没有该文件",
-		})
+		result.Err("在我们空间中没有该文件").Json(ctx)
 		return
 	}
 

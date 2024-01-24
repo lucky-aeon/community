@@ -1,14 +1,17 @@
 package services
 
 import (
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/service_context"
 	"xhyovo.cn/community/pkg/utils/page"
+	"xhyovo.cn/community/server/dao"
 	"xhyovo.cn/community/server/model"
 )
 
 type ArticleService struct {
+	dao.Article
 }
 
 // 获取文章，分页，类型

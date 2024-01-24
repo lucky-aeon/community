@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"xhyovo.cn/community/pkg/result"
 	context2 "xhyovo.cn/community/pkg/service_context"
 	"xhyovo.cn/community/pkg/utils"
 	services "xhyovo.cn/community/server/service"
@@ -29,35 +30,34 @@ func Login(c *gin.Context) {
 	context := context2.DataContext(c)
 	var form loginForm
 	if err := c.ShouldBind(&form); err != nil {
-		context.To("/login").WithError(utils.GetValidateErr(form, err)).Redirect()
+		result.Err(utils.GetValidateErr(form, err).Error()).Json(c)
 		return
 	}
 	user, err := services.Login(form.Account, form.Password)
 	if err != nil {
-		context.To("/login").WithError(err).Redirect()
+		result.Err(err.Error()).Json(c)
 		return
 	}
 	user.Password = ""
 	context.SetAuth(user)
-	context.To("/").Redirect()
+	result.Ok(form, "登录成功").Json(c)
 }
 
 func Register(c *gin.Context) {
 	var form registerForm
 
-	context := context2.DataContext(c)
 	err := c.ShouldBind(&form)
 
 	if err != nil {
-		context.To("/register").WithError(utils.GetValidateErr(form, err)).Redirect()
+		result.Err(utils.GetValidateErr(form, err).Error()).Json(c)
 		return
 	}
 
 	err = services.Register(form.Account, form.Password, form.Name, uint16(form.Code))
 	if err != nil {
-		context.To("/register").WithError(err).Redirect()
+		result.Err(err.Error()).Json(c)
 		return
 	}
 
-	context.WithMsg("注册成功").To("/login").Redirect()
+	result.Ok(form, "注册成功").Json(c)
 }

@@ -17,8 +17,8 @@ func main() {
 
 	r := gin.Default()
 	r.SetFuncMap(utils.GlobalFunc())
-	r.Static("/assets", "assets")
-	r.LoadHTMLGlob("views/**/*")
+	// r.Static("/assets", "assets")
+	// r.LoadHTMLGlob("views/**/*")
 
 	store := cookie.NewStore([]byte("123456"))
 	// 添加 session

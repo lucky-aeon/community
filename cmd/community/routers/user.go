@@ -1,9 +1,11 @@
 package routers
 
 import (
-	"github.com/gin-gonic/gin"
 	"io"
+
+	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/kodo"
+	"xhyovo.cn/community/pkg/result"
 	context2 "xhyovo.cn/community/pkg/service_context"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
@@ -50,7 +52,7 @@ func updateUser(ctx *gin.Context) {
 		form := editUserForm{}
 		err := ctx.ShouldBind(&form)
 		if err != nil {
-			context.To("/community/user/edit?tab=info").WithError(utils.GetValidateErr(form, err)).Redirect()
+			result.Err(utils.GetValidateErr(form, err).Error()).Json(ctx)
 			return
 		}
 		userService.UpdateUser(&model.Users{Name: form.Name, Desc: form.Desc, ID: id})
@@ -58,17 +60,17 @@ func updateUser(ctx *gin.Context) {
 		form := editPasswordForm{}
 		err := ctx.ShouldBind(&form)
 		if err != nil {
-			context.To("/community/user/edit?tab=pass").WithError(utils.GetValidateErr(form, err)).Redirect()
+			result.Err(utils.GetValidateErr(form, err).Error()).Json(ctx)
 			return
 		}
 		// check 旧密码
 		if form.OldPassword != userService.GetUserById(id).Password {
-			context.To("/community/user/edit?tab=pass").WithError("旧密码不一致").Redirect()
+			result.Err("旧密码不一致").Json(ctx)
 			return
 		}
 		// check 新密码
 		if form.NewPassword != form.ConfirmPassword {
-			context.To("/community/user/edit?tab=pass").WithError("两次新密码不一致").Redirect()
+			result.Err("两次新密码不一致").Json(ctx)
 			return
 		}
 		userService.UpdateUser(&model.Users{Password: form.ConfirmPassword, ID: id})
@@ -76,22 +78,22 @@ func updateUser(ctx *gin.Context) {
 
 		multipart, err := ctx.FormFile("avatar")
 		if err != nil {
-			context.To("/community/user/edit?tab=avatar").WithError("请选择上传的图片").Redirect()
+			result.Err("请选择上传的图片").Json(ctx)
 			return
 		}
 		filename := multipart.Filename
 		if err != nil {
-			context.To("/community/user/edit?tab=avatar").WithError("上传头像失败").Redirect()
+			result.Err("上传头像失败").Json(ctx)
 			return
 		}
 		if !utils.IsImage(filename) {
-			context.To("/community/user/edit?tab=avatar").WithError("请上传图片类型").Redirect()
+			result.Err("请上传图片类型").Json(ctx)
 			return
 		}
 		// 打开上传的文件
 		uploadedFile, err := multipart.Open()
 		if err != nil {
-			context.To("/community/user/edit?tab=avatar").WithError(err).Redirect()
+			result.Err(err.Error()).Json(ctx)
 			return
 		}
 		defer uploadedFile.Close()
@@ -99,14 +101,14 @@ func updateUser(ctx *gin.Context) {
 		// 读取文件的二进制数据
 		fileBytes, err := io.ReadAll(uploadedFile)
 		if err != nil {
-			context.To("/community/user/edit?tab=avatar").WithError(err).Redirect()
+			result.Err(err.Error()).Json(ctx)
 			return
 		}
 
 		// 上传oss
 		fileKey := utils.BuildFileKey(id)
 		if _, err = kodo.Upload(fileBytes, fileKey); err != nil {
-			context.To("/community/user/edit?tab=avatar").WithError(err).Redirect()
+			result.Err(err.Error()).Json(ctx)
 			return
 		}
 		// 保存文件表
@@ -117,5 +119,5 @@ func updateUser(ctx *gin.Context) {
 	}
 
 	context.Refresh(userService.GetUserById(id))
-	context.Back().WithMsg("修改成功").Redirect()
+	result.Ok(nil, "修改成功").Json(ctx)
 }

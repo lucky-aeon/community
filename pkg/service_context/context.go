@@ -2,9 +2,10 @@ package service_context
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -88,6 +89,18 @@ func (c *BaseContext) clear() {
 func (c *BaseContext) Back() *BaseContext {
 	c.path = c.Ctx.Request.RequestURI
 	return c
+}
+
+func (c *BaseContext) Referer(path ...string) {
+	s := c.Ctx.Request.Referer()
+	if s == "" {
+		s = "/"
+	} else if len(path) > 0 {
+		s = path[0]
+	}
+
+	c.To(s)
+	c.Redirect()
 }
 
 // To 设置跳转路径

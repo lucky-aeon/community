@@ -4,8 +4,6 @@
 
 {{template "layout.nav" .}}
 
-{{template "layout.msg" .}}
-
 <div class="container-fluid">
     <div class="m-auto box">
         <div class="content">
@@ -31,7 +29,7 @@
                         <div class="ms-2 text-secondary d-inline-block align-top" style="width: 700px;">
                             <p class="mb-0 mb-1">
 
-                                <a href="/topics/{{.ID}}" class="text-decoration-none table-hover text-dark">{{.Title}}</a>
+                                <a href="/community/articles/{{.ID}}" class="text-decoration-none table-hover text-dark">{{.Title}}</a>
                             </p>
                             <p class="mb-0 small" style="line-height: 1.5;color: #adaaa8;">
                                 <span class="me-1">
@@ -59,7 +57,7 @@
             <div class="right-content">
                 <div class="p-3 bg-white rounded-2 shadow-sm">
                     <div class="btn-group col-12">
-                        <a class="btn btn-dark col-12 rounded-1" href="/publish"><i class="fa fa-plus-circle">
+                        <a class="btn btn-dark col-12 rounded-1" href="/community/articles/publish"><i class="fa fa-plus-circle">
                             发布</i></a>
                     </div>
                 </div>

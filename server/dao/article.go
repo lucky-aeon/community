@@ -10,7 +10,7 @@ import (
 type Article struct {
 }
 
-func (a *Article) QuerySingle(article *model.Articles) (*model.Articles, error) {
+func (a *Article) QuerySingle(article model.Articles) (*model.Articles, error) {
 	result := &model.Articles{}
 	err := model.Article().Model(article).Where(article).First(result).Error
 	return result, err

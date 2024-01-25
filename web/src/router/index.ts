@@ -1,10 +1,10 @@
-import { createRouter, createWebHistory } from 'vue-router';
 import NProgress from 'nprogress'; // progress bar
 import 'nprogress/nprogress.css';
+import { createRouter, createWebHistory } from 'vue-router';
 
-import { appRoutes } from './routes';
-import { REDIRECT_MAIN, NOT_FOUND_ROUTE } from './routes/base';
 import createRouteGuard from './guard';
+import { appRoutes } from './routes';
+import { NOT_FOUND_ROUTE, REDIRECT_MAIN } from './routes/base';
 
 NProgress.configure({ showSpinner: false }); // NProgress Configuration
 

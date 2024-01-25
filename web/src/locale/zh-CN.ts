@@ -1,7 +1,14 @@
 import localeMessageBox from '@/components/message-box/locale/zh-CN';
 import localeLogin from '@/views/login/locale/zh-CN';
 
+import localeArticlePublic from '@/views/article/public/locale/zh-CN';
+import localeArticleSelf from '@/views/article/self/locale/zh-CN';
+import localeConsumerInfo from '@/views/consumer/info/locale/zh-CN';
 import localeWorkplace from '@/views/dashboard/workplace/locale/zh-CN';
+
+import localeLearningProject from '@/views/learning/project/locale/zh-CN';
+import localeLearningQa from '@/views/learning/qa/locale/zh-CN';
+import localeLearningShare from '@/views/learning/share/locale/zh-CN';
 
 import localeSettings from './zh-CN/settings';
 
@@ -21,8 +28,17 @@ export default {
   'menu.faq': '常见问题',
   'navbar.docs': '文档中心',
   'navbar.action.locale': '切换为中文',
+  'menu.consumer': '我的面板',
+  'menu.article': '文章',
+  'menu.learning': '知识',
   ...localeSettings,
   ...localeMessageBox,
   ...localeLogin,
   ...localeWorkplace,
+  ...localeConsumerInfo,
+  ...localeArticlePublic,
+  ...localeArticleSelf,
+  ...localeLearningQa,
+  ...localeLearningProject,
+  ...localeLearningShare
 };

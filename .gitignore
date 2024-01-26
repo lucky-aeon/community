@@ -2,3 +2,4 @@ go.sum
 .vscode/
 *.env
 __debug_bin**
+web/node_modules

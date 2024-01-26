@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50536
 File Encoding         : 65001
 
-Date: 2024-01-22 23:14:03
+Date: 2024-01-27 01:02:29
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -22,7 +22,7 @@ DROP TABLE IF EXISTS `articles`;
 CREATE TABLE `articles` (
                             `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primarykey',
                             `title` varchar(50) DEFAULT NULL,
-                            `desc` longtext DEFAULT NULL,
+                            `desc` longtext,
                             `user_id` int(11) NOT NULL,
                             `state` int(11) DEFAULT '0',
                             `like` int(11) DEFAULT '0',
@@ -39,6 +39,24 @@ CREATE TABLE `articles` (
 INSERT INTO `articles` VALUES ('1', 'Java', '内容', '3', '0', '0', '0', '2024-01-21 23:02:14', '2024-01-21 23:02:17', null);
 
 -- ----------------------------
+-- Table structure for article_relations
+-- ----------------------------
+DROP TABLE IF EXISTS `article_relations`;
+CREATE TABLE `article_relations` (
+                                     `id` int(11) NOT NULL,
+                                     `parent_id` int(11) NOT NULL,
+                                     `article_id` int(11) NOT NULL,
+                                     `created_at` datetime DEFAULT NULL,
+                                     `updated_at` datetime DEFAULT NULL,
+                                     `deleted_at` datetime DEFAULT NULL,
+                                     PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of article_relations
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for comments
 -- ----------------------------
 DROP TABLE IF EXISTS `comments`;
@@ -49,8 +67,8 @@ CREATE TABLE `comments` (
                             `user_id` int(11) NOT NULL,
                             `business_id` int(11) NOT NULL,
                             `deleted_at` datetime DEFAULT NULL,
-                            `create_at` datetime DEFAULT NULL,
-                            `update_at` datetime DEFAULT NULL,
+                            `created_at` datetime DEFAULT NULL,
+                            `updated_at` datetime DEFAULT NULL,
                             PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -109,12 +127,14 @@ INSERT INTO `invite_codes` VALUES ('4', '123', '0', null, null);
 DROP TABLE IF EXISTS `types`;
 CREATE TABLE `types` (
                          `id` int(11) NOT NULL AUTO_INCREMENT,
+                         `parent_id` int(11) DEFAULT NULL,
                          `title` varchar(255) DEFAULT NULL,
                          `desc` varchar(255) DEFAULT NULL,
                          `state` tinyint(4) DEFAULT NULL,
                          `sort` int(11) DEFAULT NULL,
-                         `create_at` datetime DEFAULT NULL,
-                         `update_at` datetime DEFAULT NULL,
+                         `article_state` varchar(255) DEFAULT NULL,
+                         `created_at` datetime DEFAULT NULL,
+                         `updated_at` datetime DEFAULT NULL,
                          `deleted_at` datetime DEFAULT NULL,
                          PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

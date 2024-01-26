@@ -7,10 +7,11 @@ import (
 
 type Types struct {
 	gorm.Model
-	Title string
-	Desc  string
-	State uint
-	Sort  int
+	Title        string
+	Desc         string
+	State        uint
+	Sort         int
+	ArticleState string // 分类下文章的状态
 }
 
 func Type() *gorm.DB {

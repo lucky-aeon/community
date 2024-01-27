@@ -1,10 +1,9 @@
-package routers
+package frontend
 
 import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/server/dao"
@@ -34,9 +33,7 @@ func articleGet(c *gin.Context) {
 	}
 	daoArticle := &dao.Article{}
 	r, err := daoArticle.QuerySingle(model.Articles{
-		Model: gorm.Model{
-			ID: uint(articleId),
-		},
+		ID: uint(articleId),
 	})
 	if err != nil {
 		result.Err("未找到相关文章").Json(c)

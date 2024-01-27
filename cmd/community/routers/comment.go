@@ -2,32 +2,28 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"xhyovo.cn/community/server/dao"
+	"strconv"
+	"xhyovo.cn/community/pkg/result"
+	services "xhyovo.cn/community/server/service"
 )
 
-var (
-	commentDao = &dao.Comment{}
-)
-
-func InitCommentRouter(r *gin.Engine) {
-	r.GET("/comments", commentList)
-	r.POST("/comments", commentAdd)
-	r.DELETE("/comments", commentDeleted)
-	r.PUT("/comments", commentUpdate)
+func InitCommentRouters(g *gin.Engine) {
+	group := g.Group("/community/comments")
+	// todo  这里的路由取名字不会取
+	group.GET("/byArticleId", listByArticleId)
 }
 
-func commentList(c *gin.Context) {
-	// commentDao.GetCommentsByArticleID()
-}
+// 返回文章下的评论
+func listByArticleId(ctx *gin.Context) {
+	articleId, err := strconv.Atoi(ctx.Query("id"))
+	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "15"))
 
-func commentAdd(c *gin.Context) {
-
-}
-
-func commentDeleted(c *gin.Context) {
-
-}
-
-func commentUpdate(c *gin.Context) {
-
+	if err != nil {
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	var commentsService services.CommentsService
+	comments := commentsService.GetCommentsByArticleID(uint(page), uint(limit), uint(articleId))
+	result.Ok(comments, "").Json(ctx)
 }

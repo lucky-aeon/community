@@ -12,9 +12,13 @@ func Ok(data any, msg string) *R {
 	return &R{Code: 200, Data: data, Msg: msg}
 }
 func Err(msg string) *R {
-	return &R{Code: 200, Data: nil, Msg: msg}
+	return &R{Code: 500, Data: nil, Msg: msg}
 }
 
 func (r *R) Json(c *gin.Context) {
 	c.JSON(r.Code, r)
+}
+
+func (r *R) Xml(c *gin.Context) {
+	c.XML(r.Code, r)
 }

@@ -2,13 +2,14 @@ package routers
 
 import (
 	"strconv"
+	services "xhyovo.cn/community/server/service"
 
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/kodo"
 	"xhyovo.cn/community/pkg/result"
 )
 
-func InitFileRouter(ctx *gin.Engine) {
+func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
 	group.GET("/getUploadToken", GetUploadToken)
 	group.POST("/saveFile", SaveFile)
@@ -29,8 +30,8 @@ func SaveFile(ctx *gin.Context) {
 		return
 	}
 	// todo get userId
-
-	err = file.Save(0, uint(atoi), fileKey)
+	var fileService services.FileService
+	err = fileService.Save(0, uint(atoi), fileKey)
 	if err != nil {
 		result.Err("在我们空间中没有该文件").Json(ctx)
 		return

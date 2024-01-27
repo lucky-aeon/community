@@ -41,8 +41,8 @@ func Register(account, pswd, name string, inviteCode uint16) error {
 		return err
 	}
 
-	// query code
-	if !code.Exist(inviteCode) {
+	// query codeDao
+	if !codeDao.Exist(inviteCode) {
 		return errors.New("验证码不存在")
 	}
 

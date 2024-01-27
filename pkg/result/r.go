@@ -14,6 +14,7 @@ func Ok(data any, msg string) *R {
 func Err(msg string) *R {
 	return &R{Code: 200, Data: nil, Msg: msg}
 }
+
 func (r *R) Json(c *gin.Context) {
 	c.JSON(r.Code, r)
 }

@@ -6,15 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/kodo"
 	"xhyovo.cn/community/pkg/result"
-	context2 "xhyovo.cn/community/pkg/service_context"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
-	services "xhyovo.cn/community/server/service"
 )
-
-var userService services.UserService
-
-var fileService services.FileService
 
 type editUserForm struct {
 	Name string `binding:"required" form:"name" msg:"用户名不可为空"`
@@ -35,17 +29,13 @@ func InitUserRouters(r *gin.Engine) {
 
 // 获取用户信息
 func getUserInfo(ctx *gin.Context) {
-	context := context2.DataContext(ctx)
-	id := context.Auth().ID
-	user := userService.GetUserById(id)
-	context.View("user.edit", user)
+	// todo get userinfo by jwt
 
 }
 
 func updateUser(ctx *gin.Context) {
-
-	context := context2.DataContext(ctx)
-	id := context.Auth().ID
+	// todo 先放这里，后续记得改
+	var userId uint
 	t := ctx.DefaultQuery("tab", "info")
 	switch t {
 	case "info":
@@ -55,7 +45,7 @@ func updateUser(ctx *gin.Context) {
 			result.Err(utils.GetValidateErr(form, err).Error()).Json(ctx)
 			return
 		}
-		userService.UpdateUser(&model.Users{Name: form.Name, Desc: form.Desc, ID: id})
+		userService.UpdateUser(&model.Users{Name: form.Name, Desc: form.Desc, ID: userId})
 	case "pass":
 		form := editPasswordForm{}
 		err := ctx.ShouldBind(&form)
@@ -64,7 +54,7 @@ func updateUser(ctx *gin.Context) {
 			return
 		}
 		// check 旧密码
-		if form.OldPassword != userService.GetUserById(id).Password {
+		if form.OldPassword != userService.GetUserById(userId).Password {
 			result.Err("旧密码不一致").Json(ctx)
 			return
 		}
@@ -73,7 +63,7 @@ func updateUser(ctx *gin.Context) {
 			result.Err("两次新密码不一致").Json(ctx)
 			return
 		}
-		userService.UpdateUser(&model.Users{Password: form.ConfirmPassword, ID: id})
+		userService.UpdateUser(&model.Users{Password: form.ConfirmPassword, ID: userId})
 	case "avatar":
 
 		multipart, err := ctx.FormFile("avatar")
@@ -106,18 +96,17 @@ func updateUser(ctx *gin.Context) {
 		}
 
 		// 上传oss
-		fileKey := utils.BuildFileKey(id)
+		fileKey := utils.BuildFileKey(userId)
 		if _, err = kodo.Upload(fileBytes, fileKey); err != nil {
 			result.Err(err.Error()).Json(ctx)
 			return
 		}
 		// 保存文件表
-		fileService.Save(id, 1, fileKey)
+		fileService.Save(userId, 1, fileKey)
 
 		// 更改用户信息
-		userService.UpdateUser(&model.Users{ID: id, Avatar: fileKey})
+		userService.UpdateUser(&model.Users{ID: userId, Avatar: fileKey})
 	}
 
-	context.Refresh(userService.GetUserById(id))
 	result.Ok(nil, "修改成功").Json(ctx)
 }

@@ -7,15 +7,8 @@ import (
 	"gorm.io/gorm"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
-	"xhyovo.cn/community/pkg/service_context"
 	"xhyovo.cn/community/server/dao"
 	"xhyovo.cn/community/server/model"
-	services "xhyovo.cn/community/server/service"
-)
-
-var (
-	articleService services.ArticleService
-	typeService    services.TypeService
 )
 
 func InitArticleRouter(r *gin.Engine) {
@@ -29,21 +22,11 @@ func InitArticleRouter(r *gin.Engine) {
 }
 
 func articleList(ctx *gin.Context) {
-	context := service_context.DataContext(ctx)
 	// 获取所有分类
-	types := typeService.List()
 
-	// 获取所有文章
-	data := articleService.Page(context)
-
-	if data != nil {
-		data["types"] = types
-	}
-	result.Ok(data, "").Json(ctx)
 }
 
 func articleGet(c *gin.Context) {
-	bc := service_context.DataContext(c)
 	articleId, err := strconv.Atoi(c.Params.ByName("articleId"))
 	if err != nil || articleId < 1 {
 		result.Err("未找到相关文章").Json(c)
@@ -54,7 +37,6 @@ func articleGet(c *gin.Context) {
 		Model: gorm.Model{
 			ID: uint(articleId),
 		},
-		UserId: bc.Auth().ID,
 	})
 	if err != nil {
 		result.Err("未找到相关文章").Json(c)

@@ -6,10 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/kodo"
 	"xhyovo.cn/community/pkg/result"
-	services "xhyovo.cn/community/server/service"
 )
-
-var file services.FileService
 
 func InitFileRouter(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")

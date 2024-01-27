@@ -3,7 +3,6 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/result"
-	context2 "xhyovo.cn/community/pkg/service_context"
 	"xhyovo.cn/community/pkg/utils"
 	services "xhyovo.cn/community/server/service"
 )
@@ -27,7 +26,6 @@ func InitLoginRegisterRouter(ctx *gin.Engine) {
 }
 
 func Login(c *gin.Context) {
-	context := context2.DataContext(c)
 	var form loginForm
 	if err := c.ShouldBind(&form); err != nil {
 		result.Err(utils.GetValidateErr(form, err).Error()).Json(c)
@@ -39,7 +37,6 @@ func Login(c *gin.Context) {
 		return
 	}
 	user.Password = ""
-	context.SetAuth(user)
 	result.Ok(form, "登录成功").Json(c)
 }
 

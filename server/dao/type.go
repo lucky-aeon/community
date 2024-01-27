@@ -16,11 +16,15 @@ func (t *Type) Update(types *model.Types) {
 }
 
 func (t *Type) Delete(id uint) {
+
 	model.Type().Where("id = ?", id).Delete(&model.Types{})
+	model.Type().Where("parent_id = ?", id).Delete(&model.Types{})
+
 }
 
-func (t *Type) List() []model.Types {
+func (t *Type) List(parentId uint) []model.Types {
 	var types []model.Types
-	model.Type().Find(&types)
+	model.Type().Where("parent_id = ?", parentId).Find(&types)
+
 	return types
 }

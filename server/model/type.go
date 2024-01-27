@@ -7,6 +7,7 @@ import (
 
 type Types struct {
 	gorm.Model
+	ParentId     int
 	Title        string
 	Desc         string
 	State        uint

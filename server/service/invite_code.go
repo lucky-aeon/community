@@ -7,21 +7,21 @@ import (
 func GenerateCode() uint16 {
 
 	var flag bool
-	var code uint16
+	var code1 uint16
 	// generate code
 	for flag {
-		code = utils.GenerateCode(8)
-		flag = InviteCode.Exist(code)
+		code1 = utils.GenerateCode(8)
+		flag = code.Exist(code1)
 	}
 
-	return code
+	return code1
 }
 
-func DestroyCode(code int) {
+func DestroyCode(code1 int) {
 
-	InviteCode.Del(code)
+	code.Del(code1)
 }
 
 func SetState(id uint16) {
-	InviteCode.SetState(id)
+	code.SetState(id)
 }

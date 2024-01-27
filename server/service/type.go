@@ -7,8 +7,8 @@ import (
 type TypeService struct {
 }
 
-func (s *TypeService) List() []model.Types {
-	return typeDao.List()
+func (s *TypeService) List(parentId uint) []model.Types {
+	return typeDao.List(parentId)
 }
 
 func (s *TypeService) Save(types *model.Types) uint {

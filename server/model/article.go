@@ -5,7 +5,6 @@ import (
 	"xhyovo.cn/community/pkg/mysql"
 )
 
-// it's issue or answer
 type Articles struct {
 	gorm.Model
 	Title  string

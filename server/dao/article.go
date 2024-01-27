@@ -3,7 +3,6 @@ package dao
 import (
 	"time"
 
-	"gorm.io/gorm"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -38,9 +37,7 @@ func (a *Article) Count() int64 {
 
 func (a *Article) Delete(articleId, userId uint) error {
 	return model.Article().Model(&model.Articles{}).Delete(&model.Articles{
-		Model: gorm.Model{
-			ID: articleId,
-		},
+		ID:     articleId,
 		UserId: userId,
 	}).Error
 }
@@ -54,9 +51,13 @@ func (a *Article) Create(article *model.Articles) error {
 func (a *Article) Update(article *model.Articles) error {
 	article.UpdatedAt = time.Now()
 	return model.Article().Model(article).Where(&model.Articles{
-		Model: gorm.Model{
-			ID: article.ID,
-		},
+		ID:     article.ID,
 		UserId: article.UserId,
 	}).Save(article).Error
+}
+
+func (a *Article) CountByTypeId(id int) int64 {
+	var count int64
+	model.Article().Where("type = ?", id).Count(&count)
+	return count
 }

@@ -7,7 +7,7 @@ import (
 
 type FileService struct{}
 
-// save file
+// save fileDao
 func (*FileService) Save(userId, businessId uint, fileKey string) error {
 
 	// get fileInfo
@@ -24,7 +24,7 @@ func (*FileService) Save(userId, businessId uint, fileKey string) error {
 		UserId:     userId,
 	}
 
-	file.Save(&f)
+	fileDao.Save(&f)
 
 	return nil
 
@@ -32,25 +32,25 @@ func (*FileService) Save(userId, businessId uint, fileKey string) error {
 
 func (*FileService) Delete(userId, fileId, tenantId uint) {
 
-	file.Delete(userId, fileId, tenantId)
+	fileDao.Delete(userId, fileId, tenantId)
 
 	// ignore err because this is not important
-	kodo.Delete(file.GetFileInfo(fileId, tenantId).FileKey)
+	kodo.Delete(fileDao.GetFileInfo(fileId, tenantId).FileKey)
 
 }
 
 func (*FileService) Deletes(userId, businessId, tenantId uint) {
 
 	// 获取所有文件的key
-	fileKeys := file.GetFileKeys(businessId)
-	file.Deletes(userId, businessId, tenantId)
+	fileKeys := fileDao.GetFileKeys(businessId)
+	fileDao.Deletes(userId, businessId, tenantId)
 	for _, fileKey := range fileKeys {
 		go kodo.Delete(fileKey)
 	}
 }
 
-// file get
+// fileDao get
 func (*FileService) GetFileKey(fileId, tenantId uint) string {
-	return file.GetFileInfo(fileId, tenantId).FileKey
+	return fileDao.GetFileInfo(fileId, tenantId).FileKey
 
 }

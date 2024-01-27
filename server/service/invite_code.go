@@ -8,10 +8,10 @@ func GenerateCode() uint16 {
 
 	var flag bool
 	var code1 uint16
-	// generate code
+	// generate codeDao
 	for flag {
 		code1 = utils.GenerateCode(8)
-		flag = code.Exist(code1)
+		flag = codeDao.Exist(code1)
 	}
 
 	return code1
@@ -19,9 +19,9 @@ func GenerateCode() uint16 {
 
 func DestroyCode(code1 int) {
 
-	code.Del(code1)
+	codeDao.Del(code1)
 }
 
 func SetState(id uint16) {
-	code.SetState(id)
+	codeDao.SetState(id)
 }

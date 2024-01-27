@@ -2,24 +2,18 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	services "xhyovo.cn/community/server/service"
+	"xhyovo.cn/community/cmd/community/routers/backend"
+	"xhyovo.cn/community/cmd/community/routers/frontend"
 )
 
 // init router
-var (
-	file           services.FileService
-	articleService services.ArticleService
-	typeService    services.TypeService
-	userService    services.UserService
-
-	fileService services.FileService
-)
 
 func InitFrontedRouter(r *gin.Engine) {
 
-	InitLoginRegisterRouter(r)
-	InitFileRouter(r)
-	InitUserRouters(r)
-	InitArticleRouter(r)
-	InitCommentRouter(r)
+	InitLoginRegisterRouters(r)
+	InitFileRouters(r)
+	frontend.InitUserRouters(r)
+	frontend.InitArticleRouter(r)
+	backend.InitTypeRouters(r)
+	InitCommentRouters(r)
 }

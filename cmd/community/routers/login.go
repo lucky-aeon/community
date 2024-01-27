@@ -19,7 +19,7 @@ type loginForm struct {
 	Password string `binding:"required" form:"password" msg:"密码不能为空"`
 }
 
-func InitLoginRegisterRouter(ctx *gin.Engine) {
+func InitLoginRegisterRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community")
 	group.POST("/login", Login)
 	group.POST("/register", Register)

@@ -2,12 +2,15 @@ package services
 
 import (
 	"github.com/gin-gonic/gin"
-
-	"xhyovo.cn/community/server/dao"
+	"xhyovo.cn/community/server/model"
 )
 
 type ArticleService struct {
-	dao.Article
+}
+
+func (*ArticleService) Get(id uint) (*model.Articles, error) {
+
+	return articleDao.QuerySingle(model.Articles{ID: id})
 }
 
 // 获取文章，分页，类型
@@ -38,4 +41,8 @@ func (a *ArticleService) Page() gin.H {
 
 func (a *ArticleService) Count() int64 {
 	return articleDao.Count()
+}
+
+func (a *ArticleService) CountByTypeId(typeId int) int64 {
+	return articleDao.CountByTypeId(typeId)
 }

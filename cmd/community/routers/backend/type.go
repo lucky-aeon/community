@@ -1,8 +1,9 @@
 package backend
 
 import (
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
@@ -11,10 +12,10 @@ import (
 
 func InitTypeRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/types")
-	group.GET("/", list)
-	group.POST("/", save)
-	group.PUT("/", update)
-	group.DELETE("/:id", delete)
+	group.GET("", list)
+	group.POST("", save)
+	group.PUT("", update)
+	group.DELETE(":id", delete)
 }
 
 func list(ctx *gin.Context) {
@@ -34,8 +35,8 @@ func save(ctx *gin.Context) {
 		return
 	}
 	var typeService services.TypeService
-	typeService.Save(&types)
-	result.Ok(nil, "添加成功").Json(ctx)
+	u, err := typeService.Save(&types)
+	result.Auto(u, err).ErrMsg("添加失败").OkMsg("添加成功").Json(ctx)
 }
 func update(ctx *gin.Context) {
 	var types model.Types
@@ -44,8 +45,7 @@ func update(ctx *gin.Context) {
 		return
 	}
 	var typeService services.TypeService
-	typeService.Update(&types)
-	result.Ok(nil, "修改成功").Json(ctx)
+	result.Auto(nil, typeService.Update(&types)).ErrMsg("分类更新失败").OkMsg("分类更新成功").Json(ctx)
 }
 
 func delete(ctx *gin.Context) {

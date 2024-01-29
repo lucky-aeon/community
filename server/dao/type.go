@@ -5,21 +5,22 @@ import "xhyovo.cn/community/server/model"
 type Type struct {
 }
 
-func (t *Type) Save(types *model.Types) uint {
-
-	model.Type().Create(&types)
-	return types.ID
+func (t *Type) Save(types *model.Types) (uint, error) {
+	d := model.Type().Create(&types)
+	return types.ID, d.Error
 }
 
-func (t *Type) Update(types *model.Types) {
-	model.Type().Model(types).Updates(types)
+func (t *Type) Update(types *model.Types) error {
+	return model.Type().Model(types).Updates(types).Error
 }
 
-func (t *Type) Delete(id uint) {
-
-	model.Type().Where("id = ?", id).Delete(&model.Types{})
-	model.Type().Where("parent_id = ?", id).Delete(&model.Types{})
-
+func (t *Type) Delete(id uint) error {
+	d := model.Type().Where("id = ?", id).Delete(&model.Types{})
+	if d.Error != nil {
+		return d.Error
+	}
+	d = model.Type().Where("parent_id = ?", id).Delete(&model.Types{})
+	return d.Error
 }
 
 func (t *Type) List(parentId uint) []model.Types {

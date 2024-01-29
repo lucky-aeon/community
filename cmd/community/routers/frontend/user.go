@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"io"
+
 	services "xhyovo.cn/community/server/service"
 
 	"github.com/gin-gonic/gin"
@@ -24,7 +25,7 @@ type editPasswordForm struct {
 
 func InitUserRouters(r *gin.Engine) {
 	group := r.Group("/community/user")
-	group.GET("/", getUserInfo)
+	group.GET("/info", getUserInfo)
 	group.POST("/edit", updateUser)
 }
 

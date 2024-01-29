@@ -1,14 +1,16 @@
 package frontend
 
 import (
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/result"
 	services "xhyovo.cn/community/server/service"
 )
 
 func InitTypeRouters(r *gin.Engine) {
-	r.Group("")
+	g := r.Group("/community/classfiys")
+	g.GET("", list)
 }
 
 func list(ctx *gin.Context) {

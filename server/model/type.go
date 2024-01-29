@@ -12,8 +12,8 @@ type Types struct {
 	Desc          string
 	State         uint
 	Sort          int
-	ArticleState  string // 分类下文章的状态
-	ArticleStates []string
+	ArticleState  string   // 分类下文章的状态
+	ArticleStates []string `gorm:"-"`
 }
 
 func Type() *gorm.DB {

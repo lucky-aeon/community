@@ -24,7 +24,7 @@ type editPasswordForm struct {
 
 func InitUserRouters(r *gin.Engine) {
 	group := r.Group("/community/user")
-	group.GET("/", getUserInfo)
+	group.GET("/info", getUserInfo)
 	group.POST("/edit", updateUser)
 }
 

@@ -24,14 +24,15 @@ type editPasswordForm struct {
 
 func InitUserRouters(r *gin.Engine) {
 	group := r.Group("/community/user")
-	group.GET("/:id", getUserInfo)
+	group.GET("/", getUserInfo)
 	group.POST("/edit", updateUser)
 }
 
 // 获取用户信息
 func getUserInfo(ctx *gin.Context) {
-	// todo get userinfo by jwt
 
+	// todo get userinfo by jwt
+	result.Ok(model.Users{Name: "xhy"}, "").Json(ctx)
 }
 
 func updateUser(ctx *gin.Context) {
@@ -45,7 +46,7 @@ func updateUser(ctx *gin.Context) {
 		form := editUserForm{}
 		err := ctx.ShouldBind(&form)
 		if err != nil {
-			result.Err(utils.GetValidateErr(form, err).Error()).Json(ctx)
+			result.Err(utils.GetValidateErr(form, err)).Json(ctx)
 			return
 		}
 
@@ -54,7 +55,7 @@ func updateUser(ctx *gin.Context) {
 		form := editPasswordForm{}
 		err := ctx.ShouldBind(&form)
 		if err != nil {
-			result.Err(utils.GetValidateErr(form, err).Error()).Json(ctx)
+			result.Err(utils.GetValidateErr(form, err)).Json(ctx)
 			return
 		}
 		var userService services.UserService

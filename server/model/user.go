@@ -10,7 +10,7 @@ type Users struct {
 	ID         uint
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
-	DeletedAt  time.Time
+	DeletedAt  *time.Time `gorm:"index"`
 	Name       string
 	Account    string
 	Password   string

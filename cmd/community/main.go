@@ -3,8 +3,6 @@ package main
 import (
 	"log"
 
-	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/routers"
 	"xhyovo.cn/community/pkg/config"
@@ -20,13 +18,11 @@ func main() {
 	// r.Static("/assets", "assets")
 	// r.LoadHTMLGlob("views/**/*")
 
-	store := cookie.NewStore([]byte("123456"))
-	// 添加 session
-	r.Use(sessions.Sessions("user", store))
 	// 添加 auth
 
 	config.Init()
-	mysql.Init(&config.GetInstance().DbConfig)
+	db := &config.GetInstance().DbConfig
+	mysql.Init(db.Username, db.Password, db.Address, db.Database)
 	kodo.Init(&config.GetInstance().KodoConfig)
 
 	routers.InitFrontedRouter(r)

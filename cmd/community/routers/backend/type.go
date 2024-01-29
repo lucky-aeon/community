@@ -30,7 +30,7 @@ func save(ctx *gin.Context) {
 
 	var types model.Types
 	if err := ctx.ShouldBindJSON(&types); err != nil {
-		result.Err(utils.GetValidateErr(types, err).Error()).Json(ctx)
+		result.Err(utils.GetValidateErr(types, err)).Json(ctx)
 		return
 	}
 	var typeService services.TypeService
@@ -40,7 +40,7 @@ func save(ctx *gin.Context) {
 func update(ctx *gin.Context) {
 	var types model.Types
 	if err := ctx.ShouldBindJSON(&types); err != nil {
-		result.Err(utils.GetValidateErr(types, err).Error()).Json(ctx)
+		result.Err(utils.GetValidateErr(types, err)).Json(ctx)
 		return
 	}
 	var typeService services.TypeService

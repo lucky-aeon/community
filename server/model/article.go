@@ -10,7 +10,7 @@ type Articles struct {
 	ID        uint `gorm:"primarykey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt time.Time `gorm:"index"`
+	DeletedAt *time.Time `gorm:"index"`
 	Title     string
 	Desc      string
 	UserId    uint

@@ -8,10 +8,12 @@ export interface LoginData {
 }
 
 export interface LoginRes {
-  token: string;
+  Data: {
+    token: string;
+  }
 }
 export function login(data: LoginData) {
-  return axios.post<LoginRes>('/api/user/login', data);
+  return axios.post<LoginRes, any>('/api/community/login', data);
 }
 
 export function logout() {
@@ -19,7 +21,8 @@ export function logout() {
 }
 
 export function getUserInfo() {
-  return axios.post<UserState>('/api/user/info');
+  // debugger
+  return axios.get<UserState>('/api/community/user/info');
 }
 
 export function getMenuList() {

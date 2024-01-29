@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"xhyovo.cn/community/pkg/middleware"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	services "xhyovo.cn/community/server/service"
@@ -15,8 +16,8 @@ type registerForm struct {
 }
 
 type loginForm struct {
-	Account  string `binding:"required" form:"account" msg:"账号不能为空"`
-	Password string `binding:"required" form:"password" msg:"密码不能为空"`
+	Account  string `binding:"required" json:"username" msg:"账号不能为空"`
+	Password string `binding:"required" json:"password" msg:"密码不能为空"`
 }
 
 func InitLoginRegisterRouters(ctx *gin.Engine) {
@@ -28,7 +29,7 @@ func InitLoginRegisterRouters(ctx *gin.Engine) {
 func Login(c *gin.Context) {
 	var form loginForm
 	if err := c.ShouldBind(&form); err != nil {
-		result.Err(utils.GetValidateErr(form, err).Error()).Json(c)
+		result.Err(utils.GetValidateErr(form, err)).Json(c)
 		return
 	}
 	user, err := services.Login(form.Account, form.Password)
@@ -37,7 +38,9 @@ func Login(c *gin.Context) {
 		return
 	}
 	user.Password = ""
-	result.Ok(form, "登录成功").Json(c)
+	token, _ := middleware.GenerateToken(user.ID, user.Name)
+
+	result.Ok(map[string]string{"token": token}, "登录成功").Json(c)
 }
 
 func Register(c *gin.Context) {
@@ -46,7 +49,7 @@ func Register(c *gin.Context) {
 	err := c.ShouldBind(&form)
 
 	if err != nil {
-		result.Err(utils.GetValidateErr(form, err).Error()).Json(c)
+		result.Err(utils.GetValidateErr(form, err)).Json(c)
 		return
 	}
 

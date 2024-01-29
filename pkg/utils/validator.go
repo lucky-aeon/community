@@ -7,10 +7,10 @@ import (
 	"strings"
 )
 
-func GetValidateErr(obj any, rawErr error) error {
+func GetValidateErr(obj any, rawErr error) string {
 	validationErrs, ok := rawErr.(validator.ValidationErrors)
 	if !ok {
-		return rawErr
+		return rawErr.Error()
 	}
 	var errString []string
 	for _, validationErr := range validationErrs {
@@ -23,5 +23,5 @@ func GetValidateErr(obj any, rawErr error) error {
 		}
 		errString = append(errString, validationErr.Error())
 	}
-	return errors.New(strings.Join(errString, "\n"))
+	return errors.New(strings.Join(errString, "\n")).Error()
 }

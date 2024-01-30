@@ -65,12 +65,12 @@
 
     {
       label: 'userSetting.label.accountId',
-      value: userStore.accountId,
+      value: userStore.account,
     },
 
     {
       label: 'userSetting.label.registrationDate',
-      value: userStore.registrationDate,
+      value: userStore.createdAt,
     },
   ] as DescData[];
   const fileList = ref<FileItem[]>([file]);

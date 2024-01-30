@@ -2,7 +2,7 @@ package frontend
 
 import (
 	"io"
-
+	"xhyovo.cn/community/cmd/community/middleware"
 	services "xhyovo.cn/community/server/service"
 
 	"github.com/gin-gonic/gin"
@@ -32,8 +32,10 @@ func InitUserRouters(r *gin.Engine) {
 // 获取用户信息
 func getUserInfo(ctx *gin.Context) {
 
-	// todo get userinfo by jwt
-	result.Ok(model.Users{Name: "xhy"}, "").Json(ctx)
+	var userService services.UserService
+	user := userService.GetUserById(middleware.GetUserId(ctx))
+
+	result.Ok(user, "").Json(ctx)
 }
 
 func updateUser(ctx *gin.Context) {

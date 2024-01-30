@@ -14,5 +14,5 @@ func BuildFileKey(userId uint) string {
 }
 
 func BuildFileUrl(fileKey string) string {
-	return kodo.GetDomain() + "/" + fileKey
+	return "http://" + kodo.GetDomain() + "/" + fileKey
 }

@@ -24,8 +24,8 @@ const useUserStore = defineStore('user', {
     organizationName: undefined,
     locationName: undefined,
     phone: undefined,
-    registrationDate: undefined,
-    accountId: undefined,
+    createdAt: undefined,
+    account: undefined,
     certification: undefined,
     role: '',
   }),
@@ -56,7 +56,6 @@ const useUserStore = defineStore('user', {
     // Get user's information
     async info() {
       const res = await getUserInfo();
-
       this.setInfo(res.data);
     },
 
@@ -64,9 +63,8 @@ const useUserStore = defineStore('user', {
     async login(loginForm: LoginData) {
       try {
         const res = await userLogin(loginForm);
-        setToken(res.Data.token);
+        setToken(res.data.token);
       } catch (err) {
-        console.log(err)
         clearToken();
         throw err;
       }

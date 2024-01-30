@@ -2,9 +2,9 @@ package main
 
 import (
 	"log"
+	"xhyovo.cn/community/cmd/community/routers"
 
 	"github.com/gin-gonic/gin"
-	"xhyovo.cn/community/cmd/community/routers"
 	"xhyovo.cn/community/pkg/config"
 	"xhyovo.cn/community/pkg/kodo"
 	"xhyovo.cn/community/pkg/mysql"
@@ -12,7 +12,6 @@ import (
 )
 
 func main() {
-
 	r := gin.Default()
 	r.SetFuncMap(utils.GlobalFunc())
 	// r.Static("/assets", "assets")
@@ -21,10 +20,10 @@ func main() {
 	// 添加 auth
 
 	config.Init()
-	db := &config.GetInstance().DbConfig
+	db := config.GetInstance().DbConfig
 	mysql.Init(db.Username, db.Password, db.Address, db.Database)
-	kodo.Init(&config.GetInstance().KodoConfig)
-
+	kodoConfig := config.GetInstance().KodoConfig
+	kodo.Init(kodoConfig.AccessKey, kodoConfig.SecretKey, kodoConfig.Bucket, kodoConfig.Domain)
 	routers.InitFrontedRouter(r)
 	err := r.Run("127.0.0.1:8080")
 	if err != nil {

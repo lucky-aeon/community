@@ -21,7 +21,6 @@ export function logout() {
 }
 
 export function getUserInfo() {
-  // debugger
   return axios.get<UserState>('/api/community/user/info');
 }
 

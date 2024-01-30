@@ -6,7 +6,6 @@ import (
 	"github.com/qiniu/go-sdk/v7/sms/bytes"
 	"github.com/qiniu/go-sdk/v7/storage"
 	"log"
-	"xhyovo.cn/community/pkg/config"
 )
 
 var authInstance *auth.Credentials
@@ -19,10 +18,10 @@ func GetDomain() string {
 	return domainInstance
 }
 
-func Init(kodo *config.KodoConfig) {
-	authInstance = auth.New(kodo.AccessKey, kodo.SecretKey)
-	bucketInstance = kodo.Bucket
-	domainInstance = kodo.Domain
+func Init(accessKey, secretKey, bucket, domain string) {
+	authInstance = auth.New(accessKey, secretKey)
+	bucketInstance = bucket
+	domainInstance = domain
 }
 
 func GetAuth() *auth.Credentials {

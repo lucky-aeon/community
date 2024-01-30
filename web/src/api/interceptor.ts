@@ -21,13 +21,13 @@ axios.interceptors.request.use(
     // this example using the JWT token
     // Authorization is a custom headers key
     // please modify it according to the actual situation
-    console.log(config);
     const token = getToken();
     if (token) {
+
       if (!config.headers) {
         config.headers = {};
       }
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `${token}`;
     }
     return config;
   },
@@ -41,9 +41,9 @@ axios.interceptors.response.use(
   (response: AxiosResponse<HttpResponse>) => {
     const res = response.data;
     // if the custom code is not 20000, it is judged as an error.
-    if (res.Code !== 200) {
+    if (res.code !== 200) {
       Message.error({
-        content: res.Msg || 'Error',
+        content: res.msg || 'Error',
         duration: 5 * 1000,
       });
       // 50008: Illegal token; 50012: Other clients logged in; 50014: Token expired;

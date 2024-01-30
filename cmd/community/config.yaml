@@ -1,9 +1,11 @@
 db:
-  address: ${DB_HOST}
-  database: ${DB_DATABASE}
-  username: ${DB_USER}
-  password: ${DB_PASS}
+  address: 127.0.0.1:3306
+  database: community
+  username: root
+  password: 123
 kodo:
   accessKey: ${KODO_ACCESS_KEY}
   bucket: ${KODO_BUCKET}
   secretKey: ${KODO_SECRET_KEY}
+  domain: ${DOMAIN}
+

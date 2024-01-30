@@ -7,16 +7,16 @@ import (
 )
 
 type Users struct {
-	ID         uint
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	ID         uint       `json:"id"`
+	CreatedAt  time.Time  `json:"createdAt"`
+	UpdatedAt  time.Time  `json:"updatedAt"`
 	DeletedAt  *time.Time `gorm:"index"`
-	Name       string
-	Account    string
+	Name       string     `json:"name"`
+	Account    string     `json:"account"`
 	Password   string
 	InviteCode uint16
-	Desc       string
-	Avatar     string // todo 暂时为url
+	Desc       string `json:"desc"`
+	Avatar     string `json:"avatar"` // todo 暂时为url
 }
 
 func User() *gorm.DB {

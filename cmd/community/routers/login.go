@@ -2,7 +2,7 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"xhyovo.cn/community/pkg/middleware"
+	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	services "xhyovo.cn/community/server/service"
@@ -38,6 +38,7 @@ func Login(c *gin.Context) {
 		return
 	}
 	user.Password = ""
+
 	token, _ := middleware.GenerateToken(user.ID, user.Name)
 
 	result.Ok(map[string]string{"token": token}, "登录成功").Json(c)

@@ -125,19 +125,23 @@ INSERT INTO `invite_codes` VALUES ('4', '123', '0', null, null);
 -- Table structure for types
 -- ----------------------------
 DROP TABLE IF EXISTS `types`;
-CREATE TABLE `types` (
-                         `id` int(11) NOT NULL AUTO_INCREMENT,
-                         `parent_id` int(11) DEFAULT NULL,
-                         `title` varchar(255) DEFAULT NULL,
-                         `desc` varchar(255) DEFAULT NULL,
-                         `state` tinyint(4) DEFAULT NULL,
-                         `sort` int(11) DEFAULT NULL,
-                         `article_state` varchar(255) DEFAULT NULL,
-                         `created_at` datetime DEFAULT NULL,
-                         `updated_at` datetime DEFAULT NULL,
-                         `deleted_at` datetime DEFAULT NULL,
-                         PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+create table types
+(
+    id            int auto_increment
+        primary key,
+    parent_id     int          null,
+    title         varchar(255) null,
+    `desc`        varchar(255) null,
+    state         tinyint      null,
+    sort          int          null,
+    article_state varchar(255) null,
+    created_at    datetime     null,
+    updated_at    datetime     null,
+    deleted_at    datetime     null,
+    flag_name     varchar(10)  not null comment '唯一标识名',
+    constraint types_pk_flag_name
+        unique (flag_name)
+);
 
 -- ----------------------------
 -- Records of types

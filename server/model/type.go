@@ -1,8 +1,9 @@
 package model
 
 import (
-	"gorm.io/gorm"
 	"time"
+
+	"gorm.io/gorm"
 	"xhyovo.cn/community/pkg/mysql"
 )
 
@@ -18,6 +19,7 @@ type Types struct {
 	Sort          int       `json:"sort"`
 	ArticleState  string    `json:"articleState"` // 分类下文章的状态
 	ArticleStates []string  `gorm:"-" json:"articleStates"`
+	FlagName      string
 }
 
 func Type() *gorm.DB {

@@ -6,6 +6,7 @@ type R struct {
 	Code int         `json:"code"`
 	Data interface{} `json:"data"`
 	Msg  string      `json:"msg"`
+	Ok   bool        `json:"ok"`
 }
 
 func Ok(data any, msg string) *R {
@@ -13,6 +14,28 @@ func Ok(data any, msg string) *R {
 }
 func Err(msg string) *R {
 	return &R{Code: 500, Data: nil, Msg: msg}
+}
+
+func Auto(data any, err error) *R {
+	if err == nil {
+		return Ok(data, "成功")
+	}
+	return Err(err.Error())
+}
+
+func (t *R) OkMsg(msg string) *R {
+
+	if t.Ok {
+		t.Msg = msg
+	}
+	return t
+}
+
+func (t *R) ErrMsg(msg string) *R {
+	if !t.Ok {
+		t.Msg = msg
+	}
+	return t
 }
 
 func (r *R) Json(c *gin.Context) {

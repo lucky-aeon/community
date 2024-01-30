@@ -16,6 +16,7 @@ func InitFrontedRouter(r *gin.Engine) {
 	InitFileRouters(r)
 	frontend.InitUserRouters(r)
 	frontend.InitArticleRouter(r)
+	frontend.InitTypeRouters(r)
 	backend.InitTypeRouters(r)
 	InitCommentRouters(r)
 	frontend.InitTypeRouters(r)

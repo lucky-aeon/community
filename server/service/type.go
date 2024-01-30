@@ -2,6 +2,7 @@ package services
 
 import (
 	"strings"
+
 	"xhyovo.cn/community/server/model"
 )
 
@@ -18,14 +19,14 @@ func (s *TypeService) List(parentId uint) []model.Types {
 	return types
 }
 
-func (s *TypeService) Save(types *model.Types) uint {
+func (s *TypeService) Save(types *model.Types) (uint, error) {
 	return typeDao.Save(types)
 }
 
-func (s *TypeService) Update(types *model.Types) {
-	typeDao.Update(types)
+func (s *TypeService) Update(types *model.Types) error {
+	return typeDao.Update(types)
 }
 
-func (s *TypeService) Delete(id uint) {
-	typeDao.Delete(id)
+func (s *TypeService) Delete(id uint) error {
+	return typeDao.Delete(id)
 }

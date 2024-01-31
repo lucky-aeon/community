@@ -10,7 +10,7 @@ type R struct {
 }
 
 func Ok(data any, msg string) *R {
-	return &R{Code: 200, Data: data, Msg: msg}
+	return &R{Code: 200, Data: data, Msg: msg, Ok: true}
 }
 func Err(msg string) *R {
 	return &R{Code: 500, Data: nil, Msg: msg}

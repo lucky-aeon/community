@@ -2,10 +2,11 @@ package middleware
 
 import (
 	"errors"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/viper"
-	"time"
 	"xhyovo.cn/community/pkg/result"
 )
 
@@ -65,7 +66,7 @@ func ParseToken(tokenStr string) (JwtCustomClaims, error) {
 		return stStringKey, nil
 	})
 
-	if err != nil && !token.Valid {
+	if err != nil || !token.Valid {
 		err = errors.New("invalid Token")
 	}
 	return iJwtCustomClaims, err

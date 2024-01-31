@@ -2,7 +2,6 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
-	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/cmd/community/routers/backend"
 	"xhyovo.cn/community/cmd/community/routers/frontend"
 )
@@ -12,12 +11,12 @@ import (
 func InitFrontedRouter(r *gin.Engine) {
 
 	InitLoginRegisterRouters(r)
-	r.Use(middleware.Auth)
+	//r.Use(middleware.Auth) todo
 	InitFileRouters(r)
 	frontend.InitUserRouters(r)
 	frontend.InitArticleRouter(r)
 	frontend.InitTypeRouters(r)
 	backend.InitTypeRouters(r)
 	InitCommentRouters(r)
-	frontend.InitTypeRouters(r)
+	frontend.InitMessageRouters(r)
 }

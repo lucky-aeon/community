@@ -19,9 +19,9 @@ type JwtCustomClaims struct {
 	jwt.RegisteredClaims
 }
 
-func GetUserId(ctx *gin.Context) uint {
+func GetUserId(ctx *gin.Context) int {
 
-	return ctx.Value(authorization).(uint)
+	return ctx.Value(authorization).(int)
 }
 
 func Auth(ctx *gin.Context) {
@@ -56,7 +56,11 @@ func GenerateToken(id uint, name string) (string, error) {
 
 // ParseToken 解析token
 func ParseToken(tokenStr string) (JwtCustomClaims, error) {
+
 	iJwtCustomClaims := JwtCustomClaims{}
+	if tokenStr == "" {
+		return iJwtCustomClaims, errors.New("token为空")
+	}
 	token, err := jwt.ParseWithClaims(tokenStr, &iJwtCustomClaims, func(token *jwt.Token) (interface{}, error) {
 		return stStringKey, nil
 	})

@@ -8,4 +8,11 @@ kodo:
   bucket: ${KODO_BUCKET}
   secretKey: ${KODO_SECRET_KEY}
   domain: ${DOMAIN}
+email:
+  address: ${ADDRESS}
+  username: ${USERNAME}
+  password: ${PASSWORD}
+  host: ${HOST}
+  pollCount: ${POLLCOUNT}
+
 

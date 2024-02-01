@@ -9,8 +9,9 @@ import (
 )
 
 type AppConfig struct {
-	DbConfig   DbConfig   `yaml:"db"`
-	KodoConfig KodoConfig `yaml:"kodo"`
+	DbConfig    DbConfig    `yaml:"db"`
+	KodoConfig  KodoConfig  `yaml:"kodo"`
+	EmailConfig EmailConfig `yaml:"email"`
 }
 
 type DbConfig struct {
@@ -25,6 +26,14 @@ type KodoConfig struct {
 	SecretKey string `yaml:"secretKey"`
 	Bucket    string `yaml:"bucket"`
 	Domain    string `yaml:"domain"`
+}
+
+type EmailConfig struct {
+	Address   string `yaml:"address"`
+	PollCount int    `yaml:"pollCount"`
+	Username  string `yaml:"username"`
+	Password  string `yaml:"password"`
+	Host      string `yaml:"host"`
 }
 
 var instance *AppConfig

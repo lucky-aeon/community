@@ -7,23 +7,23 @@ import (
 )
 
 type Comments struct {
-	ID                 uint `gorm:"primarykey" json:"id"`
+	ID                 int `gorm:"primarykey" json:"id"`
 	CreatedAt          time.Time
 	UpdatedAt          time.Time
 	DeletedAt          *time.Time `gorm:"index"`
-	ParentId           uint       `json:"parentId"`
-	RootId             uint       `json:"rootId"`
+	ParentId           int        `json:"parentId"`
+	RootId             int        `json:"rootId"`
 	Content            string     `json:"content"`
-	UserId             uint
-	BusinessId         uint `json:"articleId"`
-	TenantId           uint
+	UserId             int
+	BusinessId         int `json:"articleId"`
+	TenantId           int
 	ChildComments      []*Comments `gorm:"-"`
-	ChildCommentNumber uint        `gorm:"-"`
+	ChildCommentNumber int         `gorm:"-"`
 }
 
 type ChildCommentNumber struct {
-	RootId uint `json:"rootId"`
-	Number uint `json:"number"`
+	RootId int `json:"rootId"`
+	Number int `json:"number"`
 }
 
 func Comment() *gorm.DB {

@@ -10,7 +10,7 @@ type Types struct {
 	ParentId      int
 	Title         string
 	Desc          string
-	State         uint
+	State         int
 	Sort          int
 	ArticleState  string   // 分类下文章的状态
 	ArticleStates []string `gorm:"-"`

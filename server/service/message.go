@@ -32,7 +32,7 @@ func (*MessageService) DeleteMessageLogs(id []int) {
 	messageDao.DeleteMessageLogs(id)
 }
 
-func (m *MessageService) SendMessage(from, to, contentType uint) {
+func (m *MessageService) SendMessage(from, to, contentType int) {
 
 	// 不会搞，后续再说 todo
 	messageDao.SendMessage(from, to, "")

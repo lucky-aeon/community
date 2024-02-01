@@ -37,7 +37,7 @@ func (*MessageDao) DeleteMessageLogs(id []int) {
 }
 
 // 发送消息
-func (*MessageDao) SendMessage(from, to uint, content string) {
+func (*MessageDao) SendMessage(from, to int, content string) {
 	state := &model.MessageStates{
 		From:    from,
 		To:      to,

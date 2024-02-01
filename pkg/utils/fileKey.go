@@ -6,9 +6,9 @@ import (
 	"xhyovo.cn/community/pkg/kodo"
 )
 
-func BuildFileKey(userId uint) string {
+func BuildFileKey(userId int) string {
 
-	str := strconv.Itoa(int(userId))
+	str := strconv.Itoa(userId)
 
 	return str + "/" + (uuid.New().String())
 }

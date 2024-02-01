@@ -11,23 +11,23 @@ func (*File) Save(file *model.Files) {
 	model.File().Create(file)
 }
 
-func (*File) GetFileInfo(fileId, tenantId uint) *model.Files {
+func (*File) GetFileInfo(fileId, tenantId int) *model.Files {
 	fileInfo := &model.Files{}
 	model.File().Where(&model.Files{ID: fileId, TenantId: tenantId}).Find(fileInfo)
 
 	return fileInfo
 }
 
-func (*File) Delete(userId, fileId, tenantId uint) {
+func (*File) Delete(userId, fileId, tenantId int) {
 	model.File().Where("id = ? and user_id = ? and tenant_id = ?", fileId, userId, tenantId).Delete(&model.Files{})
 }
 
-func (*File) Deletes(userId, businessId, tenantId uint) {
+func (*File) Deletes(userId, businessId, tenantId int) {
 	model.File().Where("business_id = ? and user_id = ? and tenant_id = ?", businessId, userId, tenantId).Delete(&model.Files{})
 
 }
 
-func (*File) GetFileKeys(businessId uint) []string {
+func (*File) GetFileKeys(businessId int) []string {
 	var files []model.Files
 	model.File().Where("business_id = ?", businessId).Find(files)
 	var fileKeys []string

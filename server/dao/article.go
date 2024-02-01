@@ -35,7 +35,7 @@ func (a *Article) Count() int64 {
 	return count
 }
 
-func (a *Article) Delete(articleId, userId uint) error {
+func (a *Article) Delete(articleId, userId int) error {
 	return model.Article().Model(&model.Articles{}).Delete(&model.Articles{
 		ID:     articleId,
 		UserId: userId,

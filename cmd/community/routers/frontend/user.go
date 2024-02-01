@@ -41,7 +41,7 @@ func getUserInfo(ctx *gin.Context) {
 func updateUser(ctx *gin.Context) {
 
 	// todo 先放这里，后续记得改
-	var userId uint
+	var userId int
 	t := ctx.DefaultQuery("tab", "info")
 	var userService services.UserService
 	switch t {

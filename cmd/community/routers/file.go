@@ -31,7 +31,7 @@ func SaveFile(ctx *gin.Context) {
 	}
 	// todo get userId
 	var fileService services.FileService
-	err = fileService.Save(0, uint(atoi), fileKey)
+	err = fileService.Save(0, atoi, fileKey)
 	if err != nil {
 		result.Err("在我们空间中没有该文件").Json(ctx)
 		return

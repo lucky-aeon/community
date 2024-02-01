@@ -7,10 +7,10 @@ import (
 )
 
 type MessageStates struct {
-	ID        uint      `gorm:"primarykey" json:"id"`
+	ID        int       `gorm:"primarykey" json:"id"`
 	Content   string    `json:"content"`
-	From      uint      `json:"from"`
-	To        uint      `json:"to"`
+	From      int       `json:"from"`
+	To        int       `json:"to"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 

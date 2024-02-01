@@ -12,18 +12,18 @@ func (a *CommentsService) Comment(comment *model.Comments) {
 }
 
 // 删除评论
-func (a *CommentsService) DeleteComment(id, userId uint) {
+func (a *CommentsService) DeleteComment(id, userId int) {
 	commentDao.Delete(id, userId)
 }
 
 // 查询文章下的评论
-func (*CommentsService) GetCommentsByArticleID(page, limit, businessId uint) ([]*model.Comments, int64) {
+func (*CommentsService) GetCommentsByArticleID(page, limit, businessId int) ([]*model.Comments, int64) {
 
 	var parentComments []*model.Comments
-	commentsMap := make(map[uint][]*model.Comments)
+	commentsMap := make(map[int][]*model.Comments)
 	comments, count := commentDao.GetCommentsByArticleID(page, limit, businessId)
 
-	var parentIds []uint
+	var parentIds []int
 	// 收集根评论
 	for i := range comments {
 		if comments[i].ParentId == 0 {
@@ -43,15 +43,15 @@ func (*CommentsService) GetCommentsByArticleID(page, limit, businessId uint) ([]
 }
 
 // 查询文章下的所有评论
-func (*CommentsService) GetAllCommentsByArticleID(page, limit, businessId uint) ([]*model.Comments, int64) {
+func (*CommentsService) GetAllCommentsByArticleID(page, limit, businessId int) ([]*model.Comments, int64) {
 	return commentDao.GetAllCommentsByArticleID(page, limit, businessId)
 }
 
 // 查询指定评论下的评论
-func (*CommentsService) GetCommentsByRootID(page, limit, rootId uint) ([]*model.Comments, int64) {
+func (*CommentsService) GetCommentsByRootID(page, limit, rootId int) ([]*model.Comments, int64) {
 
 	var parentComments []*model.Comments
-	commentsMap := make(map[uint][]*model.Comments)
+	commentsMap := make(map[int][]*model.Comments)
 	comments, count := commentDao.GetCommentsByCommentID(page, limit, rootId)
 
 	// 收集根评论

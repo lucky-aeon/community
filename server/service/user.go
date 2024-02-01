@@ -10,7 +10,7 @@ type UserService struct {
 }
 
 // get user information
-func (*UserService) GetUserById(id uint) *model.Users {
+func (*UserService) GetUserById(id int) *model.Users {
 
 	user := userDao.QueryUser(&model.Users{ID: id})
 	user.Avatar = utils.BuildFileUrl(user.Avatar)

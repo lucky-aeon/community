@@ -7,11 +7,11 @@ import (
 )
 
 type MessageLogs struct {
-	ID        uint `gorm:"primarykey"`
+	ID        int `gorm:"primarykey"`
 	Content   string
-	From      uint
-	To        uint
-	Type      uint
+	From      int
+	To        int
+	Type      int
 	CreatedAt time.Time
 	DeletedAt time.Time
 }

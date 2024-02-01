@@ -7,7 +7,7 @@ import (
 )
 
 type MessageTemplates struct {
-	ID        uint `gorm:"primarykey"`
+	ID        int `gorm:"primarykey"`
 	Content   string
 	CreatedAt time.Time
 	UpdateAt  time.Time

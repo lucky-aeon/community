@@ -7,16 +7,16 @@ import (
 )
 
 type Articles struct {
-	ID        uint `gorm:"primarykey"`
+	ID        int `gorm:"primarykey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt *time.Time `gorm:"index"`
 	Title     string
 	Desc      string
-	UserId    uint
-	State     uint // 状态:草稿/发布/待解决/已解决/已关闭
-	Like      uint
-	Type      uint
+	UserId    int
+	State     int // 状态:草稿/发布/待解决/已解决/已关闭
+	Like      int
+	Type      int
 	Users     Users `gorm:"-"`
 }
 

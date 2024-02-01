@@ -24,7 +24,7 @@ func list(ctx *gin.Context) {
 		parentId = 0
 	}
 	var typeService services.TypeService
-	result.Ok(typeService.List(uint(parentId)), "").Json(ctx)
+	result.Ok(typeService.List(parentId), "").Json(ctx)
 }
 
 func save(ctx *gin.Context) {
@@ -63,6 +63,6 @@ func delete(ctx *gin.Context) {
 		result.Err("删除失败,该分类下有文章").Json(ctx)
 		return
 	}
-	typeService.Delete(uint(id))
+	typeService.Delete(id)
 	result.Ok(nil, "删除成功").Json(ctx)
 }

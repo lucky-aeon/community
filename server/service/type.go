@@ -9,7 +9,7 @@ import (
 type TypeService struct {
 }
 
-func (s *TypeService) List(parentId uint) []model.Types {
+func (s *TypeService) List(parentId int) []model.Types {
 	types := typeDao.List(parentId)
 	for i := range types {
 		typeObject := types[i]
@@ -19,7 +19,7 @@ func (s *TypeService) List(parentId uint) []model.Types {
 	return types
 }
 
-func (s *TypeService) Save(types *model.Types) (uint, error) {
+func (s *TypeService) Save(types *model.Types) (int, error) {
 	return typeDao.Save(types)
 }
 
@@ -27,6 +27,6 @@ func (s *TypeService) Update(types *model.Types) error {
 	return typeDao.Update(types)
 }
 
-func (s *TypeService) Delete(id uint) error {
+func (s *TypeService) Delete(id int) error {
 	return typeDao.Delete(id)
 }

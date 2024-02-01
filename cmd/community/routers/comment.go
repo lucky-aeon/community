@@ -22,7 +22,7 @@ func InitCommentRouters(g *gin.Engine) {
 // 发布评论
 func comment(ctx *gin.Context) {
 	var comment model.Comments
-	var userId uint
+	var userId int
 	if err := ctx.ShouldBindJSON(&comment); err != nil {
 		result.Err(utils.GetValidateErr(comment, err)).Json(ctx)
 		return
@@ -37,14 +37,14 @@ func comment(ctx *gin.Context) {
 func deleteComment(ctx *gin.Context) {
 	commentId := ctx.Param("id")
 	// todo 拿userid
-	var userId uint
+	var userId int
 	if commentId == "" {
 		result.Err("删除评论id不能为空").Json(ctx)
 		return
 	}
 	commentIdInt, _ := strconv.Atoi(commentId)
 	var commentsService services.CommentsService
-	commentsService.DeleteComment(uint(commentIdInt), userId)
+	commentsService.DeleteComment(commentIdInt, userId)
 	result.Ok(nil, "删除成功").Json(ctx)
 }
 
@@ -59,7 +59,7 @@ func listCommentsByArticleId(ctx *gin.Context) {
 		return
 	}
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetCommentsByArticleID(uint(page), uint(limit), uint(articleId))
+	comments, count := commentsService.GetCommentsByArticleID(page, limit, articleId)
 	result.Ok(map[string]interface{}{
 		"data":  &comments,
 		"count": &count,
@@ -72,7 +72,7 @@ func listCommentsByRootId(ctx *gin.Context) {
 	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
 	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "15"))
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetCommentsByRootID(uint(page), uint(limit), uint(rootId))
+	comments, count := commentsService.GetCommentsByRootID(page, limit, rootId)
 
 	result.Ok(map[string]interface{}{
 		"data":  comments,
@@ -92,7 +92,7 @@ func listAllCommentsByArticleId(ctx *gin.Context) {
 		return
 	}
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetAllCommentsByArticleID(uint(page), uint(limit), uint(articleId))
+	comments, count := commentsService.GetAllCommentsByArticleID(page, limit, articleId)
 	result.Ok(map[string]interface{}{
 		"data":  comments,
 		"count": count,

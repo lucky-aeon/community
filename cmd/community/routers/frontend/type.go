@@ -19,5 +19,5 @@ func list(ctx *gin.Context) {
 		parentId = 0
 	}
 	var typeService services.TypeService
-	result.Ok(typeService.List(uint(parentId)), "").Json(ctx)
+	result.Ok(typeService.List(parentId), "").Json(ctx)
 }

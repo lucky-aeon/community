@@ -7,7 +7,7 @@ import (
 )
 
 type Users struct {
-	ID         uint       `json:"id"`
+	ID         int        `json:"id"`
 	CreatedAt  time.Time  `json:"createdAt"`
 	UpdatedAt  time.Time  `json:"updatedAt"`
 	DeletedAt  *time.Time `gorm:"index"`

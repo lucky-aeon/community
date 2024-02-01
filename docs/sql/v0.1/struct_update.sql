@@ -44,3 +44,17 @@ CREATE TABLE `message_logs` (
                                 `deleted_at` datetime DEFAULT NULL,
                                 PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+-- ----------------------------
+-- Table structure for subscription
+-- ----------------------------
+DROP TABLE IF EXISTS `subscription`;
+CREATE TABLE `subscription` (
+                                `id` int(11) NOT NULL AUTO_INCREMENT,
+                                `user_id` int(11) NOT NULL,
+                                `event` int(11) NOT NULL,
+                                `businessId` int(11) NOT NULL,
+                                `created_at` datetime DEFAULT NULL,
+                                PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

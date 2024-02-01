@@ -7,7 +7,7 @@ import (
 )
 
 type InviteCodes struct {
-	ID        uint `gorm:"primaryKey"`
+	ID        int `gorm:"primaryKey"`
 	Code      uint16
 	State     bool // 状态: false 未使用 true 已使用
 	CreatedAt time.Time

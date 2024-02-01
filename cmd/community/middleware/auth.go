@@ -15,7 +15,7 @@ var authorization = "Authorization"
 var stStringKey = []byte(viper.GetString("jwt.StringKey"))
 
 type JwtCustomClaims struct {
-	ID   uint
+	ID   int
 	Name string
 	jwt.RegisteredClaims
 }
@@ -35,7 +35,7 @@ func Auth(ctx *gin.Context) {
 	ctx.Set(authorization, claims.ID)
 
 }
-func GenerateToken(id uint, name string) (string, error) {
+func GenerateToken(id int, name string) (string, error) {
 	// 初始化
 	iJwtCustomClaims := JwtCustomClaims{
 		ID:   id,

@@ -33,7 +33,7 @@ func articleGet(c *gin.Context) {
 	}
 	daoArticle := &dao.Article{}
 	r, err := daoArticle.QuerySingle(model.Articles{
-		ID: uint(articleId),
+		ID: articleId,
 	})
 	if err != nil {
 		result.Err("未找到相关文章").Json(c)

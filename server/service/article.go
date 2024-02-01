@@ -8,7 +8,7 @@ import (
 type ArticleService struct {
 }
 
-func (*ArticleService) Get(id uint) (*model.Articles, error) {
+func (*ArticleService) Get(id int) (*model.Articles, error) {
 
 	return articleDao.QuerySingle(model.Articles{ID: id})
 }
@@ -21,7 +21,7 @@ func (a *ArticleService) Page() gin.H {
 		limit, _ := strconv.Atoi(c.DefaultQuery("limit", "15"))
 		typeId, _ := strconv.Atoi(c.DefaultQuery("typeId", ""))
 
-		articles, err := articleDao.QueryList(&model.Articles{Type: uint(typeId)}, cur, limit)
+		articles, err := articleDao.QueryList(&model.Articles{Type: int(typeId)}, cur, limit)
 		if err != nil {
 			return nil
 		}

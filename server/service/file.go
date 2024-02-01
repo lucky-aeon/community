@@ -8,7 +8,7 @@ import (
 type FileService struct{}
 
 // save fileDao
-func (*FileService) Save(userId, businessId uint, fileKey string) error {
+func (*FileService) Save(userId, businessId int, fileKey string) error {
 
 	// get fileInfo
 	fileInfo, err := kodo.GetFileInfo(fileKey)
@@ -30,7 +30,7 @@ func (*FileService) Save(userId, businessId uint, fileKey string) error {
 
 }
 
-func (*FileService) Delete(userId, fileId, tenantId uint) {
+func (*FileService) Delete(userId, fileId, tenantId int) {
 
 	fileDao.Delete(userId, fileId, tenantId)
 
@@ -39,7 +39,7 @@ func (*FileService) Delete(userId, fileId, tenantId uint) {
 
 }
 
-func (*FileService) Deletes(userId, businessId, tenantId uint) {
+func (*FileService) Deletes(userId, businessId, tenantId int) {
 
 	// 获取所有文件的key
 	fileKeys := fileDao.GetFileKeys(businessId)
@@ -50,7 +50,7 @@ func (*FileService) Deletes(userId, businessId, tenantId uint) {
 }
 
 // fileDao get
-func (*FileService) GetFileKey(fileId, tenantId uint) string {
+func (*FileService) GetFileKey(fileId, tenantId int) string {
 	return fileDao.GetFileInfo(fileId, tenantId).FileKey
 
 }

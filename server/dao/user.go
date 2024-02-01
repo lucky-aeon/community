@@ -10,14 +10,14 @@ type UserDao struct {
 
 // set user info by article user id
 func (*UserDao) SetUserInfo(articles []*model.Articles) {
-	var userIds []uint
+	var userIds []int
 
 	for _, article := range articles {
 		userIds = append(userIds, article.UserId)
 	}
 	users := []model.Users{}
 	model.User().Find(&users, userIds)
-	var userMap = make(map[uint]model.Users)
+	var userMap = make(map[int]model.Users)
 	for _, user := range users {
 		user.Avatar = utils.BuildFileUrl(user.Avatar)
 		userMap[user.ID] = user
@@ -29,7 +29,7 @@ func (*UserDao) SetUserInfo(articles []*model.Articles) {
 
 }
 
-func (*UserDao) QueryUsersByUserIds(ids []uint) []model.Users {
+func (*UserDao) QueryUsersByUserIds(ids []int) []model.Users {
 	users := []model.Users{}
 	model.User().Find(&users, ids)
 	return users
@@ -41,7 +41,7 @@ func (*UserDao) QueryUser(user *model.Users) *model.Users {
 	return user
 }
 
-func (*UserDao) CreateUser(account, name, pswd string, ininviteCode uint16) uint {
+func (*UserDao) CreateUser(account, name, pswd string, ininviteCode uint16) int {
 
 	user := model.Users{Account: account, Name: name, Password: pswd, InviteCode: ininviteCode}
 	model.User().Create(&user)

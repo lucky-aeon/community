@@ -2,11 +2,15 @@ package model
 
 import (
 	"gorm.io/gorm"
+	"time"
 	"xhyovo.cn/community/pkg/mysql"
 )
 
 type Types struct {
-	gorm.Model
+	ID            int `gorm:"primarykey"`
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     time.Time `gorm:"index"`
 	ParentId      int
 	Title         string
 	Desc          string

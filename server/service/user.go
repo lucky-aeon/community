@@ -87,7 +87,7 @@ type UserMenu struct {
 
 func (t *UserService) GetUserMenu() []*UserMenu {
 	rootMenu := typeDao.List(0)
-	parentIds := make([]uint, len(rootMenu))
+	parentIds := make([]int, len(rootMenu))
 	userMenu := make(map[int]*UserMenu)
 	for i, item := range rootMenu {
 		parentIds[i] = item.ID

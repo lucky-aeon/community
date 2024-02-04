@@ -32,7 +32,7 @@ func InitUserRouters(r *gin.Engine) {
 	group := r.Group("/community/user")
 	group.GET("/info", getUserInfo)
 	group.POST("/edit", updateUser)
-	group.POST("/menu", getUserMenu)
+	group.GET("/menu", getUserMenu)
 }
 
 func getUserMenu(ctx *gin.Context) {

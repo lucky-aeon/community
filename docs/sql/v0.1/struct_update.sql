@@ -10,6 +10,7 @@ DROP TABLE IF EXISTS `message_templates`;
 CREATE TABLE `message_templates` (
                                      `id` int(11) NOT NULL AUTO_INCREMENT,
                                      `content` longtext NOT NULL,
+                                     `event_id` int(11) NOT NULL,
                                      `created_at` datetime DEFAULT NULL,
                                      `updated_at` datetime DEFAULT NULL,
                                      PRIMARY KEY (`id`)
@@ -23,6 +24,7 @@ DROP TABLE IF EXISTS `message_states`;
 CREATE TABLE `message_states` (
                                   `id` int(11) NOT NULL AUTO_INCREMENT,
                                   `content` longtext NOT NULL,
+                                  `event_id` int(11) DEFAULT NULL,
                                   `from` int(11) NOT NULL,
                                   `to` int(11) NOT NULL,
                                   `created_at` datetime DEFAULT NULL,
@@ -49,11 +51,11 @@ CREATE TABLE `message_logs` (
 -- ----------------------------
 -- Table structure for subscription
 -- ----------------------------
-DROP TABLE IF EXISTS `subscription`;
+DROP TABLE IF EXISTS `subscriptions`;
 CREATE TABLE `subscription` (
                                 `id` int(11) NOT NULL AUTO_INCREMENT,
                                 `user_id` int(11) NOT NULL,
-                                `event` int(11) NOT NULL,
+                                `event_id` int(11) NOT NULL,
                                 `businessId` int(11) NOT NULL,
                                 `created_at` datetime DEFAULT NULL,
                                 PRIMARY KEY (`id`)

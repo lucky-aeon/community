@@ -46,3 +46,14 @@ func (a *ArticleService) Count() int64 {
 func (a *ArticleService) CountByTypeId(typeId int) int64 {
 	return articleDao.CountByTypeId(typeId)
 }
+
+func (a *ArticleService) ListByIdsSelectIdTitleMap(id []int) map[int]string {
+
+	m := make(map[int]string)
+	articles := articleDao.ListByIdsSelectIdTitle(id)
+	for i := range articles {
+		v := articles[i]
+		m[v.ID] = v.Title
+	}
+	return m
+}

@@ -7,17 +7,17 @@ import (
 )
 
 type Articles struct {
-	ID        int `gorm:"primarykey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int        `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt time.Time  `json:"updatedAt"`
 	DeletedAt *time.Time `gorm:"index"`
-	Title     string
-	Desc      string
-	UserId    int
-	State     int // 状态:草稿/发布/待解决/已解决/已关闭
-	Like      int
-	Type      int
-	Users     Users `gorm:"-"`
+	Title     string     `json:"title"`
+	Desc      string     `json:"desc"`
+	UserId    int        `json:"userId"`
+	State     int        `json:"state"` // 状态:草稿/发布/待解决/已解决/已关闭
+	Like      int        `json:"like"`
+	Type      int        `json:"type"`
+	Users     Users      `gorm:"-" json:"users"`
 }
 
 func Article() *gorm.DB {

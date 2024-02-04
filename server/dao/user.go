@@ -50,5 +50,18 @@ func (*UserDao) CreateUser(account, name, pswd string, ininviteCode uint16) int 
 
 func (d *UserDao) UpdateUser(user *model.Users) {
 
-	model.User().Model(user).Updates(user)
+	model.User().Updates(user)
+}
+
+func (d *UserDao) ListByIds(id ...int) []string {
+	var email []string
+	model.User().Where("id in ?", id).Select("account").Find(&email)
+	return email
+
+}
+
+func (d *UserDao) ListByIdsSelectIdName(ids []int) []model.Users {
+	var users []model.Users
+	model.User().Where("id in ?", ids).Select("id,name").Find(&users)
+	return users
 }

@@ -7,15 +7,15 @@ import (
 )
 
 type Files struct {
-	ID         int `gorm:"primaryKey"`
-	FileKey    string
-	Size       int64
-	Format     string
-	UserId     int
-	BusinessId int
-	TenantId   int
-	CreatedAt  time.Time
-	UpdatedAt  time.Time
+	ID         int       `gorm:"primaryKey"`
+	FileKey    string    `json:"fileKey"`
+	Size       int64     `json:"size"`
+	Format     string    `json:"format"`
+	UserId     int       `json:"userId"`
+	BusinessId int       `json:"businessId"`
+	TenantId   int       `json:"tenantId"`
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
 }
 
 func File() *gorm.DB {

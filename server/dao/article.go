@@ -61,3 +61,16 @@ func (a *Article) CountByTypeId(id int) int64 {
 	model.Article().Where("type = ?", id).Count(&count)
 	return count
 }
+
+func (a *Article) ExistById(id int) bool {
+	var count int64
+	model.Article().Where("id = ?", id).Count(&count)
+	return count == 1
+}
+
+func (a *Article) ListByIdsSelectIdTitle(ids []int) []model.Articles {
+	var articles []model.Articles
+	model.Article().Where("id in ?", ids).Select("id,title").Find(&articles)
+
+	return articles
+}

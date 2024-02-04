@@ -7,13 +7,13 @@ import (
 )
 
 type ArticleRelations struct {
-	ID        int `gorm:"primarykey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int       `gorm:"primarykey"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 	DeletedAt time.Time `gorm:"index"`
-	ParentId  int
-	RootId    int
-	ArticleId int
+	ParentId  int       `json:"parentId"`
+	RootId    int       `json:"rootId"`
+	ArticleId int       `json:"articleId"`
 }
 
 func ArticleRelation() *gorm.DB {

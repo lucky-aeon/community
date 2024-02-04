@@ -26,15 +26,13 @@ func Init(address, username, password, host string, pollCount int) {
 }
 
 func Send(to []string, content, subject string) {
-	go func(to []string, content, subject string) {
-		e := email.NewEmail()
-		e.From = from
-		e.To = to
-		e.Subject = subject
-		e.Text = []byte(content)
-		err := emailPoll.Send(e, 10*time.Second)
-		if err != nil {
-			return
-		}
-	}(to, content, subject)
+	e := email.NewEmail()
+	e.From = from
+	e.To = to
+	e.Subject = subject
+	e.Text = []byte(content)
+	err := emailPoll.Send(e, 10*time.Second)
+	if err != nil {
+		return
+	}
 }

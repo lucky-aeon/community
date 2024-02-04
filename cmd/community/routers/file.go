@@ -2,6 +2,7 @@ package routers
 
 import (
 	"strconv"
+	"xhyovo.cn/community/cmd/community/middleware"
 	services "xhyovo.cn/community/server/service"
 
 	"github.com/gin-gonic/gin"
@@ -29,9 +30,9 @@ func SaveFile(ctx *gin.Context) {
 		result.Err("序列化文章id失败,请检查是否为数字").Json(ctx)
 		return
 	}
-	// todo get userId
+	userId := middleware.GetUserId(ctx)
 	var fileService services.FileService
-	err = fileService.Save(0, atoi, fileKey)
+	err = fileService.Save(userId, atoi, fileKey)
 	if err != nil {
 		result.Err("在我们空间中没有该文件").Json(ctx)
 		return

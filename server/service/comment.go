@@ -1,14 +1,32 @@
 package services
 
-import "xhyovo.cn/community/server/model"
+import (
+	"errors"
+	"github.com/gin-gonic/gin"
+	"xhyovo.cn/community/server/model"
+	"xhyovo.cn/community/server/service/event"
+)
 
 type CommentsService struct {
+	ctx *gin.Context
+}
+
+func NewCommentService(ctx *gin.Context) *CommentsService {
+	return &CommentsService{ctx: ctx}
 }
 
 // 发布评论
-func (a *CommentsService) Comment(comment *model.Comments) {
-	// todo 判断文章是否存在
+func (a *CommentsService) Comment(comment *model.Comments) error {
+
+	articleId := comment.BusinessId
+	if f := articleDao.ExistById(articleId); !f {
+		return errors.New("文章不存在")
+	}
 	commentDao.AddComment(comment)
+	var subscriptionService SubscriptionService
+
+	subscriptionService.Do(&model.Subscriptions{EventId: event.CommentUpdateEvent, BusinessId: comment.BusinessId})
+	return nil
 }
 
 // 删除评论
@@ -22,7 +40,9 @@ func (*CommentsService) GetCommentsByArticleID(page, limit, businessId int) ([]*
 	var parentComments []*model.Comments
 	commentsMap := make(map[int][]*model.Comments)
 	comments, count := commentDao.GetCommentsByArticleID(page, limit, businessId)
-
+	if count == 0 {
+		return parentComments, 0
+	}
 	var parentIds []int
 	// 收集根评论
 	for i := range comments {

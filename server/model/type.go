@@ -7,17 +7,17 @@ import (
 )
 
 type Types struct {
-	ID            int `gorm:"primarykey"`
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID            int       `gorm:"primarykey" json:"id"`
+	CreatedAt     time.Time `json:"createdAt"`
+	UpdatedAt     time.Time `json:"updatedAt"`
 	DeletedAt     time.Time `gorm:"index"`
-	ParentId      int
-	Title         string
-	Desc          string
-	State         int
-	Sort          int
-	ArticleState  string   // 分类下文章的状态
-	ArticleStates []string `gorm:"-"`
+	ParentId      int       `json:"parentId"`
+	Title         string    `json:"title"`
+	Desc          string    `json:"desc"`
+	State         int       `json:"state"`
+	Sort          int       `json:"sort"`
+	ArticleState  string    `json:"articleState"` // 分类下文章的状态
+	ArticleStates []string  `gorm:"-" json:"articleStates"`
 }
 
 func Type() *gorm.DB {

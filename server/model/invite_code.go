@@ -7,11 +7,11 @@ import (
 )
 
 type InviteCodes struct {
-	ID        int `gorm:"primaryKey"`
-	Code      uint16
-	State     bool // 状态: false 未使用 true 已使用
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int       `gorm:"primaryKey"`
+	Code      uint16    `json:"code"`
+	State     bool      `json:"state"` // 状态: false 未使用 true 已使用
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func InviteCode() *gorm.DB {

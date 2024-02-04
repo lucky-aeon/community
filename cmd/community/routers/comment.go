@@ -3,6 +3,7 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
@@ -28,16 +29,21 @@ func comment(ctx *gin.Context) {
 		return
 	}
 	comment.UserId = userId
-	var commentsService services.CommentsService
-	commentsService.Comment(&comment)
-	result.Ok(nil, "评论成功").Json(ctx)
+
+	commentsService := services.NewCommentService(ctx)
+	err := commentsService.Comment(&comment)
+	msg := "评论成功"
+	if err != nil {
+		msg = err.Error()
+	}
+	result.Ok(nil, msg).Json(ctx)
 }
 
 // 删除评论
 func deleteComment(ctx *gin.Context) {
 	commentId := ctx.Param("id")
-	// todo 拿userid
-	var userId int
+
+	userId := middleware.GetUserId(ctx)
 	if commentId == "" {
 		result.Err("删除评论id不能为空").Json(ctx)
 		return

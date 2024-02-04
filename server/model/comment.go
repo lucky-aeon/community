@@ -7,18 +7,18 @@ import (
 )
 
 type Comments struct {
-	ID                 int `gorm:"primarykey" json:"id"`
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
-	DeletedAt          *time.Time `gorm:"index"`
-	ParentId           int        `json:"parentId"`
-	RootId             int        `json:"rootId"`
-	Content            string     `json:"content"`
-	UserId             int
-	BusinessId         int `json:"articleId"`
-	TenantId           int
-	ChildComments      []*Comments `gorm:"-"`
-	ChildCommentNumber int         `gorm:"-"`
+	ID                 int         `gorm:"primarykey" json:"id"`
+	CreatedAt          time.Time   `json:"createdAt"`
+	UpdatedAt          time.Time   `json:"updatedAt"`
+	DeletedAt          *time.Time  `gorm:"index"`
+	ParentId           int         `json:"parentId"`
+	RootId             int         `json:"rootId"`
+	Content            string      `json:"content"`
+	UserId             int         `json:"userId"`
+	BusinessId         int         `json:"articleId"`
+	TenantId           int         `json:"tenantId"`
+	ChildComments      []*Comments `gorm:"-" json:"childComments"`
+	ChildCommentNumber int         `gorm:"-" json:"childCommentNumber"`
 }
 
 type ChildCommentNumber struct {

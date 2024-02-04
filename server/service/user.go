@@ -24,6 +24,21 @@ func (*UserService) UpdateUser(user *model.Users) {
 
 }
 
+func (*UserService) ListByIdsSelectEmail(id ...int) []string {
+	return userDao.ListByIds(id...)
+}
+
+func (s *UserService) ListByIdsSelectIdNameMap(ids []int) map[int]string {
+
+	m := make(map[int]string)
+	users := userDao.ListByIdsSelectIdName(ids)
+	for i := range users {
+		user := users[i]
+		m[user.ID] = user.Name
+	}
+	return m
+}
+
 func Login(account, pswd string) (*model.Users, error) {
 
 	user := userDao.QueryUser(&model.Users{Account: account, Password: pswd})

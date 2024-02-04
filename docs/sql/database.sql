@@ -146,7 +146,8 @@ create table types
 -- ----------------------------
 -- Records of types
 -- ----------------------------
-
+INSERT INTO luckyaeon_community.types (id, parent_id, title, `desc`, state, sort, article_state, created_at, updated_at, deleted_at, flag_name) VALUES (1, 0, '文章', 'sefsffff', null, null, null, null, '2024-01-29 23:24:02', null, 'awdad');
+INSERT INTO luckyaeon_community.types (id, parent_id, title, `desc`, state, sort, article_state, created_at, updated_at, deleted_at, flag_name) VALUES (2, 1, 'Java八股', 'sefseff', null, null, null, null, '2024-01-30 23:02:43', null, 'nhv');
 -- ----------------------------
 -- Table structure for users
 -- ----------------------------

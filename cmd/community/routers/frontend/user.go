@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"io"
+
 	"xhyovo.cn/community/cmd/community/middleware"
 	services "xhyovo.cn/community/server/service"
 
@@ -10,6 +11,10 @@ import (
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
+)
+
+var (
+	userService services.UserService
 )
 
 type editUserForm struct {
@@ -27,6 +32,11 @@ func InitUserRouters(r *gin.Engine) {
 	group := r.Group("/community/user")
 	group.GET("/info", getUserInfo)
 	group.POST("/edit", updateUser)
+	group.GET("/menu", getUserMenu)
+}
+
+func getUserMenu(ctx *gin.Context) {
+	result.Ok(userService.GetUserMenu(), "ok").Json(ctx)
 }
 
 // 获取用户信息
@@ -43,7 +53,6 @@ func updateUser(ctx *gin.Context) {
 	// todo 先放这里，后续记得改
 	var userId int
 	t := ctx.DefaultQuery("tab", "info")
-	var userService services.UserService
 	switch t {
 	case "info":
 		form := editUserForm{}
@@ -61,7 +70,6 @@ func updateUser(ctx *gin.Context) {
 			result.Err(utils.GetValidateErr(form, err)).Json(ctx)
 			return
 		}
-		var userService services.UserService
 		// check 旧密码
 		if form.OldPassword != userService.GetUserById(userId).Password {
 			result.Err("旧密码不一致").Json(ctx)

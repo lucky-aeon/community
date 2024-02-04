@@ -1,7 +1,9 @@
 <script setup>
 import { RouterView } from 'vue-router';
+import { useUserStore } from './stores/UserStore';
 
-
+const  userStore = useUserStore()
+userStore.getMenu()
 </script>
 
 <template>

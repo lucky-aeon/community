@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 )
@@ -73,4 +74,53 @@ func Register(account, pswd, name string, inviteCode uint16) error {
 	SetState(inviteCode)
 
 	return nil
+}
+
+type UserMenu struct {
+	Path       string                 `json:"path"`
+	Redirect   string                 `json:"redirect,omitempty"`
+	Name       string                 `json:"name"`
+	Components string                 `json:"components,omitempty"`
+	Meta       map[string]interface{} `json:"meta,omitempty"`
+	Children   []UserMenu             `json:"children,omitempty"`
+}
+
+func (t *UserService) GetUserMenu() []*UserMenu {
+	rootMenu := typeDao.List(0)
+	parentIds := make([]int, len(rootMenu))
+	userMenu := make(map[int]*UserMenu)
+	for i, item := range rootMenu {
+		parentIds[i] = item.ID
+		userMenu[int(item.ID)] = &UserMenu{
+			Path:     "/article/" + item.FlagName,
+			Name:     item.FlagName,
+			Children: []UserMenu{},
+			Meta: map[string]interface{}{
+				"locale":       item.Title,
+				"requiresAuth": true,
+				"icon":         "icon-dashboard",
+				"order":        1,
+			},
+		}
+	}
+	children := []model.Types{}
+	model.Type().Where("parent_id in (?)", parentIds).Find(&children)
+	for _, item := range children {
+		um := userMenu[int(item.ParentId)]
+		um.Children = append(um.Children, UserMenu{
+			Path: "/article/" + item.FlagName,
+			Name: item.FlagName,
+			Meta: map[string]interface{}{
+				"locale":       item.Title,
+				"requiresAuth": true,
+				"icon":         "icon-dashboard",
+			},
+		})
+	}
+	result := []*UserMenu{}
+
+	for _, um := range userMenu {
+		result = append(result, um)
+	}
+	return result
 }

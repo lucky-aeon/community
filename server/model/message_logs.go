@@ -7,13 +7,13 @@ import (
 )
 
 type MessageLogs struct {
-	ID        int       `gorm:"primarykey" json:"id"`
-	Content   string    `json:"content"`
-	From      int       `json:"from"`
-	To        int       `json:"to"`
-	Type      int       `json:"type"`
-	CreatedAt time.Time `json:"createdAt"`
-	DeletedAt time.Time `json:"deletedAt"`
+	ID        int `gorm:"primarykey"`
+	Content   string
+	From      int
+	To        int
+	Type      int
+	CreatedAt time.Time
+	DeletedAt time.Time
 }
 
 func MessageLog() *gorm.DB {

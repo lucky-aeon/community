@@ -12,14 +12,6 @@ func (*MessageDao) ListMessageTemplate(page, limit int) []*model.MessageTemplate
 	return templates
 }
 
-func (*MessageDao) GetMessageTemplate(id int) string {
-	var messageTemplate string
-	model.MessageTemplate().Where("event_id = ?", id).Select("content").Find(&messageTemplate)
-	return messageTemplate
-}
-
-// todo 模板填充
-
 func (*MessageDao) SaveMessageTemplate(template *model.MessageTemplates) {
 	model.MessageTemplate().Save(&template)
 }

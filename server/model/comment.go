@@ -14,11 +14,15 @@ type Comments struct {
 	ParentId           int         `json:"parentId"`
 	RootId             int         `json:"rootId"`
 	Content            string      `json:"content"`
-	UserId             int         `json:"userId"`
+	FromUserId         int         `json:"FromUserId"`
+	ToUserId           int         `json:"toUserId"`
 	BusinessId         int         `json:"articleId"`
 	TenantId           int         `json:"tenantId"`
 	ChildComments      []*Comments `gorm:"-" json:"childComments"`
 	ChildCommentNumber int         `gorm:"-" json:"childCommentNumber"`
+	FromUserName       string      `json:"fromUserName" gorm:"-"`
+	ToUserName         string      `json:"toUserName" gorm:"-"`
+	ArticleTitle       string      `json:"articleTitle" gorm:"-"`
 }
 
 type ChildCommentNumber struct {

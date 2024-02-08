@@ -15,7 +15,7 @@ type Users struct {
 	Name       string     `json:"name"`
 	Account    string     `json:"account"`
 	Password   string
-	InviteCode uint16 `json:"inviteCode"`
+	InviteCode int    `json:"inviteCode"`
 	Desc       string `json:"desc"`
 	Avatar     string `json:"avatar"` // todo 暂时为url
 }

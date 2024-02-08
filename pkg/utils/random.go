@@ -1,19 +1,21 @@
 package utils
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
+	"time"
 )
 
-func GenerateCode(digits int) uint16 {
+func GenerateCode(length int) int {
 
-	code := ""
-	for i := 0; i < digits; i++ {
-		digit := rand.Int()
+	rand.Seed(time.Now().UnixNano())
 
-		code += fmt.Sprint(digit)
+	charSet := "0123456789"
+	code := make([]byte, length)
+	for i := 0; i < length; i++ {
+		randomIndex := rand.Intn(len(charSet))
+		code[i] = charSet[randomIndex]
 	}
-	num, _ := strconv.Atoi(code)
-	return uint16(num)
+	atoi, _ := strconv.Atoi(string(code))
+	return atoi
 }

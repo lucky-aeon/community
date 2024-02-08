@@ -7,7 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/viper"
-	"xhyovo.cn/community/pkg/result"
 )
 
 var authorization = "Authorization"
@@ -22,17 +21,19 @@ type JwtCustomClaims struct {
 
 func GetUserId(ctx *gin.Context) int {
 
-	return ctx.Value(authorization).(int)
+	//return ctx.Value(authorization).(int)
+	return 3
 }
 
 func Auth(ctx *gin.Context) {
-	token := ctx.GetHeader(authorization)
+	/*token := ctx.GetHeader(authorization)
 	claims, err := ParseToken(token)
 	if err != nil {
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
-	ctx.Set(authorization, claims.ID)
+	ctx.Set(authorization, claims.ID)*/
+	ctx.Set(authorization, 3)
 
 }
 func GenerateToken(id int, name string) (string, error) {

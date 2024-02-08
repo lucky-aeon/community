@@ -54,7 +54,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	err = services.Register(form.Account, form.Password, form.Name, uint16(form.Code))
+	err = services.Register(form.Account, form.Password, form.Name, form.Code)
 	if err != nil {
 		result.Err(err.Error()).Json(c)
 		return

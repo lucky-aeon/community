@@ -51,7 +51,7 @@ func Login(account, pswd string) (*model.Users, error) {
 	return user, nil
 }
 
-func Register(account, pswd, name string, inviteCode uint16) error {
+func Register(account, pswd, name string, inviteCode int) error {
 
 	if err := utils.NotBlank(account, pswd, name, inviteCode); err != nil {
 		return err
@@ -71,7 +71,8 @@ func Register(account, pswd, name string, inviteCode uint16) error {
 	// 保存用户
 	userDao.CreateUser(account, name, pswd, inviteCode)
 	// 修改code状态
-	SetState(inviteCode)
+	var c CodeService
+	c.SetState(inviteCode)
 
 	return nil
 }
@@ -123,4 +124,10 @@ func (t *UserService) GetUserMenu() []*UserMenu {
 		result = append(result, um)
 	}
 	return result
+}
+
+func (s *UserService) CheckCodeUsed(code int) bool {
+	var count int64
+	model.User().Where("invite_code = ?", code).Count(&count)
+	return count == 1
 }

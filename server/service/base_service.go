@@ -11,4 +11,5 @@ var (
 	userDao         dao.UserDao
 	commentDao      dao.CommentDao
 	subscriptionDao dao.SubscriptionDao
+	memberDao       dao.MemberDao
 )

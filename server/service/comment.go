@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
@@ -38,33 +39,73 @@ func (a *CommentsService) DeleteComment(id, userId int) {
 func (*CommentsService) GetCommentsByArticleID(page, limit, businessId int) ([]*model.Comments, int64) {
 
 	var parentComments []*model.Comments
-	commentsMap := make(map[int][]*model.Comments)
+	childCommentsMap := make(map[int][]*model.Comments)
 	comments, count := commentDao.GetCommentsByArticleID(page, limit, businessId)
 	if count == 0 {
 		return parentComments, 0
 	}
-	var parentIds []int
+	parentIds := make([]int, len(comments))
+	userIds := make([]int, len(comments))
 	// 收集根评论
 	for i := range comments {
-		if comments[i].ParentId == 0 {
-			parentComments = append(parentComments, comments[i])
-			parentIds = append(parentIds, comments[i].ID)
+		comment := comments[i]
+		if comment.ParentId == 0 {
+			parentComments = append(parentComments, comment)
+			parentIds = append(parentIds, comment.ID)
 		} else {
-			commentsMap[comments[i].RootId] = append(commentsMap[comments[i].RootId], comments[i])
+			childCommentsMap[comment.RootId] = append(childCommentsMap[comment.RootId], comment)
 		}
+		userIds = append(userIds, comment.FromUserId)
 	}
+
+	setCommentUserNameAndArticleTitle(comments)
+
 	ChildCommentNumberMap := commentDao.GetCommentsCountByRootId(parentIds)
 	for i := range parentComments {
-		parentComments[i].ChildComments = commentsMap[parentComments[i].RootId]
+		parentComments[i].ChildComments = childCommentsMap[parentComments[i].RootId]
 		parentComments[i].ChildCommentNumber = ChildCommentNumberMap[parentComments[i].RootId]
 	}
 
 	return parentComments, count
 }
 
-// 查询文章下的所有评论
-func (*CommentsService) GetAllCommentsByArticleID(page, limit, businessId int) ([]*model.Comments, int64) {
-	return commentDao.GetAllCommentsByArticleID(page, limit, businessId)
+func setCommentUserNameAndArticleTitle(comments []*model.Comments) {
+	userIds := mapset.NewSetWithSize[int](len(comments))
+	articleIds := mapset.NewSetWithSize[int](len(comments))
+	for i := range comments {
+		comment := comments[i]
+		articleIds.Add(comment.BusinessId)
+		userIds.Add(comment.FromUserId)
+		userIds.Add(comment.ToUserId)
+	}
+
+	if userIds.IsEmpty() {
+		return
+	}
+	var u UserService
+	userNameMap := u.ListByIdsSelectIdNameMap(userIds.ToSlice())
+
+	var a ArticleService
+	articleTitleMap := a.ListByIdsSelectIdTitleMap(articleIds.ToSlice())
+
+	for i := range comments {
+		comment := comments[i]
+		comment.ArticleTitle = articleTitleMap[comment.BusinessId]
+		comment.FromUserName = userNameMap[comment.FromUserId]
+		if comment.ParentId != 0 {
+			comment.ToUserName = userNameMap[comment.ToUserId]
+		}
+	}
+}
+
+// 查询文章下的所有评论(可指定)
+func (*CommentsService) GetAllCommentsByArticleID(page, limit, userId, businessId int) ([]*model.Comments, int64) {
+	comments, count := commentDao.GetAllCommentsByArticleID(page, userId, limit, businessId)
+	if count == 0 {
+		return comments, count
+	}
+	setCommentUserNameAndArticleTitle(comments)
+	return comments, count
 }
 
 // 查询指定评论下的评论

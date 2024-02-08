@@ -28,7 +28,7 @@ func comment(ctx *gin.Context) {
 		result.Err(utils.GetValidateErr(comment, err)).Json(ctx)
 		return
 	}
-	comment.UserId = userId
+	comment.FromUserId = userId
 
 	commentsService := services.NewCommentService(ctx)
 	err := commentsService.Comment(&comment)
@@ -97,8 +97,9 @@ func listAllCommentsByArticleId(ctx *gin.Context) {
 		result.Err("文章不可为空").Json(ctx)
 		return
 	}
+	userId := middleware.GetUserId(ctx)
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetAllCommentsByArticleID(page, limit, articleId)
+	comments, count := commentsService.GetAllCommentsByArticleID(page, userId, limit, articleId)
 	result.Ok(map[string]interface{}{
 		"data":  comments,
 		"count": count,

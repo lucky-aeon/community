@@ -27,7 +27,26 @@
               <router-link v-for="child in item.children" :key="child.name" :to="child.path">
               <a-menu-item  >{{ child.meta.locale }}</a-menu-item></router-link>
             </a-sub-menu>
+            <a-sub-menu key="0">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>个人空间</template>
+              <router-link to="user">
+                <a-menu-item >工作台</a-menu-item>
+              </router-link>
+              <router-link to="user">
+                <a-menu-item >用户信息</a-menu-item>
+              </router-link>
+            </a-sub-menu>
+            <a-sub-menu key="1">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>评论</template>
+              <router-link to="comment">
+                <a-menu-item>评论</a-menu-item>
+              </router-link>
+
+            </a-sub-menu>
           </a-menu>
+
         </a-layout-sider>
         <a-layout-content style="padding: 15px;">
           <RouterView />

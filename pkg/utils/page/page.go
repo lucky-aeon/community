@@ -1,48 +1,21 @@
 package page
 
 import (
-	"math"
+	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
-type Pagination struct {
-	perPage     int
-	totalAmount int
-	currentPage int
-	totalPage   int
-	baseUrl     string
-
-	// render parts
-	firstPart  []string
-	middlePart []string
-	lastPart   []string
+type Page struct {
+	Data  interface{} `json:"data"`
+	Count int64       `json:"count"`
 }
 
-// New constructor
-func New(totalAmount, perPage, currentPage int, baseUrl string) *Pagination {
-	if currentPage == 0 {
-		currentPage = 1
-	}
-
-	n := int(math.Ceil(float64(totalAmount) / float64(perPage)))
-	if currentPage > n {
-		currentPage = n
-	}
-
-	return &Pagination{
-		perPage:     perPage,
-		totalAmount: totalAmount,
-		currentPage: currentPage,
-		totalPage:   int(math.Ceil(float64(totalAmount) / float64(perPage))),
-		baseUrl:     baseUrl,
-	}
+func GetPage(ctx *gin.Context) (p, limit int) {
+	p, _ = strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	limit, _ = strconv.Atoi(ctx.DefaultQuery("limit", "15"))
+	return p, limit
 }
 
-// TotalPages 总共几页
-func (p *Pagination) TotalPages() int {
-	return p.totalPage
-}
-
-// HasPages 是否要显示分页
-func (p *Pagination) HasPages() bool {
-	return p.TotalPages() > 1
+func New(data interface{}, count int64) *Page {
+	return &Page{Data: data, Count: count}
 }

@@ -12,13 +12,13 @@ import (
 
 func InitTypeRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/types")
-	group.GET("", list)
-	group.POST("", save)
-	group.PUT("", update)
-	group.DELETE(":id", delete)
+	group.GET("", listType)
+	group.POST("", saveType)
+	group.PUT("", UpdateType)
+	group.DELETE(":id", deleteType)
 }
 
-func list(ctx *gin.Context) {
+func listType(ctx *gin.Context) {
 	parentId, err := strconv.Atoi(ctx.DefaultQuery("parentId", "0"))
 	if err != nil {
 		parentId = 0
@@ -27,7 +27,7 @@ func list(ctx *gin.Context) {
 	result.Ok(typeService.List(parentId), "").Json(ctx)
 }
 
-func save(ctx *gin.Context) {
+func saveType(ctx *gin.Context) {
 
 	var types model.Types
 	if err := ctx.ShouldBindJSON(&types); err != nil {
@@ -38,7 +38,7 @@ func save(ctx *gin.Context) {
 	u, err := typeService.Save(&types)
 	result.Auto(u, err).ErrMsg("添加失败").OkMsg("添加成功").Json(ctx)
 }
-func update(ctx *gin.Context) {
+func UpdateType(ctx *gin.Context) {
 	var types model.Types
 	if err := ctx.ShouldBindJSON(&types); err != nil {
 		result.Err(utils.GetValidateErr(types, err)).Json(ctx)
@@ -48,7 +48,7 @@ func update(ctx *gin.Context) {
 	result.Auto(nil, typeService.Update(&types)).ErrMsg("分类更新失败").OkMsg("分类更新成功").Json(ctx)
 }
 
-func delete(ctx *gin.Context) {
+func deleteType(ctx *gin.Context) {
 
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {

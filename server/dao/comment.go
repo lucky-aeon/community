@@ -51,9 +51,13 @@ func (a *CommentDao) Create(comment *model.Comments) error {
 }
 
 // 查询文章下的所有评论
-func (a *CommentDao) GetAllCommentsByArticleID(page, limit, businessId int) ([]*model.Comments, int64) {
+func (a *CommentDao) GetAllCommentsByArticleID(page, limit, fromUserId, businessId int) ([]*model.Comments, int64) {
 	var comments []*model.Comments
-	model.Comment().Where("business_id", businessId).Order("created_at").Select("id").Limit(limit).Offset((page - 1) * limit).Find(&comments)
+	comment := &model.Comments{
+		FromUserId: fromUserId,
+		BusinessId: businessId,
+	}
+	model.Comment().Where(&comment).Order("created_at").Limit(limit).Offset((page - 1) * limit).Find(&comments)
 	count := a.GetCommentsCountByArticleID(businessId)
 	return comments, count
 }

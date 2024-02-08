@@ -64,7 +64,8 @@ CREATE TABLE `comments` (
                             `id` int(11) NOT NULL AUTO_INCREMENT,
                             `parent_id` int(11) DEFAULT NULL,
                             `content` longtext NOT NULL,
-                            `user_id` int(11) NOT NULL,
+                            `from_user_id` int(11) NOT NULL,
+                            `to_user_id` int(11) NOT NULL,
                             `business_id` int(11) NOT NULL,
                             `deleted_at` datetime DEFAULT NULL,
                             `created_at` datetime DEFAULT NULL,
@@ -108,6 +109,7 @@ DROP TABLE IF EXISTS `invite_codes`;
 CREATE TABLE `invite_codes` (
                                 `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'primarykey',
                                 `code` varchar(20) NOT NULL,
+                                `member_Id` int(11) NOT NULL,
                                 `state` tinyint(1) NOT NULL,
                                 `created_at` datetime DEFAULT NULL,
                                 `updated_at` datetime DEFAULT NULL,
@@ -231,4 +233,17 @@ CREATE TABLE `subscription` (
                                 `businessId` int(11) NOT NULL,
                                 `created_at` datetime DEFAULT NULL,
                                 PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Table structure for member
+-- ----------------------------
+DROP TABLE IF EXISTS `member`;
+CREATE TABLE `member` (
+                          `id` int(11) NOT NULL AUTO_INCREMENT,
+                          `name` varchar(255) DEFAULT NULL,
+                          `desc` varchar(255) DEFAULT NULL,
+                          `created_at` datetime DEFAULT NULL,
+                          `updated_at` datetime DEFAULT NULL,
+                          PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

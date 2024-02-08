@@ -3,7 +3,6 @@ package frontend
 import (
 	"io"
 
-	"xhyovo.cn/community/cmd/community/middleware"
 	services "xhyovo.cn/community/server/service"
 
 	"github.com/gin-gonic/gin"
@@ -31,7 +30,7 @@ type editPasswordForm struct {
 func InitUserRouters(r *gin.Engine) {
 	group := r.Group("/community/user")
 	group.GET("/info", getUserInfo)
-	group.POST("/edit", updateUser)
+	group.POST("/edit/:tab", updateUser)
 	group.GET("/menu", getUserMenu)
 }
 
@@ -43,7 +42,7 @@ func getUserMenu(ctx *gin.Context) {
 func getUserInfo(ctx *gin.Context) {
 
 	var userService services.UserService
-	user := userService.GetUserById(middleware.GetUserId(ctx))
+	user := userService.GetUserById(3)
 
 	result.Ok(user, "").Json(ctx)
 }
@@ -51,17 +50,21 @@ func getUserInfo(ctx *gin.Context) {
 func updateUser(ctx *gin.Context) {
 
 	// todo 先放这里，后续记得改
-	var userId int
-	t := ctx.DefaultQuery("tab", "info")
+	var userId int = 3
+	t := ctx.Param("tab")
 	switch t {
 	case "info":
 		form := editUserForm{}
 		err := ctx.ShouldBind(&form)
+
 		if err != nil {
 			result.Err(utils.GetValidateErr(form, err)).Json(ctx)
 			return
 		}
-
+		if len(form.Desc) > 200 {
+			result.Err("描述长度不可超过200字").Json(ctx)
+			return
+		}
 		userService.UpdateUser(&model.Users{Name: form.Name, Desc: form.Desc, ID: userId})
 	case "pass":
 		form := editPasswordForm{}

@@ -41,7 +41,7 @@ func (*UserDao) QueryUser(user *model.Users) *model.Users {
 	return user
 }
 
-func (*UserDao) CreateUser(account, name, pswd string, ininviteCode uint16) int {
+func (*UserDao) CreateUser(account, name, pswd string, ininviteCode int) int {
 
 	user := model.Users{Account: account, Name: name, Password: pswd, InviteCode: ininviteCode}
 	model.User().Create(&user)
@@ -50,7 +50,7 @@ func (*UserDao) CreateUser(account, name, pswd string, ininviteCode uint16) int 
 
 func (d *UserDao) UpdateUser(user *model.Users) {
 
-	model.User().Updates(user)
+	model.User().Where("id = ?", user.ID).Updates(&user)
 }
 
 func (d *UserDao) ListByIds(id ...int) []string {

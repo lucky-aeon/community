@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"io"
+	"xhyovo.cn/community/cmd/community/middleware"
 
 	services "xhyovo.cn/community/server/service"
 
@@ -49,8 +50,7 @@ func getUserInfo(ctx *gin.Context) {
 
 func updateUser(ctx *gin.Context) {
 
-	// todo 先放这里，后续记得改
-	var userId int = 3
+	userId := middleware.GetUserId(ctx)
 	t := ctx.Param("tab")
 	switch t {
 	case "info":

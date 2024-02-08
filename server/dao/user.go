@@ -65,3 +65,9 @@ func (d *UserDao) ListByIdsSelectIdName(ids []int) []model.Users {
 	model.User().Where("id in ?", ids).Select("id,name").Find(&users)
 	return users
 }
+
+func (d *UserDao) ExistById(id int) bool {
+	var count int64
+	model.User().Where("id = ?", id).Count(&count)
+	return count == 1
+}

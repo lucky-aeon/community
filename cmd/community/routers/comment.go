@@ -23,7 +23,7 @@ func InitCommentRouters(g *gin.Engine) {
 // 发布评论
 func comment(ctx *gin.Context) {
 	var comment model.Comments
-	var userId int
+	userId := middleware.GetUserId(ctx)
 	if err := ctx.ShouldBindJSON(&comment); err != nil {
 		result.Err(utils.GetValidateErr(comment, err)).Json(ctx)
 		return
@@ -50,7 +50,10 @@ func deleteComment(ctx *gin.Context) {
 	}
 	commentIdInt, _ := strconv.Atoi(commentId)
 	var commentsService services.CommentsService
-	commentsService.DeleteComment(commentIdInt, userId)
+	if !commentsService.DeleteComment(commentIdInt, userId) {
+		result.Err("删除失败").Json(ctx)
+		return
+	}
 	result.Ok(nil, "删除成功").Json(ctx)
 }
 

@@ -23,6 +23,12 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 	if f := articleDao.ExistById(articleId); !f {
 		return errors.New("文章不存在")
 	}
+
+	// 父评论是否存在
+	if comment.ParentId != 0 && commentDao.ExistById(comment.ParentId, comment.FromUserId, comment.BusinessId, comment.RootId) {
+		return errors.New("回复评论不存在")
+	}
+
 	commentDao.AddComment(comment)
 	var subscriptionService SubscriptionService
 
@@ -31,8 +37,9 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 }
 
 // 删除评论
-func (a *CommentsService) DeleteComment(id, userId int) {
-	commentDao.Delete(id, userId)
+func (a *CommentsService) DeleteComment(id, userId int) bool {
+
+	return commentDao.Delete(id, userId) == 1
 }
 
 // 查询文章下的评论

@@ -13,10 +13,10 @@ type Comments struct {
 	DeletedAt          *time.Time  `gorm:"index"`
 	ParentId           int         `json:"parentId"`
 	RootId             int         `json:"rootId"`
-	Content            string      `json:"content"`
+	Content            string      `json:"content" binding:"required" msg:"请评论内容"`
 	FromUserId         int         `json:"FromUserId"`
 	ToUserId           int         `json:"toUserId"`
-	BusinessId         int         `json:"articleId"`
+	BusinessId         int         `json:"articleId" binding:"required" msg:"请选择对应的文章进行评论"`
 	TenantId           int         `json:"tenantId"`
 	ChildComments      []*Comments `gorm:"-" json:"childComments"`
 	ChildCommentNumber int         `gorm:"-" json:"childCommentNumber"`

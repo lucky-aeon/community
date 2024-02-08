@@ -18,32 +18,12 @@ func (a *CommentDao) AddComment(comment *model.Comments) {
 	db.Where("id = ?", comment.ID).Update("root_id", &comment.RootId)
 }
 
-// 删除评论以及下的子评论
-func (a *CommentDao) Delete(id, userId int) {
-	//model.Comment().Where("id = ?", id).Delete(&model.Comments{})
-	sql := "select id,parent_id from comments where root_id = (select root_id from comments where id = ?) and user_id =?"
-	db := model.Comment()
-	var comments []*model.Comments
-	db.Raw(sql, id, userId).Find(&comments)
+// 删除评论
+func (a *CommentDao) Delete(id, userId int) int {
 
-	// key: parentId value: id
-	m := make(map[int]int)
-
-	for _, v := range comments {
-		m[v.ParentId] = v.ID
-	}
-	var deleteIds []int
-	deleteIds = append(deleteIds, id)
-	for true {
-		if v, ok := m[id]; ok {
-			id = v
-			deleteIds = append(deleteIds, id)
-		} else {
-			break
-		}
-	}
-
-	db.Delete(&model.Comments{}, &deleteIds)
+	tx := model.Comment().Delete(&model.Comments{ID: id, FromUserId: userId})
+	affected := tx.RowsAffected
+	return int(affected)
 }
 
 func (a *CommentDao) Create(comment *model.Comments) error {
@@ -122,4 +102,10 @@ func (a *CommentDao) GetCommentsCountByArticleID(businessId int) int64 {
 	var count int64
 	model.Comment().Where("business_id", businessId).Count(&count)
 	return count
+}
+
+func (a *CommentDao) ExistById(id int, userId int, businessId int, rootId int) bool {
+	var count int64
+	model.Comment().Where("id = ? and from_user_id = ? and business_id = ? and root_id", id, userId, businessId, rootId).Count(&count)
+	return count == 1
 }

@@ -17,7 +17,7 @@ type Users struct {
 	Password   string
 	InviteCode int    `json:"inviteCode"`
 	Desc       string `json:"desc"`
-	Avatar     string `json:"avatar"` // todo 暂时为url
+	Avatar     string `json:"avatar"`
 }
 
 func User() *gorm.DB {

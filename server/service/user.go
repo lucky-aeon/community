@@ -18,6 +18,17 @@ func (*UserService) GetUserById(id int) *model.Users {
 	return user
 }
 
+// get user information
+func (*UserService) GetUserSimpleById(id int) *model.UserSimple {
+	user := userDao.QueryUser(&model.Users{ID: id})
+	return &model.UserSimple{
+		UId:     user.ID,
+		UName:   user.Name,
+		UDesc:   user.Desc,
+		UAvatar: utils.BuildFileUrl(user.Avatar),
+	}
+}
+
 // update user information
 func (*UserService) UpdateUser(user *model.Users) {
 

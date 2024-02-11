@@ -22,6 +22,11 @@ type Types struct {
 	FlagName      string
 }
 
+type TypeSimple struct {
+	TypeFlag  string `json:"flag" gorm:"column:flag_name"` // flag name
+	TypeTitle string `json:"title" gorm:"column:title"`    // title
+}
+
 func Type() *gorm.DB {
 	return mysql.GetInstance().Model(&Types{})
 }

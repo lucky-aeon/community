@@ -9,7 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.3.11"
+    "axios": "^1.6.7",
+    "pinia": "^2.1.7",
+    "vue": "^3.3.11",
+    "vue-router": "4"
   },
   "devDependencies": {
     "@arco-design/web-vue": "^2.54.3",

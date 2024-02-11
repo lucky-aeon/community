@@ -23,6 +23,16 @@ func Auto(data any, err error) *R {
 	return Err(err.Error())
 }
 
+func Page(data any, total int64, err error) *R {
+	if err != nil {
+		return Err(err.Error())
+	}
+	return Ok(map[string]any{
+		"list":  data,
+		"total": total,
+	}, "成功")
+}
+
 func (t *R) OkMsg(msg string) *R {
 
 	if t.Ok {

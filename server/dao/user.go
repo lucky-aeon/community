@@ -41,6 +41,12 @@ func (*UserDao) QueryUser(user *model.Users) *model.Users {
 	return user
 }
 
+func (*UserDao) QueryUserSimple(user *model.Users) (result model.UserSimple, err error) {
+	err = model.User().Where(&user).Find(&result).Error
+	result.UAvatar = utils.BuildFileUrl(result.UAvatar)
+	return
+}
+
 func (*UserDao) CreateUser(account, name, pswd string, ininviteCode int) int {
 
 	user := model.Users{Account: account, Name: name, Password: pswd, InviteCode: ininviteCode}

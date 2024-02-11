@@ -247,3 +247,28 @@ CREATE TABLE `member` (
                           `updated_at` datetime DEFAULT NULL,
                           PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+create table article_tags
+(
+    id          int auto_increment
+        primary key,
+    tag_name    varchar(20)  null,
+    description varchar(255) null,
+    user_id     int          not null comment '操作人',
+    created_at  datetime     null,
+    updated_at  datetime     null,
+    deleted_at  datetime     null,
+    constraint article_tags_tag_name_uindex
+        unique (tag_name)
+)
+    comment '文章标签';
+
+create table article_tag_user_relations
+(
+    user_id int not null comment '用户',
+    tag_id  int not null comment '标签'
+);
+
+create unique index article_tag_user_relations_user_id_tag_id_uindex
+    on article_tag_user_relations (user_id, tag_id);
+

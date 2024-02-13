@@ -29,5 +29,5 @@ func deleteMessage(ctx *gin.Context) {
 	}
 	var msgService services.MessageService
 	msgService.ReadMessage(ids, middleware.GetUserId(ctx))
-	result.Ok(nil, "已读").Json(ctx)
+	result.OkWithMsg(nil, "已读").Json(ctx)
 }

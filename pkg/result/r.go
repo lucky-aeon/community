@@ -9,6 +9,10 @@ type R struct {
 	Ok   bool        `json:"ok"`
 }
 
+func OkWithMsg(data any, msg string) *R {
+	return &R{Code: 2000, Data: data, Msg: msg, Ok: true}
+}
+
 func Ok(data any, msg string) *R {
 	return &R{Code: 200, Data: data, Msg: msg, Ok: true}
 }

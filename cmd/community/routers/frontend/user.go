@@ -1,13 +1,11 @@
 package frontend
 
 import (
-	"io"
 	"xhyovo.cn/community/cmd/community/middleware"
 
 	services "xhyovo.cn/community/server/service"
 
 	"github.com/gin-gonic/gin"
-	"xhyovo.cn/community/pkg/kodo"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
@@ -85,49 +83,16 @@ func updateUser(ctx *gin.Context) {
 		}
 		userService.UpdateUser(&model.Users{Password: form.ConfirmPassword, ID: userId})
 	case "avatar":
-
-		multipart, err := ctx.FormFile("avatar")
-		if err != nil {
-			result.Err("请选择上传的图片").Json(ctx)
+		type avatar struct {
+			Avatar string `json:"avatar" binding:"required" msg:"头像不能为空"`
+		}
+		object := &avatar{}
+		if err := ctx.ShouldBindJSON(&object); err != nil {
+			result.Err(utils.GetValidateErr(object, err)).Json(ctx)
 			return
 		}
-		filename := multipart.Filename
-		if err != nil {
-			result.Err("上传头像失败").Json(ctx)
-			return
-		}
-		if !utils.IsImage(filename) {
-			result.Err("请上传图片类型").Json(ctx)
-			return
-		}
-		// 打开上传的文件
-		uploadedFile, err := multipart.Open()
-		if err != nil {
-			result.Err(err.Error()).Json(ctx)
-			return
-		}
-		defer uploadedFile.Close()
-
-		// 读取文件的二进制数据
-		fileBytes, err := io.ReadAll(uploadedFile)
-		if err != nil {
-			result.Err(err.Error()).Json(ctx)
-			return
-		}
-
-		// 上传oss
-		fileKey := utils.BuildFileKey(userId)
-		if _, err = kodo.Upload(fileBytes, fileKey); err != nil {
-			result.Err(err.Error()).Json(ctx)
-			return
-		}
-		// 保存文件表
-		var fileService services.FileService
-		fileService.Save(userId, 1, fileKey)
-
 		// 更改用户信息
-		userService.UpdateUser(&model.Users{ID: userId, Avatar: fileKey})
+		userService.UpdateUser(&model.Users{ID: userId, Avatar: object.Avatar})
 	}
-
-	result.Ok(nil, "修改成功").Json(ctx)
+	result.OkWithMsg(nil, "修改成功").Json(ctx)
 }

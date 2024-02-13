@@ -2,9 +2,9 @@ package utils
 
 import (
 	"strconv"
+	"xhyovo.cn/community/pkg/oss"
 
 	"github.com/google/uuid"
-	"xhyovo.cn/community/pkg/kodo"
 )
 
 func BuildFileKey(userId int) string {
@@ -15,5 +15,5 @@ func BuildFileKey(userId int) string {
 }
 
 func BuildFileUrl(fileKey string) string {
-	return "http://" + kodo.GetDomain() + "/" + fileKey
+	return "http://" + oss.GetEndpoint() + "/" + fileKey
 }

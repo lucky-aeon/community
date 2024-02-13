@@ -54,7 +54,7 @@ func deleteComment(ctx *gin.Context) {
 		result.Err("删除失败").Json(ctx)
 		return
 	}
-	result.Ok(nil, "删除成功").Json(ctx)
+	result.OkWithMsg(nil, "删除成功").Json(ctx)
 }
 
 // 返回文章下的评论(文章页面展示)

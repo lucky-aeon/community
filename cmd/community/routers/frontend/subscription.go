@@ -57,7 +57,7 @@ func subscribe(ctx *gin.Context) {
 	} else {
 		msg = "取消订阅"
 	}
-	result.Ok(msg, "").Json(ctx)
+	result.OkWithMsg(nil, msg).Json(ctx)
 }
 
 func eventList(ctx *gin.Context) {

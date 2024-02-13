@@ -9,11 +9,11 @@ import (
 
 type Files struct {
 	ID         int       `gorm:"primaryKey"`
-	FileKey    string    `json:"fileKey"`
-	Size       int64     `json:"size"`
-	Format     string    `json:"format"`
-	UserId     int       `json:"userId"`
-	BusinessId int       `json:"businessId"`
+	FileKey    string    `json:"filename" from:"filename"`
+	Size       int64     `json:"size" from:"size"`
+	Format     string    `json:"mimeType" from:"mimeType"`
+	UserId     int       `json:"userId" from:"userId"`
+	BusinessId int       `json:"businessId" from:"articleId"`
 	TenantId   int       `json:"tenantId"`
 	CreatedAt  time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`

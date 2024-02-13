@@ -41,7 +41,7 @@ func Login(c *gin.Context) {
 
 	token, _ := middleware.GenerateToken(user.ID, user.Name)
 
-	result.Ok(map[string]string{"token": token}, "登录成功").Json(c)
+	result.OkWithMsg(map[string]string{"token": token}, "登录成功").Json(c)
 }
 
 func Register(c *gin.Context) {
@@ -60,5 +60,5 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	result.Ok(form, "注册成功").Json(c)
+	result.OkWithMsg(form, "注册成功").Json(c)
 }

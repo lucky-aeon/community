@@ -3,11 +3,12 @@ db:
   database: ${DB_DATABASE}
   username: ${DB_USER}
   password: ${DB_PASS}
-kodo:
-  accessKey: ${KODO_ACCESS_KEY}
-  bucket: ${KODO_BUCKET}
-  secretKey: ${KODO_SECRET_KEY}
-  domain: ${DOMAIN}
+oss:
+  accessKey: ${OSS_ACCESS_KEY}
+  bucket: ${OSS_BUCKET}
+  secretKey: ${OSS_SECRET_KEY}
+  endpoint: ${OSS_ENDPOINT}
+  callback: ${OSS_CALLBACK}
 email:
   address: ${ADDRESS}
   username: ${USERNAME}

@@ -8,7 +8,7 @@ type File struct {
 }
 
 func (*File) Save(file *model.Files) {
-	model.File().Create(file)
+	model.File().Create(&file)
 }
 
 func (*File) GetFileInfo(fileId, tenantId int) *model.Files {

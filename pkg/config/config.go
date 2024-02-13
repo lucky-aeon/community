@@ -10,7 +10,7 @@ import (
 
 type AppConfig struct {
 	DbConfig    DbConfig    `yaml:"db"`
-	KodoConfig  KodoConfig  `yaml:"kodo"`
+	OssConfig   OssConfig   `yaml:"oss"`
 	EmailConfig EmailConfig `yaml:"email"`
 }
 
@@ -21,11 +21,12 @@ type DbConfig struct {
 	Password string `yaml:"password"`
 }
 
-type KodoConfig struct {
+type OssConfig struct {
 	AccessKey string `yaml:"accessKey"`
 	SecretKey string `yaml:"secretKey"`
 	Bucket    string `yaml:"bucket"`
-	Domain    string `yaml:"domain"`
+	Endpoint  string `yaml:"endpoint"`
+	Callback  string `json:"callback"`
 }
 
 type EmailConfig struct {

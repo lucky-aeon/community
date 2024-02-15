@@ -36,3 +36,22 @@ func (*File) GetFileKeys(businessId int) []string {
 	}
 	return fileKeys
 }
+
+func (f *File) PageFiles(p, limit, userId int) []model.Files {
+
+	f1 := &model.Files{
+		UserId: userId,
+	}
+	var files []model.Files
+	model.File().Where(&f1).Offset(limit).Limit((p - 1) * limit).Find(&files)
+
+	return files
+}
+
+func (f *File) Count() int64 {
+
+	var count int64
+	model.File().Count(&count)
+
+	return count
+}

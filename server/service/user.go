@@ -142,3 +142,9 @@ func (s *UserService) CheckCodeUsed(code int) bool {
 	model.User().Where("invite_code = ?", code).Count(&count)
 	return count == 1
 }
+
+func (s *UserService) PageUsers(p, limit int) (users []model.Users, count int64) {
+	model.User().Offset(limit).Limit((p - 1) * limit).Find(&users)
+	model.User().Count(&count)
+	return users, count
+}

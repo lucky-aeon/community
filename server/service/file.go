@@ -15,3 +15,10 @@ func (*FileService) Delete(userId, fileId, tenantId int) {
 func (*FileService) Deletes(userId, businessId, tenantId int) {
 
 }
+
+func (s *FileService) PageFiles(p, limit, userId int) (files []model.Files, count int64) {
+
+	files = fileDao.PageFiles(p, limit, userId)
+	count = fileDao.Count()
+	return files, count
+}

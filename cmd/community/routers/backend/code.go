@@ -13,7 +13,7 @@ import (
 func InitCodeRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/code")
 	group.GET("", listCode)
-	group.POST("/generate", saveCode)
+	group.POST("/generate", generate)
 	group.DELETE("/:code", deleteCode)
 }
 
@@ -24,7 +24,7 @@ func listCode(ctx *gin.Context) {
 	result.Ok(page.New(codes, count), "").Json(ctx)
 }
 
-func saveCode(ctx *gin.Context) {
+func generate(ctx *gin.Context) {
 	var c services.CodeService
 	var v model.GenerateCode
 	if err := ctx.ShouldBindJSON(&v); err != nil {

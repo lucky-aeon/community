@@ -38,22 +38,29 @@ func (*MessageDao) ListMessageLogs(page, limit int) []*model.MessageLogs {
 }
 
 // 添加记录
-func (*MessageDao) SaveMessageLogs(messageLog *model.MessageLogs) {
-	model.MessageLog().Save(messageLog)
+func (*MessageDao) SaveMessageLogs(messageLog []*model.MessageLogs) {
+	model.MessageLog().Create(&messageLog)
 }
 
 func (*MessageDao) DeleteMessageLogs(id []int) {
 	model.MessageLog().Delete(&id)
 }
 
-// 发送消息
-func (*MessageDao) SendMessage(from, to int, content string) {
-	state := &model.MessageStates{
-		From:    from,
-		To:      to,
-		Content: content,
+// 保存消息
+func (*MessageDao) SaveMessage(from, types int, to []int, content string) {
+	var msgs []*model.MessageStates
+	for i := range to {
+		state := &model.MessageStates{
+			From:    from,
+			To:      to[i],
+			Content: content,
+			Type:    types,
+			State:   1,
+		}
+		msgs = append(msgs, state)
 	}
-	model.MessageState().Save(&state)
+
+	model.MessageState().Create(&msgs)
 }
 
 // 删除用户收到的消息(确认消息),

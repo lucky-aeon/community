@@ -77,3 +77,10 @@ func (d *UserDao) ExistById(id int) bool {
 	model.User().Where("id = ?", id).Count(&count)
 	return count == 1
 }
+
+func (d *UserDao) GetById(id int) model.Users {
+	var user model.Users
+	model.User().Where("id = ?", id).First(&user)
+	user.Password = ""
+	return user
+}

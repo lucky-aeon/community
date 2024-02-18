@@ -34,7 +34,8 @@ func comment(ctx *gin.Context) {
 	err := commentsService.Comment(&comment)
 	msg := "评论成功"
 	if err != nil {
-		msg = err.Error()
+		result.Err(err.Error()).Json(ctx)
+		return
 	}
 	result.Ok(nil, msg).Json(ctx)
 }

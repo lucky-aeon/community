@@ -148,3 +148,16 @@ func (s *UserService) PageUsers(p, limit int) (users []model.Users, count int64)
 	model.User().Count(&count)
 	return users, count
 }
+
+func (s *UserService) ListByNameSelectEmailAndId(usernames []string) (emails []string, id []int) {
+	var users []model.Users
+	model.User().Where("name ? in", usernames).Select("account", "id").Find(&users)
+
+	for i := range users {
+		u := users[i]
+		emails = append(emails, u.Account)
+		id = append(id, u.ID)
+	}
+
+	return emails, id
+}

@@ -74,3 +74,9 @@ func (a *Article) ListByIdsSelectIdTitle(ids []int) []model.Articles {
 
 	return articles
 }
+
+func (a *Article) GetById(id int) model.Articles {
+	var article model.Articles
+	model.Article().Where("id = ?", id).First(&article)
+	return article
+}

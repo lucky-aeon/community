@@ -94,3 +94,10 @@ func (a *ArticleService) ListByIdsSelectIdTitleMap(id []int) map[int]string {
 	}
 	return m
 }
+
+func (a *ArticleService) GetById(id int) model.Articles {
+	article := articleDao.GetById(id)
+	user := userDao.GetById(article.UserId)
+	article.Users = user
+	return article
+}

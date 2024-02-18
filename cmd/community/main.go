@@ -6,9 +6,8 @@ import (
 	"xhyovo.cn/community/cmd/community/routers"
 	"xhyovo.cn/community/pkg/config"
 	"xhyovo.cn/community/pkg/email"
-	"xhyovo.cn/community/pkg/oss"
-
 	"xhyovo.cn/community/pkg/mysql"
+	"xhyovo.cn/community/pkg/oss"
 	"xhyovo.cn/community/pkg/utils"
 )
 
@@ -29,4 +28,5 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 }

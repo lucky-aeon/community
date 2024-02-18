@@ -11,6 +11,9 @@ type MessageStates struct {
 	Content   string    `json:"content"`
 	From      int       `json:"from"`
 	To        int       `json:"to"`
+	State     int       `json:"state"`
+	Type      int       `json:"type"`
+	ArticleId int       `json:"articleId"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 

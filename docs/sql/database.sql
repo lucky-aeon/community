@@ -201,6 +201,8 @@ CREATE TABLE `message_states` (
                                   `content` longtext NOT NULL,
                                   `from` int(11) NOT NULL,
                                   `to` int(11) NOT NULL,
+                                  add state tinyint(1) DEFAULT '0',
+                                    add type tinyint(1) DEFAULT '1',
                                   `created_at` datetime DEFAULT NULL,
                                   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

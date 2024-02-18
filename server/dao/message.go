@@ -1,6 +1,8 @@
 package dao
 
-import "xhyovo.cn/community/server/model"
+import (
+	"xhyovo.cn/community/server/model"
+)
 
 type MessageDao struct {
 }
@@ -54,15 +56,25 @@ func (*MessageDao) SendMessage(from, to int, content string) {
 	model.MessageState().Save(&state)
 }
 
-// 查看用户未读消息
-func (*MessageDao) ListNoReadMessage(page, limit, userId int) []*model.MessageStates {
+// 删除用户收到的消息(确认消息),
+func (*MessageDao) ReadMessage(id []int, userId int) int64 {
+	tx := model.MessageState().Where("id in ? and `to` = ?", id, userId).Updates(&model.MessageStates{State: 1})
+	return tx.RowsAffected
+}
+
+func (d *MessageDao) ListMessage(page, limit, userId, types, state int) []*model.MessageStates {
+	m := model.MessageStates{
+		To:    userId,
+		Type:  types,
+		State: state,
+	}
 	var message []*model.MessageStates
-	model.MessageState().Where("to", userId).Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&message)
+	model.MessageState().Where(&m).Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&message)
 	return message
 }
 
-// 删除用户收到的消息(确认消息),
-func (*MessageDao) DeleteMessage(id []int, userId int) {
-
-	model.MessageState().Where("to", userId).Delete(&model.MessageStates{}, id)
+func (d *MessageDao) CountMessage(userId int, types int) int64 {
+	var count int64
+	model.MessageState().Where("`to` = ? and type = ?", userId, types).Count(&count)
+	return count
 }

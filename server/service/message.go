@@ -40,10 +40,12 @@ func (m *MessageService) SendMessage(from, to, contentType int) {
 	m.AddMessageLogs(&model.MessageLogs{From: from, To: to, Content: ""})
 }
 
-func (*MessageService) ListNoReadMessage(page, limit, userId int) []*model.MessageStates {
-	return messageDao.ListNoReadMessage(page, limit, userId)
+func (*MessageService) ReadMessage(id []int, userId int) int64 {
+	return messageDao.ReadMessage(id, userId)
 }
 
-func (*MessageService) ReadMessage(id []int, userId int) {
-	messageDao.DeleteMessage(id, userId)
+func (m *MessageService) PageMessage(page, limit, userId, types, state int) (msgs []*model.MessageStates, count int64) {
+	msgs = messageDao.ListMessage(page, limit, userId, types, state)
+	count = messageDao.CountMessage(userId, types)
+	return msgs, count
 }

@@ -13,7 +13,7 @@ type Files struct {
 	Size       int64     `json:"size" from:"size"`
 	Format     string    `json:"mimeType" from:"mimeType"`
 	UserId     int       `json:"userId" from:"userId"`
-	BusinessId int       `json:"businessId" from:"articleId"`
+	BusinessId int       `json:"businessId" from:"articleId"` // todo 遗弃
 	TenantId   int       `json:"tenantId"`
 	CreatedAt  time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`

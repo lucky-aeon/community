@@ -53,7 +53,11 @@ func (t *R) ErrMsg(msg string) *R {
 }
 
 func (r *R) Json(c *gin.Context) {
-	c.JSON(r.Code, r)
+	var code int = 200
+	if !r.Ok {
+		code = 500
+	}
+	c.JSON(code, r)
 }
 
 func (r *R) Xml(c *gin.Context) {

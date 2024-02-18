@@ -32,7 +32,7 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 	commentDao.AddComment(comment)
 	var subscriptionService SubscriptionService
 
-	subscriptionService.Do(&model.Subscriptions{EventId: event.CommentUpdateEvent, BusinessId: comment.BusinessId})
+	subscriptionService.Do(event.CommentUpdateEvent, comment.BusinessId, comment.FromUserId, comment.Content)
 	return nil
 }
 

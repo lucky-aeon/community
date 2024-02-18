@@ -1,6 +1,9 @@
 package services
 
 import (
+	"regexp"
+	"strings"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/email"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
@@ -56,22 +59,47 @@ func (*SubscriptionService) Subscribe(subscription *model.Subscriptions) bool {
 }
 
 // 查询事件订阅的userid
-func (*SubscriptionService) ListSubscriptionUserId(event, businessId int) []int {
-	return subscriptionDao.ListSubscriptionUserId(event, businessId)
+func (*SubscriptionService) ListSubscriptionUserId(event, businessId int) []model.Subscriptions {
+	return subscriptionDao.ListSubscriptions(event, businessId)
 }
 
 // 触发订阅事件
-func (s *SubscriptionService) Do(subscription *model.Subscriptions) {
+func (s *SubscriptionService) Do(eventId, businessId, triggerId int, content string) {
 
-	go func(subscription *model.Subscriptions) {
-		userIds := s.ListSubscriptionUserId(subscription.EventId, subscription.BusinessId)
-		if len(userIds) > 0 {
+	go func(eventId, businessId int, content string) {
+
+		subscriptions := s.ListSubscriptionUserId(eventId, businessId)
+		var m MessageService
+
+		if len(subscriptions) > 0 {
+			var userIds []int
+			for i := range subscriptions {
+				userIds = append(userIds, subscriptions[i].SubscriberId)
+			}
+			sendId := subscriptions[0].SendId
 			to := userDao.ListByIds(userIds...)
 
-			messageTemplate := messageDao.GetMessageTemplate(subscription.EventId)
+			messageTemplate := messageDao.GetMessageTemplate(eventId)
+			msg := m.GetMsg(messageTemplate, eventId, businessId)
+			m.SendMessages(sendId, constant.NOTICE, userIds, content)
+			email.Send(to, msg, "技术鸭社区")
 
-			email.Send(to, messageTemplate, "技术鸭社区")
+			// @的情况再给@发送
+			if strings.Contains(content, "@") {
+				re := regexp.MustCompile(`@(\w+)`)
+				matches := re.FindAllStringSubmatch(content, -1)
+
+				var usernames []string
+				for _, match := range matches {
+					usernames = append(usernames, match[1])
+				}
+				var userS UserService
+				emails, ids := userS.ListByNameSelectEmailAndId(usernames)
+				m.SendMessages(triggerId, constant.MENTION, ids, content)
+				email.Send(emails, content, "技术鸭社区")
+			}
 		}
-	}(subscription)
+
+	}(eventId, businessId, content)
 
 }

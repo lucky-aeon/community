@@ -5,6 +5,7 @@ import "xhyovo.cn/community/server/model"
 type FileService struct{}
 
 func (*FileService) Save(file *model.Files) {
+	file.TenantId = 1
 	fileDao.Save(file)
 }
 

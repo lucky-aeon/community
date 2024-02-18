@@ -8,7 +8,8 @@ import (
 
 type Subscriptions struct {
 	ID           int `gorm:"primaryKey" json:"id"`
-	UserId       int `json:"userId"`                                          // 订阅人
+	SubscriberId int `json:"userId"`                                          // 订阅人
+	SendId       int `json:"sendId"`                                          // 发送人
 	EventId      int `json:"eventId"`                                         // 事件类型： 人 / 文章
 	BusinessId   int `json:"businessId" binding:"required" msg:"请选择对应业务进行订阅"` // 业务id  人id / 文章id
 	IndexKey     string

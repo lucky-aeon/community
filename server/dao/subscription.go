@@ -12,7 +12,7 @@ type SubscriptionDao struct {
 func (*SubscriptionDao) ListSubscription(userId, event, page, limit int) []model.Subscriptions {
 	var subscriptions []model.Subscriptions
 
-	model.Subscription().Where(&model.Subscriptions{UserId: userId, EventId: event}).Offset((page - 1) * limit).Limit(limit).Find(&subscriptions)
+	model.Subscription().Where(&model.Subscriptions{SubscriberId: userId, EventId: event}).Offset((page - 1) * limit).Limit(limit).Find(&subscriptions)
 	return subscriptions
 }
 
@@ -25,7 +25,7 @@ func (*SubscriptionDao) SubscriptionState(subscriptions *model.Subscriptions) bo
 
 // 订阅/取消订阅
 func (s *SubscriptionDao) Subscribe(subscription *model.Subscriptions) bool {
-	subscription.IndexKey = strconv.Itoa(subscription.UserId) + strconv.Itoa(subscription.EventId) + strconv.Itoa(subscription.BusinessId)
+	subscription.IndexKey = strconv.Itoa(subscription.SubscriberId) + strconv.Itoa(subscription.EventId) + strconv.Itoa(subscription.BusinessId)
 	tx := model.Subscription().Save(&subscription)
 	if tx.Error != nil {
 		s.cancelSubscribe(subscription)
@@ -39,8 +39,8 @@ func (*SubscriptionDao) cancelSubscribe(subscription *model.Subscriptions) {
 	model.Subscription().Where("index_key = ? ", subscription.IndexKey).Delete(&subscription)
 }
 
-func (s *SubscriptionDao) ListSubscriptionUserId(event, businessId int) []int {
-	var userIds []int
-	model.Subscription().Where("event_id = ? and business_id = ?", event, businessId).Select("user_id").Find(&userIds)
-	return userIds
+func (s *SubscriptionDao) ListSubscriptions(event, businessId int) []model.Subscriptions {
+	var sub []model.Subscriptions
+	model.Subscription().Where("event_id = ? and business_id = ?", event, businessId).Find(&sub)
+	return sub
 }

@@ -38,7 +38,7 @@ func subscriptionState(ctx *gin.Context) {
 		return
 	}
 	userId := middleware.GetUserId(ctx)
-	subscription.UserId = userId
+	subscription.SubscriberId = userId
 	result.Ok(su.SubscriptionState(&subscription), "").Json(ctx)
 }
 
@@ -50,7 +50,7 @@ func subscribe(ctx *gin.Context) {
 		result.Err(utils.GetValidateErr(subscription, err)).Json(ctx)
 	}
 	userId := middleware.GetUserId(ctx)
-	subscription.UserId = userId
+	subscription.SubscriberId = userId
 	msg := ""
 	if su.Subscribe(&subscription) {
 		msg = "订阅成功"

@@ -1,6 +1,8 @@
 package dao
 
-import "xhyovo.cn/community/server/model"
+import (
+	"xhyovo.cn/community/server/model"
+)
 
 type MessageDao struct {
 }
@@ -36,33 +38,50 @@ func (*MessageDao) ListMessageLogs(page, limit int) []*model.MessageLogs {
 }
 
 // 添加记录
-func (*MessageDao) SaveMessageLogs(messageLog *model.MessageLogs) {
-	model.MessageLog().Save(messageLog)
+func (*MessageDao) SaveMessageLogs(messageLog []*model.MessageLogs) {
+	model.MessageLog().Create(&messageLog)
 }
 
 func (*MessageDao) DeleteMessageLogs(id []int) {
 	model.MessageLog().Delete(&id)
 }
 
-// 发送消息
-func (*MessageDao) SendMessage(from, to int, content string) {
-	state := &model.MessageStates{
-		From:    from,
-		To:      to,
-		Content: content,
+// 保存消息
+func (*MessageDao) SaveMessage(from, types int, to []int, content string) {
+	var msgs []*model.MessageStates
+	for i := range to {
+		state := &model.MessageStates{
+			From:    from,
+			To:      to[i],
+			Content: content,
+			Type:    types,
+			State:   1,
+		}
+		msgs = append(msgs, state)
 	}
-	model.MessageState().Save(&state)
-}
 
-// 查看用户未读消息
-func (*MessageDao) ListNoReadMessage(page, limit, userId int) []*model.MessageStates {
-	var message []*model.MessageStates
-	model.MessageState().Where("to", userId).Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&message)
-	return message
+	model.MessageState().Create(&msgs)
 }
 
 // 删除用户收到的消息(确认消息),
-func (*MessageDao) DeleteMessage(id []int, userId int) {
+func (*MessageDao) ReadMessage(id []int, userId int) int64 {
+	tx := model.MessageState().Where("id in ? and `to` = ?", id, userId).Updates(&model.MessageStates{State: 1})
+	return tx.RowsAffected
+}
 
-	model.MessageState().Where("to", userId).Delete(&model.MessageStates{}, id)
+func (d *MessageDao) ListMessage(page, limit, userId, types, state int) []*model.MessageStates {
+	m := model.MessageStates{
+		To:    userId,
+		Type:  types,
+		State: state,
+	}
+	var message []*model.MessageStates
+	model.MessageState().Where(&m).Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&message)
+	return message
+}
+
+func (d *MessageDao) CountMessage(userId int, types int) int64 {
+	var count int64
+	model.MessageState().Where("`to` = ? and type = ?", userId, types).Count(&count)
+	return count
 }

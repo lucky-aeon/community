@@ -49,7 +49,7 @@ func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
 
 	group.GET("/policy", getPolicy)
-	group.GET("/singUrl/:fileKey", getUrl)
+	group.GET("/singUrl", getUrl)
 	group.POST("/upload", upload)
 }
 
@@ -104,17 +104,17 @@ func getPolicy(ctx *gin.Context) {
 	policyToken.Directory = prefix
 	policyToken.Policy = string(debyte)
 	policyToken.Callback = string(callbackBase64)
-	response, err := json.Marshal(policyToken)
+	//response, err := json.Marshal(policyToken)
 	if err != nil {
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
 
-	result.Ok(response, "成功").Json(ctx)
+	result.Ok(policyToken, "成功").Json(ctx)
 }
 
 func getUrl(ctx *gin.Context) {
-	fileKey := ctx.Param("fileKey")
+	fileKey := ctx.Query("fileKey")
 	if fileKey == "" {
 		result.Err("fileKey 为空").Json(ctx)
 		return

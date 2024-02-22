@@ -27,7 +27,7 @@ type SearchArticle struct {
 func InitArticleRouter(r *gin.Engine) {
 	group := r.Group("/community")
 	group.GET("/articles/:id", articleGet)
-	group.GET("/articles", articlePageBySearch)
+	group.POST("/articles", articlePageBySearch)
 	group.POST("/articles/update", articleUpdate)
 	group.DELETE("/articles/:id", articleDeleted)
 	group.Use(middleware.Auth)

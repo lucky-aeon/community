@@ -1,72 +1,99 @@
 <template>
-   <a-list
-    class="list-demo-action-layout"
-    :bordered="false"
-    :data="dataSource"
-    :pagination-props="paginationProps"
-  >
-    <template #item="{ item }">
-      <a-list-item class="list-demo-item" action-layout="vertical">
+  <a-list v-if="dataSource.length" class="list-demo-action-layout" :bordered="false">
+    <a-list-item v-for="item in dataSource" :key="item.id" @click="router.push(`view/${item.id}`)" class="list-demo-item"
+        action-layout="vertical">
         <template #actions>
+          <span><icon-user />{{ item.user.name || "未知" }}</span>
           <span><icon-heart />83</span>
-          <span><icon-star />{{ item.index }}</span>
-          <span><icon-message />Reply</span>
+          <span><icon-calendar />{{ item.updatedAt }}</span>
         </template>
-        <template #extra>
-          <div className="image-area">
-            <img alt="arco-design" :src="item.imageSrc" />
-          </div>
-        </template>
-        <a-list-item-meta
-          :title="item.title"
-          :description="item.description"
-        >
+        <a-list-item-meta :title="item.title">
+          <template #description>
+
+            <a-tag size="small">
+              分类: {{ item.type.title || "未知" }}
+            </a-tag>
+            <a-divider direction="vertical" />
+            <a-tag v-if="!item.tags" color="blue" size="small">
+              无标签
+            </a-tag>
+            <template v-else>
+              <a-space><a-tag v-for="tagItem in item.tags.split(',')" :key="tagItem" color="blue" size="small">{{ tagItem
+              }}</a-tag>
+              </a-space>
+            </template>
+          </template>
           <template #avatar>
             <a-avatar shape="square">
-              <img alt="avatar" :src="item.avatar" />
+              <img alt="avatar" :src="item.user.avatar" />
             </a-avatar>
           </template>
         </a-list-item-meta>
       </a-list-item>
-    </template>
   </a-list>
+  <AResult v-else title="no articles">
+    <template #icon>
+      <IconEmpty />
+    </template>
+  </AResult>
 </template>
-<script>
-import { reactive } from 'vue';
-
-const names = ['Socrates', 'Balzac', 'Plato'];
-const avatarSrc = [
-  '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/a8c8cdb109cb051163646151a4a5083b.png~tplv-uwbnlip3yd-webp.webp',
-  '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/e278888093bef8910e829486fb45dd69.png~tplv-uwbnlip3yd-webp.webp',
-  '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/9eeb1800d9b78349b24682c3518ac4a3.png~tplv-uwbnlip3yd-webp.webp',
-];
-const imageSrc = [
-  '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/29c1f9d7d17c503c5d7bf4e538cb7c4f.png~tplv-uwbnlip3yd-webp.webp',
-  '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/04d7bc31dd67dcdf380bc3f6aa07599f.png~tplv-uwbnlip3yd-webp.webp',
-  '//p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/1f61854a849a076318ed527c8fca1bbf.png~tplv-uwbnlip3yd-webp.webp',
-];
-const dataSource = new Array(15).fill(null).map((_, index) => {
-  return {
-    index: index,
-    avatar: avatarSrc[index % avatarSrc.length],
-    title: names[index % names.length],
-    description:
-      'Beijing ByteDance Technology Co., Ltd. is an enterprise located in China. ByteDance has products such as TikTok, Toutiao, volcano video and Douyin (the Chinese version of TikTok).',
-    imageSrc: imageSrc[index % imageSrc.length],
-  };
-});
-
-export default {
-  setup() {
-    return {
-      dataSource,
-      paginationProps: reactive({
-        defaultPageSize: 3,
-        total: dataSource.length
-      })
-    }
-  },
+<script setup>
+import { apiArticleList } from '@/apis/article';
+import router from '@/router';
+import { IconCalendar, IconEmpty, IconHeart, IconUser } from '@arco-design/web-vue/es/icon';
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+const dataSource = ref([])
+dataSource.value = []
+const paginationProps = reactive({
+  page: 1,
+  noReq: false,
+  defaultPageSize: 10,
+  total: 9999
+})
+const queryData = ref({
+  tags: [],
+  context: "",
+  orderBy: "created_at",
+  descOrder: true
+})
+const route = useRoute()
+function getArticleList() {
+  queryData.value.context = route.query.context
+  queryData.value.tags = (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || []
+  apiArticleList(queryData.value, paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
+    paginationProps.total = data.total
+    dataSource.value.push(...data.list)
+  })
 }
+const scroll = () => {
+  const scrollHeight = document.documentElement.scrollHeight // 可滚动区域的高
+  const scrollTop = document.documentElement.scrollTop // 已经滚动区域的高
+  const clientHeight = document.documentElement.clientHeight // 可视区高度
+  // 以滚动高度 + 当前视口高度  >= 可滚动高度 = 触底
+  if (clientHeight + scrollTop >= scrollHeight - 0.5 && !paginationProps.noReq) {
+    // 此处可书写触底刷新代码
+    
+    paginationProps.noReq = true
+    if (paginationProps.page >= Math.ceil(paginationProps.total / paginationProps.defaultPageSize)) {
+      return
+    }
+    setTimeout(() => paginationProps.noReq = false, 1000)
+    paginationProps.page++
+    getArticleList()
+  }
+}
+onMounted(() => {
+  window.addEventListener('scroll', scroll)
+  getArticleList()
+})
+// 页面销毁移除scroll事件
+onUnmounted(() => window.removeEventListener('scroll', scroll))
+watch(() => route.fullPath, () => {
+  dataSource.value = []
+  paginationProps.page = 1
+  getArticleList()
+})
 </script>
 
 <style scoped>
@@ -88,5 +115,12 @@ export default {
 
 .list-demo-action-layout .arco-list-item-action .arco-icon {
   margin: 0 4px;
+}
+
+
+.list-demo-item:hover {
+  transition: background-color 0.3s ease;
+  background-color: #f4f4f491;
+  cursor: pointer;
 }
 </style>

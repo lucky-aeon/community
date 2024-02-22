@@ -19,7 +19,8 @@ func InitArticleTagRouter(r *gin.Engine) {
 
 func getArticleTags(r *gin.Context) {
 	qp := ginutils.GetPage(r)
-	result.Auto(articleTagService.QueryList(qp.Page, qp.Limit)).Json(r)
+	title := r.DefaultQuery("title", "")
+	result.Auto(articleTagService.QueryList(qp.Page, qp.Limit, title)).Json(r)
 }
 
 func getHotTags(r *gin.Context) {

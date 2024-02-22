@@ -16,10 +16,10 @@ func (*ArticleTagService) QueryHotTags(limit int) (result []*model.ArticleTags, 
 	return result, d.Error
 }
 
-func (*ArticleTagService) QueryList(page, limit int) (result map[string]interface{}, err error) {
+func (*ArticleTagService) QueryList(page, limit int, title string) (result map[string]interface{}, err error) {
 	var count int64
 	list := make([]*model.ArticleTags, 0)
-	err = model.ArticleTag().Count(&count).Offset((page - 1) * limit).Limit(limit).Find(&list).Error
+	err = model.ArticleTag().Where("tag_name like ?", "%"+title+"%").Count(&count).Offset((page - 1) * limit).Limit(limit).Find(&list).Error
 	result = map[string]interface{}{
 		"list":  list,
 		"total": count,

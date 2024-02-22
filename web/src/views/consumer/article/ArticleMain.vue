@@ -1,74 +1,150 @@
 <template>
-    <div style="border-bottom: 1px solid rgba(215, 215, 215, 0.784); padding-bottom: 20px;">
-        <ARow justify="center" :gutter="[20,20]">
+    <div v-if="route.name !== 'articleView'"
+        style="border-bottom: 1px solid rgba(215, 215, 215, 0.784); padding-bottom: 20px;">
+        <ARow justify="center" :gutter="[20, 20]">
             <ACol class="search">
-                <ARow :gutter="[0,10]">
+                <ARow :gutter="[0, 10]">
                     <ACol>
                         <h1>搜索全站文章</h1>
-                        <a-auto-complete :data="data" @search="handleSearch" :style="StyleSearch"
-                            placeholder="please enter something">
-                            <template #prefix>
-                                <icon-search />
-                            </template>
-                            <template #footer>
-                                <div style="padding: 6px 0; text-align: center;">
-                                    <a-button>Click Me</a-button>
-                                </div>
-                            </template>
-                        </a-auto-complete>
+                        <a-input-group style="height: 36px;max-height: 36px;width: 400px;">
+                            <a-badge :count="searchData.search.tags.length" :offset="[-50, 15]">
+                                <AButton size="large" type="dashed" @click="searchData.tagModal.show = true">
+                                    <IconTags />
+                                </AButton>
+                            </a-badge>
+                            <a-auto-complete allowClear @select="(e) => router.push(`/article/view/${e}`)"
+                                :data="searchData.result" :style="StyleSearch" @search="handlerSearchArticle"
+                                placeholder="please enter something">
+
+                            </a-auto-complete>
+                            <AButton size="large" type="primary" @click="ToSearchRoute()">
+                                <IconSearch />
+                            </AButton>
+                        </a-input-group>
+
                     </ACol>
                     <ACol>
                         <a-space>
-                            <a-tag color="gray">
+                            <a-tooltip mini :content="tagItem.description" position="bottom"
+                                v-for="tagItem in searchData.hotTags" :key="tagItem.tag">
+                                <a-tag color="red">
+                                    {{ tagItem.tag }}
+                                </a-tag>
+                            </a-tooltip>
+                            <!-- <a-tag color="blue">
                                 <template #icon>
-                                    <icon-github />
+                                    <icon-tags />
                                 </template>
-                                Github
-                            </a-tag>
-                            <a-tag color="orangered">
-                                <template #icon>
-                                    <icon-gitlab />
-                                </template>
-                                Gitlab
-                            </a-tag>
-                            <a-tag color="blue">
-                                <template #icon>
-                                    <icon-twitter />
-                                </template>
-                                Twitter
-                            </a-tag>
-                            <a-tag color="arcoblue">
-                                <template #icon>
-                                    <icon-facebook />
-                                </template>
-                                Facebook
-                            </a-tag>
+                                更多
+                            </a-tag> -->
                         </a-space>
                     </ACol>
                 </ARow>
             </ACol>
         </ARow>
     </div>
-    <router-view></router-view>
+    <router-view :articleData="currentArticleData"></router-view>
+    <a-modal hideCancel v-model:visible="searchData.tagModal.show" @ok="() => { searchData.tagModal.show = false }">
+        <template #title>
+            搜索标签
+        </template>
+        <div>
+            <a-auto-complete allowClear @select="(e) => { searchData.search.tags.push(e) }" placeholder="搜索标签"
+                :data="searchData.tagModal.searchResult" @search="handleSearchTags">
+                <template #data="{ data }">
+                    {{ data.title }}</template>
+            </a-auto-complete>
+            <a-space v-if="searchData.search.tags.length" style="margin: 10px;">
+                <a-tag v-for="tagitem in [...new Set(searchData.search.tags)]" :key="tagitem">{{ tagitem }}</a-tag>
+            </a-space>
+            <AResult v-else title="no tag condition">
+                <template #icon>
+                    <IconEmpty />
+                </template>
+            </AResult>
+        </div>
+    </a-modal>
 </template>
 <script setup>
-import { reactive } from 'vue';
+import { apiArticleList } from '@/apis/article';
+import { apiTagHots, apiTags } from '@/apis/tags';
+import router from '@/router';
+import { IconEmpty, IconSearch, IconTags } from '@arco-design/web-vue/es/icon';
+import { onMounted, reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
-
-const route = useRoute()
+// const route = useRoute()
 // search input style
 const StyleSearch = reactive({
-    width: '360px',
-    height: '40px',
-    innerHeight: '50px'
+    width: '100%',
+    height: '100%',
+})
+const searchData = reactive({
+    search: {
+        tags: [],
+        context: "",
+        orderBy: "created_at",
+        descOrder: true
+    },
+    hotTags: [],
+    tagModal: {
+        show: false,
+        searchResult: []
+    },
+    result: []
 })
 
+
+const route = useRoute()
+
+const currentArticleData = ref({})
+const handleSearchTags = (value) => {
+    apiTags(1, 15, value).then(({ data, ok }) => {
+        if (!ok) {
+            return
+        }
+        searchData.tagModal.searchResult = data.list.map(({ tag }) => {
+            return tag
+        })
+    })
+}
+const handlerSearchArticle = (value) => {
+    searchData.search.context = value
+    apiArticleList(searchData.search, 1, 5).then(({ data, ok }) => {
+        if (!ok) {
+            return
+        }
+        searchData.result = data.list.map(data => ({
+            label: data.title,
+            value: data.id
+        }))
+    })
+}
+
+function ToSearchRoute() {
+    router.push({
+        path: route.path,
+        query: {
+            tags: searchData.search.tags,
+            context: searchData.search.context
+        }
+    })
+}
+
+onMounted(() => {
+    apiTagHots().then(({ data }) => {
+        searchData.hotTags = data
+        searchData.tagModal.searchResult = data.map(({ tag }) => {
+            return tag
+        })
+    })
+    handlerSearchArticle("")
+})
 
 </script>
 
 <style scoped>
 .search {
     width: 100%;
-    text-align: center; 
+    text-align: center;
 }
 </style>

@@ -35,6 +35,7 @@ func (*ArticleService) GetArticleData(id int) (data *model.ArticleData, err erro
 		State:      a.State,
 		Like:       a.Like,
 		Tags:       tags,
+		Desc:       a.Desc,
 		UserSimple: us,
 		TypeSimple: typeData,
 		CreatedAt:  a.CreatedAt,
@@ -44,24 +45,27 @@ func (*ArticleService) GetArticleData(id int) (data *model.ArticleData, err erro
 
 func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, page data.QueryPage, sort data.ListSortStrategy) (result []*model.ArticleData, total int64, err error) {
 	query := mysql.GetInstance().Table("articles").
-		Select("articles.id, articles.title, articles.state, articles.`like`, tp.title as type_title, tp.flag_name as type_flag, u.name as u_name, u.id as u_id, articles.created_at, articles.updated_at, GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
+		Select("articles.id, articles.title, articles.state, articles.`like`, " +
+			"tp.title as type_title, tp.flag_name as type_flag, " +
+			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, " +
+			"articles.created_at, articles.updated_at, GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
 		Joins("LEFT JOIN article_tag_relations as atr on atr.article_id = articles.id").
 		Joins("LEFT JOIN article_tags as atg on atg.id = atr.tag_id").
 		Joins("LEFT JOIN types as tp on tp.id = articles.type").
 		Joins("LEFT JOIN users as u on u.id = articles.user_id")
 	if article != nil {
 		if article.Type > 0 {
-			query.Where("type = ?", article.Type)
+			query.Where("articles.type = ?", article.Type)
 		}
 		if len(article.Title) > 0 {
-			query.Where("title like ?", article.Title)
+			query.Where("articles.title like ?", "%"+article.Title+"%")
 		}
 		if len(article.Desc) > 0 {
-			query.Where("desc like ?", article.Desc)
+			query.Where("articles.`desc` like ?", "%"+article.Desc+"%")
 		}
 	}
 	if len(tagId) > 0 {
-		query.Where("atr.tag_id in ?", tagId)
+		query.Where("atg.tag_name in ?", tagId)
 	}
 	query.Group("articles.id").Count(&total)
 	if len(sort.OrderBy) > 0 {
@@ -70,9 +74,28 @@ func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, p
 			Desc:   sort.DescOrder,
 		})
 	}
-	query.Offset((page.Page - 1) * page.Limit).
+	rows, err := query.Offset((page.Page - 1) * page.Limit).
 		Limit(page.Limit).
-		Find(&result)
+		Rows()
+	if err != nil {
+		return
+	}
+	for rows.Next() {
+		item := model.ArticleData{}
+		itemType := model.TypeSimple{}
+		itemUser := model.UserSimple{}
+		tags := ""
+		rows.Scan(
+			&item.ID, &item.Title, &item.State, &item.Like,
+			&itemType.TypeTitle, &itemType.TypeFlag,
+			&itemUser.UName, &itemUser.UId, &itemUser.UAvatar,
+			&item.CreatedAt, &item.UpdatedAt, &tags,
+		)
+		item.UserSimple = itemUser
+		item.TypeSimple = itemType
+		item.Tags = tags
+		result = append(result, &item)
+	}
 	return
 }
 

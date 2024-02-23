@@ -10,6 +10,9 @@ const ConsumerRouters = [
     {
         path: "/article",
         component: ArticleMainVue,
+        meta: {
+            requiresAuth: true
+        },
         children: [
             {
                 path: ":classfily",
@@ -24,11 +27,17 @@ const ConsumerRouters = [
     },
     {
         path: "/user",
-        component: UserInfo
+        component: UserInfo,
+        meta: {
+            requiresAuth: true
+        }
     },
     {
         path: "/comment",
-        component: Comments
+        component: Comments,
+        meta: {
+            requiresAuth: true
+        }
     }
 ]
 export default ConsumerRouters

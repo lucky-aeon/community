@@ -142,9 +142,10 @@ func (*CommentsService) GetCommentsByRootID(page, limit, rootId int) ([]*model.C
 	return parentComments, count
 }
 
-func (a *CommentsService) PageComment(p, limit int) (comments []model.Comments, count int64) {
-	model.Comment().Limit((p - 1) * limit).Offset(limit).Find(&comments)
+func (a *CommentsService) PageComment(p, limit int) (comments []*model.Comments, count int64) {
+	model.Comment().Limit(limit).Offset((p - 1) * limit).Find(&comments)
 
 	model.Comment().Count(&count)
+	setCommentUserNameAndArticleTitle(comments)
 	return comments, count
 }

@@ -17,7 +17,8 @@ func InitCommentRouters(r *gin.Engine) {
 func listComment(ctx *gin.Context) {
 	p, limit := page.GetPage(ctx)
 	var c services.CommentsService
-	c.PageComment(p, limit)
+	comments, count := c.PageComment(p, limit)
+	result.Page(comments, count, nil).Json(ctx)
 }
 
 func deleteComment(ctx *gin.Context) {

@@ -15,6 +15,8 @@ func (*UserService) GetUserById(id int) *model.Users {
 
 	user := userDao.QueryUser(&model.Users{ID: id})
 	user.Avatar = utils.BuildFileUrl(user.Avatar)
+	user.Password = ""
+	user.InviteCode = 0
 	return user
 }
 
@@ -160,4 +162,18 @@ func (s *UserService) ListByNameSelectEmailAndId(usernames []string) (emails []s
 	}
 
 	return emails, id
+}
+
+func (s *UserService) Statistics(userId int) (m map[string]interface{}) {
+	m = make(map[string]interface{})
+	var articleS ArticleService
+	// 获取被点赞次数,获取用户发布的所有文章
+	ids := articleS.PublishArticlesSelectId(userId)
+	likeCount := articleS.ArticlesLikeCount(ids)
+	// 获取发布文章
+	count := len(ids)
+
+	m["articleCount"] = count
+	m["likeCount"] = likeCount
+	return
 }

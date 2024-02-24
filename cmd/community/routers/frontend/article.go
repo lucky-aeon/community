@@ -30,6 +30,7 @@ func InitArticleRouter(r *gin.Engine) {
 	group.POST("/articles", articlePageBySearch)
 	group.POST("/articles/update", articleUpdate)
 	group.DELETE("/articles/:id", articleDeleted)
+	group.POST("/articles/like", articleLike)
 	group.Use(middleware.Auth)
 }
 
@@ -60,4 +61,19 @@ func articleDeleted(c *gin.Context) {
 
 func articleUpdate(c *gin.Context) {
 
+}
+
+func articleLike(c *gin.Context) {
+	v := c.Query("articleId")
+	articleId, err := strconv.Atoi(v)
+	if err != nil {
+		result.Err(err.Error()).Json(c)
+		return
+	}
+	userId := middleware.GetUserId(c)
+	var msg string = "取消点赞"
+	if articleService.Like(articleId, userId) {
+		msg = "点赞"
+	}
+	result.OkWithMsg(nil, msg).Json(c)
 }

@@ -6,6 +6,7 @@ import (
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
+	"xhyovo.cn/community/pkg/utils/page"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
 )
@@ -37,7 +38,7 @@ func comment(ctx *gin.Context) {
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
-	result.Ok(nil, msg).Json(ctx)
+	result.OkWithMsg(nil, msg).Json(ctx)
 }
 
 // 删除评论
@@ -61,7 +62,7 @@ func deleteComment(ctx *gin.Context) {
 // 返回文章下的评论(文章页面展示)
 func listCommentsByArticleId(ctx *gin.Context) {
 	articleId, err := strconv.Atoi(ctx.Param("articleId"))
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	p, _ := strconv.Atoi(ctx.DefaultQuery("p", "1"))
 	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "15"))
 
 	if err != nil {
@@ -69,32 +70,26 @@ func listCommentsByArticleId(ctx *gin.Context) {
 		return
 	}
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetCommentsByArticleID(page, limit, articleId)
-	result.Ok(map[string]interface{}{
-		"data":  &comments,
-		"count": &count,
-	}, "").Json(ctx)
+	comments, count := commentsService.GetCommentsByArticleID(p, limit, articleId)
+	result.Ok(page.New(comments, count), "").Json(ctx)
 }
 
 // 查询根评论下的评论
 func listCommentsByRootId(ctx *gin.Context) {
 	rootId, _ := strconv.Atoi(ctx.Param("rootId"))
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	p, _ := strconv.Atoi(ctx.DefaultQuery("p", "1"))
 	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "15"))
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetCommentsByRootID(page, limit, rootId)
+	comments, count := commentsService.GetCommentsByRootID(p, limit, rootId)
 
-	result.Ok(map[string]interface{}{
-		"data":  comments,
-		"count": count,
-	}, "").Json(ctx)
+	result.Ok(page.New(comments, count), "").Json(ctx)
 
 }
 
 // 查询文章下的所有评论(管理端)
 func listAllCommentsByArticleId(ctx *gin.Context) {
 	articleId, err := strconv.Atoi(ctx.Param("articleId"))
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
+	p, _ := strconv.Atoi(ctx.DefaultQuery("p", "1"))
 	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "15"))
 
 	if err != nil {
@@ -103,9 +98,7 @@ func listAllCommentsByArticleId(ctx *gin.Context) {
 	}
 	userId := middleware.GetUserId(ctx)
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetAllCommentsByArticleID(page, userId, limit, articleId)
-	result.Ok(map[string]interface{}{
-		"data":  comments,
-		"count": count,
-	}, "").Json(ctx)
+	comments, count := commentsService.GetAllCommentsByArticleID(p, userId, limit, articleId)
+
+	result.Ok(page.New(comments, count), "").Json(ctx)
 }

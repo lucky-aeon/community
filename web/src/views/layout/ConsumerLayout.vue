@@ -16,31 +16,36 @@
           <a-menu-item key="2">Solution</a-menu-item>
           <a-menu-item key="3">Cloud Service</a-menu-item>
           <a-menu-item key="4">Cooperation</a-menu-item>
+          <AButtonGroup style="float: right;" >
+            <AButton type="text"><icon-notification size="large"/></AButton>
+            <AButton type="text" @click="userStore.logOut()">退出</AButton>
+          </AButtonGroup>
+
         </a-menu>
       </a-layout-header>
       <a-layout>
-        <a-layout-sider style="height: 100%;" :width="220" collapsible :collapsed="collapsed" @collapse="onCollapse">
+        <a-layout-sider style="height: 100%;" :width="220" collapsible>
           <a-menu :style="{ height: '100%' }" :default-open-keys="['0']" :default-selected-keys="['0_2']">
             <a-sub-menu v-for="item in userStore.menu" :key="item.name">
               <template #icon><icon-apps></icon-apps></template>
               <template #title>{{ item.meta.locale }}</template>
               <router-link v-for="child in item.children" :key="child.name" :to="child.path">
-              <a-menu-item  >{{ child.meta.locale }}</a-menu-item></router-link>
+                <a-menu-item>{{ child.meta.locale }}</a-menu-item></router-link>
             </a-sub-menu>
             <a-sub-menu key="0">
               <template #icon><icon-apps></icon-apps></template>
               <template #title>个人空间</template>
-              <router-link to="user">
-                <a-menu-item >工作台</a-menu-item>
+              <router-link to="/user">
+                <a-menu-item>工作台</a-menu-item>
               </router-link>
-              <router-link to="user">
-                <a-menu-item >用户信息</a-menu-item>
+              <router-link to="/user">
+                <a-menu-item>用户信息</a-menu-item>
               </router-link>
             </a-sub-menu>
             <a-sub-menu key="1">
               <template #icon><icon-apps></icon-apps></template>
               <template #title>评论</template>
-              <router-link to="comment">
+              <router-link to="/comment">
                 <a-menu-item>评论</a-menu-item>
               </router-link>
 
@@ -74,9 +79,10 @@
 </template>
 <script setup>
 import { useUserStore } from "@/stores/UserStore";
+import { IconApps, IconNotification } from "@arco-design/web-vue/es/icon";
 import { RouterView } from "vue-router";
 const userStore = useUserStore()
-
+userStore.getMenu()
 </script>
 <style scoped>
 .layout-demo {

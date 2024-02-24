@@ -274,3 +274,9 @@ create table article_tag_user_relations
 create unique index article_tag_user_relations_user_id_tag_id_uindex
     on article_tag_user_relations (user_id, tag_id);
 
+create table article_tag_relations
+(
+    article_id int null comment '文章id',
+    tag_id     int null
+)
+    comment '文章与标签关联表';

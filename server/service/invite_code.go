@@ -81,3 +81,8 @@ func (*CodeService) DestroyCode(code int) error {
 func (*CodeService) SetState(id int) {
 	codeDao.SetState(id)
 }
+
+func (s *CodeService) CountByMemberId(id int) (count int64) {
+	model.InviteCode().Where("member_id = ?", id).Count(&count)
+	return count
+}

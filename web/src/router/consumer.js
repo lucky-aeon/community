@@ -3,6 +3,8 @@
 import ArticleListVue from '@/views/consumer/article/ArticleList.vue';
 import ArticleMainVue from '@/views/consumer/article/ArticleMain.vue';
 import Comments from "@/views/consumer/comment/Comment.vue";
+import Message from "@/views/consumer/message/Message.vue";
+import Member from "@/views/admin/member/Member.vue";
 import UserInfo from "@/views/consumer/user/UserInfo.vue";
 
 
@@ -38,6 +40,14 @@ const ConsumerRouters = [
         meta: {
             requiresAuth: true
         }
+    },
+    {
+        path: "/message",
+        component: Message
+    },
+    {
+        path: "/member",
+        component: Member
     }
 ]
 export default ConsumerRouters

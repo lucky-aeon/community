@@ -1,6 +1,7 @@
 package services
 
 import (
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"xhyovo.cn/community/pkg/data"
 	"xhyovo.cn/community/pkg/mysql"
@@ -123,4 +124,43 @@ func (a *ArticleService) GetById(id int) model.Articles {
 	user := userDao.GetById(article.UserId)
 	article.Users = user
 	return article
+}
+
+// 点赞/取消点赞文章
+func (a *ArticleService) Like(articleId, userId int) bool {
+
+	// 点赞
+	err := mysql.GetInstance().Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&model.Article_Likes{ArticleId: articleId, UserId: userId}).Error; err != nil {
+			return err
+		}
+
+		return tx.Model(&model.Articles{}).Where("id = ?", articleId).Update("like", gorm.Expr("`like` + ?", 1)).Error
+	})
+
+	if err != nil {
+		mysql.GetInstance().Transaction(func(tx *gorm.DB) error {
+			if err := tx.Where("article_id = ? and user_id = ?", articleId, userId).Delete(&model.Article_Likes{}).Error; err != nil {
+				return err
+			}
+			return tx.Model(&model.Articles{}).Where("id = ?", articleId).Update("like", gorm.Expr("`like` + ?", -1)).Error
+		})
+	}
+	return err == nil
+}
+
+func (a *ArticleService) PublishArticleCount(userId int) (count int64) {
+	model.Article().Where("user_id = ?", userId).Count(&count)
+	return
+}
+
+func (a *ArticleService) PublishArticlesSelectId(userId int) (id []int) {
+	model.Article().Where("user_id").Select("id").Find(&id)
+	return
+}
+
+// 获取文章的点赞次数
+func (a *ArticleService) ArticlesLikeCount(ids []int) (count int64) {
+	model.ArticleLike().Where("article_id  in ? ", ids).Count(&count)
+	return
 }

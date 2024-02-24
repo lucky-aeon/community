@@ -1,6 +1,7 @@
 package frontend
 
 import (
+	"strconv"
 	"xhyovo.cn/community/cmd/community/middleware"
 
 	services "xhyovo.cn/community/server/service"
@@ -31,6 +32,7 @@ func InitUserRouters(r *gin.Engine) {
 	group.GET("/info", getUserInfo)
 	group.POST("/edit/:tab", updateUser)
 	group.GET("/menu", getUserMenu)
+	group.GET("/statistics", statistics)
 }
 
 func getUserMenu(ctx *gin.Context) {
@@ -41,7 +43,12 @@ func getUserMenu(ctx *gin.Context) {
 func getUserInfo(ctx *gin.Context) {
 
 	var userService services.UserService
-	user := userService.GetUserById(3)
+	userId := ctx.Query("userId")
+	uId, err := strconv.Atoi(userId)
+	if err != nil {
+		uId = middleware.GetUserId(ctx)
+	}
+	user := userService.GetUserById(uId)
 
 	result.Ok(user, "").Json(ctx)
 }
@@ -95,4 +102,12 @@ func updateUser(ctx *gin.Context) {
 		userService.UpdateUser(&model.Users{ID: userId, Avatar: object.Avatar})
 	}
 	result.OkWithMsg(nil, "修改成功").Json(ctx)
+}
+
+// 数据统计
+func statistics(ctx *gin.Context) {
+	userId := middleware.GetUserId(ctx)
+
+	m := userService.Statistics(userId)
+	result.Ok(m, "").Json(ctx)
 }

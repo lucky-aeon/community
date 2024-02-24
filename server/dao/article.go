@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"gorm.io/gorm"
 	"time"
 
 	"xhyovo.cn/community/server/model"
@@ -79,4 +80,19 @@ func (a *Article) GetById(id int) model.Articles {
 	var article model.Articles
 	model.Article().Where("id = ?", id).First(&article)
 	return article
+}
+
+func (a *Article) CreateLike(articleId, userId int) bool {
+
+	tx := model.ArticleLike().Create(&model.Article_Likes{ArticleId: articleId, UserId: userId})
+	affected := tx.RowsAffected
+	return affected == 1
+}
+
+func (a *Article) DeleteLike(articleId, userId int) {
+	model.ArticleLike().Delete("article_id = ? and user_id = ?", articleId, userId)
+}
+
+func (a *Article) UpdateCount(articleId, number int) {
+	model.Article().Where("id = ?", articleId).Update("like", gorm.Expr("'like' + ?", number))
 }

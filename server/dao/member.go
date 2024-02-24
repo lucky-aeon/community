@@ -13,7 +13,12 @@ func (*MemberDao) ListMemberInfo() []*model.MemberInfos {
 
 // save or updated
 func (*MemberDao) SaveMemberInfo(memberInfo *model.MemberInfos) {
-	model.MemberInfo().Save(memberInfo)
+	if memberInfo.ID == 0 {
+		model.MemberInfo().Save(&memberInfo)
+	} else {
+		model.MemberInfo().Where("id = ?", memberInfo.ID).Updates(&memberInfo)
+	}
+
 }
 
 func (*MemberDao) DeleteMemberInfo(id int) {

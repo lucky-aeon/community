@@ -49,26 +49,35 @@ import { IconPlus, IconCheckCircle } from '@arco-design/web-vue/es/icon';
 
 const visible = ref(false);
 const form = reactive({
+  id:null,
   name: '',
   desc: ''
 });
 
 const handleClick = () => {
   visible.value = true;
+  clearForm()
 };
 const handleBeforeOk = (done) => {
   saveMember(form)
   done()
   getCommentList()
 };
+
+function clearForm(){
+  form.id = null
+  form.name = null
+  form.desc = null
+}
 const handleCancel = () => {
   visible.value = false;
+  clearForm()
 }
 
 function updateComment(id){
   const comment = commentData.value[id]
-
   visible.value = true;
+  form.id = comment.id
   form.name = comment.name
   form.desc = comment.desc
 }

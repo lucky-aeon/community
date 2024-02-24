@@ -45,6 +45,22 @@
               </router-link>
 
             </a-sub-menu>
+            <a-sub-menu key="2">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>消息</template>
+              <router-link to="message">
+                <a-menu-item>消息</a-menu-item>
+              </router-link>
+
+            </a-sub-menu>
+            <a-sub-menu key="3">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>等级</template>
+              <router-link to="member">
+                <a-menu-item>等级</a-menu-item>
+              </router-link>
+
+            </a-sub-menu>
           </a-menu>
 
         </a-layout-sider>

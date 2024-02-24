@@ -1,17 +1,25 @@
 <template>
   <a-space direction="vertical" size="large" fill>
-    <div>
-      <span>OnlyCurrent: </span>
-      <a-switch v-model="rowSelection.onlyCurrent" />
-    </div>
+
     <a-table row-key="name" :columns="columns" :data="commentData" :row-selection="rowSelection"
-             v-model:selectedKeys="selectedKeys" :pagination="pagination" />
+             v-model:selectedKeys="selectedKeys" :pagination="pagination" >
+      <template #optional="{ record }">
+        <a-button @click="delComment(record.id)">删除</a-button>
+      </template>
+    </a-table>
   </a-space>
 </template>
 
 <script setup>
 import { listAllCommentsByArticleId} from '@/apis/comment.js'
+import { deleteComment} from '@/apis/comment.js'
 import { reactive, ref } from 'vue';
+
+function delComment(id) {
+  deleteComment(id).then(({msg})=>{
+    console.log(msg)
+  })
+}
 
 const selectedKeys = ref(['Jane Doe', 'Alisa Ross']);
 
@@ -20,7 +28,7 @@ const rowSelection = reactive({
   showCheckedAll: true,
   onlyCurrent: false,
 });
-const pagination = {pageSize: 5}
+const pagination = {pageSize: 15}
 
 const columns = [
   {
@@ -28,27 +36,29 @@ const columns = [
     dataIndex: "id"
   },
   {
-    title: 'fromUserName',
+    title: '评论者',
     dataIndex: 'fromUserName',
   },
   {
-    title: 'toUserName',
+    title: '回复人',
     dataIndex: 'toUserName',
   },
   {
-    title: 'content',
+    title: '评论内容',
     dataIndex: 'content',
   },
   {
-    title: 'articleTitle',
+    title: '文章标题',
     dataIndex: 'articleTitle',
   },
+  {
+    title: '操作',
+    slotName: 'optional'
+  }
 ]
-// 你data是什么数据？对的上的数据 哈哈哈哈哈哈哈？咋这么多data，哪个data ？？？？ 行不行，
+
 const commentData = ref([])
 listAllCommentsByArticleId(0).then(({data})=>{
-  // 你是会写变量名 ？
-  // data.value = data.data 都是dat你要给谁？ 我一开始写的是body我不管 ？？？？？我tm
   commentData.value = data.data
 })
 </script>

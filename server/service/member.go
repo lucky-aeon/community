@@ -1,6 +1,9 @@
 package services
 
-import "xhyovo.cn/community/server/model"
+import (
+	"errors"
+	"xhyovo.cn/community/server/model"
+)
 
 type MemberInfoService struct {
 }
@@ -12,8 +15,15 @@ func (*MemberInfoService) ListMember() []*model.MemberInfos {
 func (*MemberInfoService) SaveMember(member *model.MemberInfos) {
 	memberDao.SaveMemberInfo(member)
 }
-func (*MemberInfoService) DeleteMember(id int) {
+func (*MemberInfoService) DeleteMember(id int) error {
+	// 是否被邀请码使用
+	var codeS CodeService
+	count := codeS.CountByMemberId(id)
+	if count > 0 {
+		return errors.New("等级被引用,无法删除")
+	}
 	memberDao.DeleteMemberInfo(id)
+	return nil
 }
 
 func (*MemberInfoService) Exist(id int) bool {

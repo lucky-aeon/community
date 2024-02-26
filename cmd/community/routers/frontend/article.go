@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+	"xhyovo.cn/community/pkg/utils"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -28,7 +29,7 @@ func InitArticleRouter(r *gin.Engine) {
 	group := r.Group("/community")
 	group.GET("/articles/:id", articleGet)
 	group.POST("/articles", articlePageBySearch)
-	group.POST("/articles/update", articleUpdate)
+	group.POST("/articles/update", articleSave)
 	group.DELETE("/articles/:id", articleDeleted)
 	group.POST("/articles/like", articleLike)
 	group.Use(middleware.Auth)
@@ -56,11 +57,27 @@ func articleGet(c *gin.Context) {
 }
 
 func articleDeleted(c *gin.Context) {
-
+	id := c.Param("id")
+	articleId, _ := strconv.Atoi(id)
+	if err := articleService.Delete(articleId, middleware.GetUserId(c)); err != nil {
+		result.Err(err.Error()).Json(c)
+		return
+	}
+	result.OkWithMsg(nil, "删除成功").Json(c)
 }
 
-func articleUpdate(c *gin.Context) {
-
+func articleSave(c *gin.Context) {
+	var o model.Articles
+	if err := c.ShouldBindJSON(&o); err != nil {
+		result.Err(err.Error()).Json(c)
+		return
+	}
+	o.UserId = middleware.GetUserId(c)
+	if err := articleService.SaveArticle(o); err != nil {
+		result.Err(utils.GetValidateErr(o, err)).Json(c)
+		return
+	}
+	result.OkWithMsg(nil, "发布成功").Json(c)
 }
 
 func articleLike(c *gin.Context) {

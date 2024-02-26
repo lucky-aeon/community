@@ -30,3 +30,15 @@ func (s *TypeService) Update(types *model.Types) error {
 func (s *TypeService) Delete(id int) error {
 	return typeDao.Delete(id)
 }
+
+func (s *TypeService) GetById(id int) (types model.Types) {
+
+	model.Type().Where("id = ?", id).Find(&types)
+	return
+}
+
+func (s *TypeService) Exist(id int) bool {
+	var c int64
+	model.Type().Where("id = ?", id).Count(&c)
+	return c == 1
+}

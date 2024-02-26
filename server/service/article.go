@@ -1,8 +1,12 @@
 package services
 
 import (
+	"errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"strconv"
+	"strings"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/data"
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/server/model"
@@ -162,5 +166,72 @@ func (a *ArticleService) PublishArticlesSelectId(userId int) (id []int) {
 // 获取文章的点赞次数
 func (a *ArticleService) ArticlesLikeCount(ids []int) (count int64) {
 	model.ArticleLike().Where("article_id  in ? ", ids).Count(&count)
+	return
+}
+
+func (a *ArticleService) SaveArticle(article model.Articles) error {
+
+	id := article.ID
+	typeO := article.Type
+	var typeS TypeService
+	// 分类是否存在
+	if !typeS.Exist(typeO) {
+		return errors.New("分类不存在")
+	}
+	// 状态是否存在
+	oldState := article.State
+	if oldState < 0 || oldState > 5 {
+		return errors.New("状态不存在")
+	}
+
+	// 根据分类选择状态：QA分类没有发布,普通分类只有草稿和发布 todo QA分类标识暂不确认
+	if typeO == 1 && oldState == constant.Published {
+		return errors.New("QA分类状态不能选择已发布")
+	} else {
+		// 普通分类校验状态
+		if oldState == constant.Pending || oldState == constant.Resolved || oldState == constant.PrivateQuestion {
+			msg := constant.GetArticleMsg(oldState)
+			return errors.New("普通分类不支持该状态:" + msg)
+		}
+	}
+	// 修改
+	if id != 0 {
+		// 获取老文章
+		oldArticle := a.GetById(id)
+		oldTypeParentId := typeS.GetById(oldArticle.Type).ParentId
+		// 修改 一级分类不能修改,如果parent不同则修改了一级分类
+		newTypeParentId := typeS.GetById(typeO).ParentId
+		if oldTypeParentId != newTypeParentId {
+			return errors.New("修改的分类只能属于同一级分类下")
+		}
+		// 老文章状态如果为非草稿状态，则新文章不可修改为草稿状态
+		if oldState != constant.Draft && article.State == constant.Draft {
+			return errors.New("旧文章状态不可从非草稿转为草稿")
+		}
+	}
+	article.Like = 0
+	mysql.GetInstance().Save(&article)
+	id = article.ID
+	// 关联关系
+	db := model.ArticleTagRelation
+	db().Where("article_id = ?", id).Delete(nil)
+	var tags []model.ArticleTagRelations
+	tagList := strings.Split(article.Tags, ",")
+	for i := range tagList {
+		atoi, _ := strconv.Atoi(tagList[i])
+		tags = append(tags, model.ArticleTagRelations{ArticleId: id, TagId: atoi})
+	}
+	db().Create(&tags)
+
+	return nil
+}
+
+func (a *ArticleService) Delete(articleId, userId int) (err error) {
+
+	// 删除文章
+	db := mysql.GetInstance()
+	err = db.Where("id = ? and user_id = ?", articleId, userId).Delete(&model.Articles{}).Error
+	// 删除文章标签表
+	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
 	return
 }

@@ -10,8 +10,8 @@ import (
 // 文章标签
 type ArticleTags struct {
 	Id          int        `json:"id"`
-	TagName     string     `json:"tag"`
-	Description string     `json:"description"`
+	TagName     string     `json:"tag" binding:"required" msg:"标签不能未空"`
+	Description string     `json:"desc"`
 	UserId      int        `json:"user_id"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
@@ -31,6 +31,12 @@ type ArticleTagRelations struct {
 type ArticleTagUserRelations struct {
 	UserId int `json:"user_id"`
 	TagId  int `json:"tag_id"`
+}
+
+type TagArticleCount struct {
+	ArticleCount int
+	TagId        int
+	TagName      string
 }
 
 func ArticleTag() *gorm.DB {

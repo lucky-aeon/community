@@ -1,8 +1,8 @@
 package services
 
 import (
-	"time"
-
+	"errors"
+	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -27,41 +27,52 @@ func (*ArticleTagService) QueryList(page, limit int, title string) (result map[s
 	return
 }
 
-func (*ArticleTagService) CreateTag(tag *model.ArticleTags) (result *model.ArticleTags, err error) {
+func (*ArticleTagService) CreateTag(tag model.ArticleTags) (result *model.ArticleTags, err error) {
 	db := model.ArticleTag()
-	db.Where(`tag_name = ?`, tag.TagName).First(result)
-	if result == nil {
-		result = &model.ArticleTags{
-			TagName:     tag.TagName,
-			Description: tag.Description,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
-			UserId:      tag.UserId,
-		}
-		err = db.Create(result).Error
-		if err != nil {
-			result = nil
-		}
+	// 暂时先count代替查重
+	var count int64
+	db.Where("tag_name = ?", tag.TagName, tag.UserId).Count(&count)
+	if count == 0 {
+		db.Create(&tag)
 	}
-	model.ArticleTagUserRelation().Create(
-		model.ArticleTagUserRelations{
-			UserId: tag.UserId,
-			TagId:  result.Id,
-		})
-	return tag, err
+
+	model.ArticleTagUserRelation().Create(&model.ArticleTagUserRelations{UserId: tag.UserId, TagId: tag.Id})
+	return &tag, nil
 }
 
-func (*ArticleTagService) DeleteTag(userId, tagId int) bool {
-	var count int64 = 0
-	// find user tag
-	model.ArticleTagUserRelation().Where("tag_id = ?, user_id = ?", tagId, userId).Count(&count)
-	if count == 0 {
-		return false
+func (a *ArticleTagService) DeleteTag(tagId, userId int) error {
+	// 被引用则不能删除
+	var count int64
+	model.ArticleTagRelation().Where("tag_id = ?", tagId).Count(&count)
+	if count > 0 {
+		return errors.New("标签已被引用,不可删除")
 	}
-	// remove article tag ref and user ref
-	var userArticleIds []int
-	model.Article().Select("id").Where("user_id = ?", userId).Scan(&userArticleIds)
-	model.ArticleTagRelation().Delete("tag_id = ? and article_id in ?", tagId, userArticleIds)
-	model.ArticleTagUserRelation().Delete("user_id = ? and tag_id = ?", userId, tagId)
-	return true
+	mysql.GetInstance().Where("user_id = ? and tag_id = ?", userId, tagId).Delete(model.ArticleTagUserRelations{})
+	mysql.GetInstance().Where("id = ? and user_id = ?", tagId, userId).Delete(model.ArticleTags{})
+	return nil
+}
+
+func (a *ArticleTagService) GetTagArticleCount(userId int) []model.TagArticleCount {
+	var tagsIds []int
+	model.ArticleTagUserRelation().Where("user_id = ?", userId).Select("tag_id").Find(&tagsIds)
+	if len(tagsIds) == 0 {
+		return []model.TagArticleCount{}
+	}
+	var tagAcount []model.TagArticleCount
+	db := mysql.GetInstance()
+	db.Raw("select tag_id,count(article_id) as article_count from article_tag_relations WHERE tag_id in(?) GROUP BY tag_id", tagsIds).Scan(&tagAcount)
+	if len(tagAcount) == 0 {
+		return []model.TagArticleCount{}
+	}
+	var articleTags []model.ArticleTags
+	model.ArticleTag().Where("id in ?", tagsIds).Select("id", "tag_name").Find(&articleTags)
+
+	var m = make(map[int]string)
+	for i := range articleTags {
+		m[articleTags[i].Id] = articleTags[i].TagName
+	}
+	for i := range tagAcount {
+		tagAcount[i].TagName = m[tagAcount[i].TagId]
+	}
+	return tagAcount
 }

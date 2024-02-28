@@ -66,6 +66,14 @@
               </router-link>
 
             </a-sub-menu>
+            <a-sub-menu key="4">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>文件</template>
+              <router-link to="/file">
+                <a-menu-item>文件</a-menu-item>
+              </router-link>
+
+            </a-sub-menu>
           </a-menu>
 
         </a-layout-sider>

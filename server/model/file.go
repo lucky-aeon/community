@@ -9,7 +9,7 @@ import (
 
 type Files struct {
 	ID         int       `gorm:"primaryKey"`
-	FileKey    string    `json:"filename" from:"filename"`
+	FileKey    string    `json:"fileKey" from:"filename"`
 	Size       int64     `json:"size" from:"size"`
 	Format     string    `json:"mimeType" from:"mimeType"`
 	UserId     int       `json:"userId" from:"userId"`
@@ -17,6 +17,8 @@ type Files struct {
 	TenantId   int       `json:"tenantId"`
 	CreatedAt  time.Time `json:"createdAt"`
 	UpdatedAt  time.Time `json:"updatedAt"`
+	UserName   string    `json:"userName" gorm:"-"`
+	SizeName   string    `json:"sizeName"`
 }
 
 func File() *gorm.DB {

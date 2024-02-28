@@ -2,7 +2,6 @@ package backend
 
 import (
 	"github.com/gin-gonic/gin"
-	"strconv"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
 	services "xhyovo.cn/community/server/service"
@@ -14,14 +13,8 @@ func InitFileRouters(r *gin.Engine) {
 }
 
 func listFiles(ctx *gin.Context) {
-
 	p, limit := page.GetPage(ctx)
-	userId := ctx.DefaultQuery("userId", "0")
-
-	uId, _ := strconv.Atoi(userId)
-
 	var fileS services.FileService
-
-	files, count := fileS.PageFiles(p, limit, uId)
+	files, count := fileS.PageFiles(p, limit, 0)
 	result.Ok(page.New(files, count), "").Json(ctx)
 }

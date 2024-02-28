@@ -1,0 +1,49 @@
+<template>
+  <a-table :columns="columns" :data="fileData">
+
+
+    <template #fileKey="{ record }">
+      <div style="width: 200px; height: 100px;">
+      <template v-if="record.mimeType.includes('video')">
+        <video :src="record.fileKey" style="max-width: 100%; max-height: 100%;"></video>
+      </template>
+      <template v-else>
+        <a-image :src="record.fileKey"  width="100%" height="100%">123</a-image>
+      </template>
+      </div>
+    </template>
+
+  </a-table>
+
+</template>
+
+<script setup>
+import {ref, render} from "vue";
+import {apiAdminFile} from "@/apis/file.js"
+
+const columns = [{
+  title: '资源',
+  slotName: 'fileKey',
+}, {
+  title: '文件大小',
+  dataIndex: 'sizeName',
+}, {
+  title: '文件类型',
+  dataIndex: 'mimeType',
+}, {
+  title: '发布者',
+  dataIndex: 'userName',
+}, {
+  title: '上传时间',
+  dataIndex: 'createdAt'
+}];
+
+
+const fileData = ref([])
+const getFileList = ()=>{
+  apiAdminFile().then(({data})=>{
+    fileData.value = data.data
+  })
+}
+getFileList()
+</script>

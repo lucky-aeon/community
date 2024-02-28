@@ -6,6 +6,7 @@ import Comments from "@/views/consumer/comment/Comment.vue";
 import Message from "@/views/consumer/message/Message.vue";
 import Member from "@/views/admin/member/Member.vue";
 import UserInfo from "@/views/consumer/user/UserInfo.vue";
+import File from "@/views/admin/file/File.vue";
 
 
 const ConsumerRouters = [
@@ -48,6 +49,10 @@ const ConsumerRouters = [
     {
         path: "/member",
         component: Member
+    },
+    {
+        path: "/file",
+        component: File
     }
 ]
 export default ConsumerRouters

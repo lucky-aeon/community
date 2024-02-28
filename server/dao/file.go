@@ -43,7 +43,7 @@ func (f *File) PageFiles(p, limit, userId int) []model.Files {
 		UserId: userId,
 	}
 	var files []model.Files
-	model.File().Where(&f1).Offset(limit).Limit((p - 1) * limit).Find(&files)
+	model.File().Where(&f1).Offset((p - 1) * limit).Limit(limit).Order("created_at desc").Find(&files)
 
 	return files
 }

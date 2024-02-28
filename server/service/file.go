@@ -1,6 +1,10 @@
 package services
 
-import "xhyovo.cn/community/server/model"
+import (
+	"github.com/dustin/go-humanize"
+	"xhyovo.cn/community/pkg/utils"
+	"xhyovo.cn/community/server/model"
+)
 
 type FileService struct{}
 
@@ -20,6 +24,21 @@ func (*FileService) Deletes(userId, businessId, tenantId int) {
 func (s *FileService) PageFiles(p, limit, userId int) (files []model.Files, count int64) {
 
 	files = fileDao.PageFiles(p, limit, userId)
+	if len(files) == 0 {
+		return []model.Files{}, 0
+	}
+	var uS UserService
+	var uIds = make([]int, 0)
+	for i := range files {
+		uIds = append(uIds, files[i].UserId)
+	}
+	nameMap := uS.ListByIdsSelectIdNameMap(uIds)
+	for i := range files {
+		files[i].UserName = nameMap[files[i].UserId]
+		files[i].SizeName = humanize.Bytes(uint64(files[i].Size))
+		files[i].FileKey = utils.BuildFileUrl(files[i].FileKey)
+	}
 	count = fileDao.Count()
+
 	return files, count
 }

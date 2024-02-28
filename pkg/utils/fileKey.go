@@ -15,5 +15,5 @@ func BuildFileKey(userId int) string {
 }
 
 func BuildFileUrl(fileKey string) string {
-	return "http://" + oss.GetEndpoint() + "/" + fileKey
+	return oss.GetEndpoint() + "/" + fileKey
 }

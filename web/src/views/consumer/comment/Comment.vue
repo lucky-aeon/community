@@ -10,8 +10,8 @@
   </a-space>
 </template>
 
-<script setup>
-import { listAllCommentsByArticleId} from '@/apis/comment.js'
+import { listAllCommentsByArticleId } from '@/apis/comment.js';
+import { reactive, ref } from 'vue';
 import { deleteComment} from '@/apis/comment.js'
 import { reactive, ref } from 'vue';
 

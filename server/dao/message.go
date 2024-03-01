@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -20,14 +21,12 @@ func (*MessageDao) GetMessageTemplate(id int) string {
 	return messageTemplate
 }
 
-// todo 模板填充
-
-func (*MessageDao) SaveMessageTemplate(template *model.MessageTemplates) {
-	model.MessageTemplate().Save(&template)
+func (*MessageDao) SaveMessageTemplate(template model.MessageTemplates) {
+	mysql.GetInstance().Save(&template)
 }
 
-func (*MessageDao) DeleteMessageTemplate(id []int) {
-	model.MessageState().Delete(&id)
+func (*MessageDao) DeleteMessageTemplate(id int) {
+	model.MessageState().Where("id = ?", id).Delete(nil)
 }
 
 // 消息日志crud

@@ -10,6 +10,7 @@ import (
 	"xhyovo.cn/community/pkg/data"
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/server/model"
+	"xhyovo.cn/community/server/service/event"
 )
 
 type ArticleService struct {
@@ -40,7 +41,7 @@ func (*ArticleService) GetArticleData(id int) (data *model.ArticleData, err erro
 		State:      a.State,
 		Like:       a.Like,
 		Tags:       tags,
-		Desc:       a.Desc,
+		Desc:       a.Content,
 		UserSimple: us,
 		TypeSimple: typeData,
 		CreatedAt:  a.CreatedAt,
@@ -65,8 +66,8 @@ func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, p
 		if len(article.Title) > 0 {
 			query.Where("articles.title like ?", "%"+article.Title+"%")
 		}
-		if len(article.Desc) > 0 {
-			query.Where("articles.`desc` like ?", "%"+article.Desc+"%")
+		if len(article.Content) > 0 {
+			query.Where("articles.`desc` like ?", "%"+article.Content+"%")
 		}
 	}
 	if len(tagId) > 0 {
@@ -173,6 +174,7 @@ func (a *ArticleService) SaveArticle(article model.Articles) error {
 
 	id := article.ID
 	typeO := article.Type
+	flag := false
 	var typeS TypeService
 	// 分类是否存在
 	if !typeS.Exist(typeO) {
@@ -184,7 +186,7 @@ func (a *ArticleService) SaveArticle(article model.Articles) error {
 		return errors.New("状态不存在")
 	}
 
-	// 根据分类选择状态：QA分类没有发布,普通分类只有草稿和发布 todo QA分类标识暂不确认
+	// 根据分类选择状态：QA分类没有发布,普通分类只有草稿和发布
 	if typeO == 1 && oldState == constant.Published {
 		return errors.New("QA分类状态不能选择已发布")
 	} else {
@@ -193,6 +195,7 @@ func (a *ArticleService) SaveArticle(article model.Articles) error {
 			msg := constant.GetArticleMsg(oldState)
 			return errors.New("普通分类不支持该状态:" + msg)
 		}
+		flag = true
 	}
 	// 修改
 	if id != 0 {
@@ -222,7 +225,10 @@ func (a *ArticleService) SaveArticle(article model.Articles) error {
 		tags = append(tags, model.ArticleTagRelations{ArticleId: id, TagId: atoi})
 	}
 	db().Create(&tags)
-
+	if flag {
+		var subscriptionService SubscriptionService
+		subscriptionService.ConstantAtSend(event.ArticleAt, id, article.UserId, article.Content)
+	}
 	return nil
 }
 

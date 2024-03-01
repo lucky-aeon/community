@@ -24,6 +24,7 @@ func main() {
 	emailConfig := appConfig.EmailConfig
 	email.Init(emailConfig.Address, emailConfig.Username, emailConfig.Password, emailConfig.Host, emailConfig.PollCount)
 	routers.InitFrontedRouter(r)
+
 	err := r.Run("127.0.0.1:8080")
 	if err != nil {
 		log.Fatalln(err)

@@ -1,7 +1,6 @@
 package services
 
 import (
-	"regexp"
 	"strings"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/email"
@@ -77,29 +76,81 @@ func (s *SubscriptionService) Do(eventId, businessId, triggerId int, content str
 				userIds = append(userIds, subscriptions[i].SubscriberId)
 			}
 			sendId := subscriptions[0].SendId
-			to := userDao.ListByIds(userIds...)
-
+			var users []model.Users
+			model.User().Where("id in ?", userIds).Select("account", "id", "subscribe").Find(&users)
+			var emails []string
+			for i := range users {
+				if users[i].Subscribe {
+					emails = append(emails, users[i].Account)
+				}
+			}
 			messageTemplate := messageDao.GetMessageTemplate(eventId)
 			msg := m.GetMsg(messageTemplate, eventId, businessId)
-			m.SendMessages(sendId, constant.NOTICE, userIds, content)
-			email.Send(to, msg, "技术鸭社区")
-
-			// @的情况再给@发送
-			if strings.Contains(content, "@") {
-				re := regexp.MustCompile(`@(\w+)`)
-				matches := re.FindAllStringSubmatch(content, -1)
-
-				var usernames []string
-				for _, match := range matches {
-					usernames = append(usernames, match[1])
-				}
-				var userS UserService
-				emails, ids := userS.ListByNameSelectEmailAndId(usernames)
-				m.SendMessages(triggerId, constant.MENTION, ids, content)
-				email.Send(emails, content, "技术鸭社区")
-			}
+			m.SendMessages(sendId, constant.NOTICE, userIds, content) // todo确定内容
+			email.Send(emails, msg, "技术鸭社区")
 		}
 
 	}(eventId, businessId, content)
+}
 
+func (s *SubscriptionService) ConstantAtSend(eventId, businessId, triggerId int, content string) {
+	go func(eventId, businessId, triggerId int, content string) {
+		var m MessageService
+		if strings.Contains(content, "@") {
+			mentionedUsers := extractMentionedUsers(content)
+			if len(mentionedUsers) == 0 {
+				return
+			}
+
+			var users []model.Users
+			model.User().Where("name in ?", mentionedUsers).Select("account", "id", "subscribe").Find(&users)
+
+			var ids []int
+			var emails []string
+			for i := range users {
+				ids = append(ids, users[i].ID)
+				if users[i].Subscribe {
+					emails = append(emails, users[i].Account)
+				}
+			}
+			messageTemplate := messageDao.GetMessageTemplate(eventId)
+			msg := m.GetMsg(messageTemplate, eventId, businessId)
+			m.SendMessages(triggerId, constant.MENTION, ids, content)
+			email.Send(emails, msg, "技术鸭社区")
+		}
+	}(eventId, businessId, triggerId, content)
+
+}
+
+func extractMentionedUsers(s string) []string {
+	var mentionedUsers []string
+
+	// 搜索字符串中的 "@" 符号
+	startIndex := 0
+	for {
+		atIndex := strings.Index(s[startIndex:], "@")
+		if atIndex == -1 {
+			break
+		}
+
+		atIndex += startIndex
+		startIndex = atIndex + 1
+
+		// 寻找下一个空格或句号，作为结束索引
+		endIndex := len(s)
+		spaceIndex := strings.Index(s[startIndex:], " ")
+		dotIndex := strings.Index(s[startIndex:], ".")
+
+		if spaceIndex != -1 && spaceIndex < endIndex {
+			endIndex = startIndex + spaceIndex
+		}
+		if dotIndex != -1 && dotIndex < endIndex {
+			endIndex = startIndex + dotIndex
+		}
+
+		mentionedUser := s[startIndex:endIndex]
+		mentionedUsers = append(mentionedUsers, mentionedUser)
+	}
+
+	return mentionedUsers
 }

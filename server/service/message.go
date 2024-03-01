@@ -2,25 +2,49 @@ package services
 
 import (
 	"fmt"
-	"reflect"
 	"strings"
+	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/server/model"
-	"xhyovo.cn/community/server/service/event"
 )
+
+var messageTemplateVar = make(map[string]map[string]string)
+
+func init() {
+	messageTemplateVar["user"] = map[string]string{
+		"user.id":      "id",
+		"user.name":    "name",
+		"user.account": "account",
+		"user.avatar":  "avatar",
+	}
+	messageTemplateVar["article"] = map[string]string{
+		"article.id":      "id",
+		"article.title":   "title",
+		"article.content": "content",
+		"article.userId":  "user_id",
+	}
+	messageTemplateVar["comment"] = map[string]string{
+		"comment.id":           "id",
+		"comment.content":      "content",
+		"comment.FromUserName": "from_user_name",
+		"comment.ToUserName":   "to_user_name",
+		"comment.ArticleTitle": "article_title",
+	}
+}
 
 type MessageService struct {
 }
 
-func (*MessageService) ListMessageTemplate(page, limit int) []*model.MessageTemplates {
-
-	return messageDao.ListMessageTemplate(page, limit)
+func (*MessageService) ListMessageTemplate(page, limit int) ([]*model.MessageTemplates, int64) {
+	var count int64
+	model.MessageTemplate().Count(&count)
+	return messageDao.ListMessageTemplate(page, limit), count
 }
 
-func (*MessageService) SaveMessageTemplate(template *model.MessageTemplates) {
+func (*MessageService) SaveMessageTemplate(template model.MessageTemplates) {
 	messageDao.SaveMessageTemplate(template)
 }
 
-func (*MessageService) DeleteMessageTemplate(id []int) {
+func (*MessageService) DeleteMessageTemplate(id int) {
 	messageDao.DeleteMessageTemplate(id)
 }
 
@@ -72,39 +96,25 @@ func (m *MessageService) PageMessage(page, limit, userId, types, state int) (msg
 // 人：你订阅的 xxx 用户发布了文章，文章标题：xxx
 // 文章：你订阅的 xxx 文章，被xxx评论了，评论内容：xxx
 func (m *MessageService) GetMsg(template string, eventId, businessId int) string {
-	// 根据事件类型获取对象
-	var object any
-	if eventId == event.CommentUpdateEvent {
-		// 查询文章
-		var articleS ArticleService
-		object = articleS.GetById(businessId)
-
-	} else if eventId == event.UserFollowingEvent {
-		// 查询用户
-		object = userDao.GetById(businessId)
-	}
-	v := reflect.ValueOf(object)
-	return setValue(template, v)
-}
-
-func setValue(template string, v reflect.Value) string {
-	var msg = template
-	t := v.Type()
-	for i := 0; i < v.NumField(); i++ {
-		field := v.Field(i)
-		fieldName := t.Field(i).Name
-
-		if field.Kind() == reflect.Struct {
-			// 如果字段是结构体类型，则递归调用处理
-			msg = setValue(msg, field)
-		} else {
-			if fieldName[0] >= 'a' && fieldName[0] <= 'z' {
-				continue
+	for s, v := range messageTemplateVar {
+		// 拼接 ${ + s + "." 如果存在则找
+		str := fmt.Sprintf("${%s.", s)
+		if strings.Contains(template, str) {
+			var objet map[string]interface{}
+			mysql.GetInstance().Table(s + "s").Find(&objet)
+			// 遍历 v 从key找template
+			for s2 := range v {
+				varTemlp := fmt.Sprintf("${%s}", s2)
+				if strings.Contains(template, varTemlp) {
+					i := objet[v[s2]]
+					template = strings.ReplaceAll(template, varTemlp, fmt.Sprintf("%s", i))
+				}
 			}
-			fieldValue := fmt.Sprintf("%v", field.Interface())
-			fieldName = fmt.Sprintf("${%s}", strings.ToLower(fieldName))
-			msg = strings.Replace(msg, fieldName, fieldValue, -1)
 		}
 	}
-	return msg
+	return template
+}
+
+func (*MessageService) GetMessageTemplateVar() map[string]map[string]string {
+	return messageTemplateVar
 }

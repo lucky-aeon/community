@@ -153,7 +153,7 @@ func (s *UserService) PageUsers(p, limit int) (users []model.Users, count int64)
 
 func (s *UserService) ListByNameSelectEmailAndId(usernames []string) (emails []string, id []int) {
 	var users []model.Users
-	model.User().Where("name ? in", usernames).Select("account", "id").Find(&users)
+	model.User().Where("name in ? ", usernames).Select("account", "id").Find(&users)
 
 	for i := range users {
 		u := users[i]
@@ -162,6 +162,11 @@ func (s *UserService) ListByNameSelectEmailAndId(usernames []string) (emails []s
 	}
 
 	return emails, id
+}
+
+func (s *UserService) ListBySelect(user model.Users) (users []model.Users) {
+	model.User().Where(user).Find(&users)
+	return
 }
 
 func (s *UserService) Statistics(userId int) (m map[string]interface{}) {

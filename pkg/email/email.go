@@ -26,6 +26,9 @@ func Init(address, username, password, host string, pollCount int) {
 }
 
 func Send(to []string, content, subject string) {
+	if len(to) == 0 {
+		return
+	}
 	e := email.NewEmail()
 	e.From = from
 	e.To = to

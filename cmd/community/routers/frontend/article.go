@@ -41,9 +41,9 @@ func articlePageBySearch(ctx *gin.Context) {
 	ctx.ShouldBindBodyWith(searchArticle, binding.JSON)
 
 	result.Page(articleService.PageByClassfily(searchArticle.Tags, &model.Articles{
-		Title: searchArticle.Context,
-		Desc:  searchArticle.Context,
-		Type:  searchArticle.Type,
+		Title:   searchArticle.Context,
+		Content: searchArticle.Context,
+		Type:    searchArticle.Type,
 	}, ginutils.GetPage(ctx), ginutils.GetOderBy(ctx))).Json(ctx)
 }
 

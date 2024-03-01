@@ -31,7 +31,7 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 
 	commentDao.AddComment(comment)
 	var subscriptionService SubscriptionService
-
+	subscriptionService.ConstantAtSend(event.CommentAt, comment.BusinessId, comment.FromUserId, comment.Content)
 	subscriptionService.Do(event.CommentUpdateEvent, comment.BusinessId, comment.FromUserId, comment.Content)
 	return nil
 }

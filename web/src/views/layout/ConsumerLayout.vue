@@ -38,17 +38,15 @@
               <router-link to="/user">
                 <a-menu-item>工作台</a-menu-item>
               </router-link>
-              <router-link to="/user">
+              <router-link to="/user/profile">
                 <a-menu-item>用户信息</a-menu-item>
               </router-link>
-            </a-sub-menu>
-            <a-sub-menu key="1">
-              <template #icon><icon-apps></icon-apps></template>
-              <template #title>评论</template>
-              <router-link to="/comment">
+              <router-link to="/user/article">
+                <a-menu-item>文章管理</a-menu-item>
+              </router-link>
+              <router-link to="/user/comment">
                 <a-menu-item>评论</a-menu-item>
               </router-link>
-
             </a-sub-menu>
             <a-sub-menu key="2">
               <template #icon><icon-apps></icon-apps></template>

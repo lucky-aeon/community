@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+
 	"xhyovo.cn/community/pkg/utils"
 
 	"github.com/gin-gonic/gin"
@@ -22,6 +23,7 @@ type SearchArticle struct {
 	Tags    []int  `json:"tags"`    // 文章标签
 	Context string `json:"context"` // 模糊查询内容
 	Type    int    `json:"type"`    // 分类id
+	UserId  int    `json:"userId"`  // 用户id
 	data.ListSortStrategy
 }
 
@@ -44,6 +46,7 @@ func articlePageBySearch(ctx *gin.Context) {
 		Title:   searchArticle.Context,
 		Content: searchArticle.Context,
 		Type:    searchArticle.Type,
+		UserId:  searchArticle.UserId,
 	}, ginutils.GetPage(ctx), ginutils.GetOderBy(ctx))).Json(ctx)
 }
 

@@ -23,3 +23,11 @@ export function apiAuthAccount(authForm) {
   }
   return axios.post(`/community/login`, authForm)
 }
+
+/**
+ * 用户数据统计
+ * @returns {"code":200,"data":{"articleCount":2,"likeCount":1},"msg":"","ok":true}
+ */
+export function apiGetUserStatistics() {
+  return axios.get(`/community/user/statistics`)
+}

@@ -2,10 +2,11 @@ package services
 
 import (
 	"errors"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 	"strconv"
 	"strings"
+
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/data"
 	"xhyovo.cn/community/pkg/mysql"
@@ -68,6 +69,9 @@ func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, p
 		}
 		if len(article.Content) > 0 {
 			query.Where("articles.`desc` like ?", "%"+article.Content+"%")
+		}
+		if article.UserId > 0 {
+			query.Where("articles.user_id = ?", article.UserId)
 		}
 	}
 	if len(tagId) > 0 {

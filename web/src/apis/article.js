@@ -2,12 +2,12 @@ import axios from "axios";
 
 /**
  * 获取文章列表(多条件查询)
- * @param {{tags?:number[],context?:string,orderBy?:string,descOrder?:boolean}} data - 条件
+ * @param {{tags?:number[],context?:string,orderBy?:string,descOrder?:boolean,userId?:number}} data - 条件
  * @param {number} page - 当前页
  * @param {number} limit - 条数
  */
 export function apiArticleList(data, page, limit) {
-    return axios({method: "POST", url: "/community/articles", params: {page, limit}, data: data})
+    return axios({ method: "POST", url: "/community/articles", params: { page, limit }, data: data })
 }
 
 /**
@@ -16,5 +16,17 @@ export function apiArticleList(data, page, limit) {
  * @returns article object
  */
 export function apiArticleView(id) {
-    return axios.get("/community/articles/"+id)
+    return axios.get("/community/articles/" + id)
+}
+
+/**
+ * 文章添加或更新接口
+ * @param {object} data 文章数据
+ * @param {boolean} add 添加文章？
+ */
+export function apiArticleUpdate(data, add = false) {
+    if (add) {
+        data.id = 0
+    }
+    return axios.post(`/community/articles/update`, data)
 }

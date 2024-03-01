@@ -1,3 +1,4 @@
+import { apiUserTagArticleCount } from '@/apis/tags'
 import { apiAuthAccount, getUserInfo, getUserMenu } from '@/apis/user'
 import router from '@/router'
 import * as authUtls from '@/utils/auth'
@@ -10,16 +11,32 @@ export const useUserStore = defineStore('UserStore', {
   state: () => ({
     token: "",
     userInfo: {},
+    userTags: [],
     menu: []
   }),
 
   // actions
   actions: {
-    async refreshInfo() {
+    isLogin() {
       if (!authUtls.isLogin()) {
         router.push("/auth")
-        return
+        return false
       }
+      return true
+    },
+    async refreshTags() {
+      if (!this.isLogin()) return
+      apiUserTagArticleCount().then(({ data, ok }) => {
+        if (!ok) {
+          this.userTags = []
+          return
+        }
+        this.userTags = data
+      })
+    },
+    async refreshInfo() {
+      if (!this.isLogin()) return
+      this.refreshTags()
       const { data, ok } = await getUserInfo()
       if (!ok) {
         this.logOut()
@@ -58,7 +75,7 @@ export const useUserStore = defineStore('UserStore', {
     },
     async getMenu() {
       const { data, ok } = await getUserMenu()
-      if(ok) this.menu = data
+      if (ok) this.menu = data
       else this.menu = []
     }
   }

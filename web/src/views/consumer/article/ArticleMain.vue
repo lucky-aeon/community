@@ -43,7 +43,9 @@
             </ACol>
         </ARow>
     </div>
-    <router-view :articleData="currentArticleData"></router-view>
+
+        <router-view :articleData="currentArticleData">
+        </router-view>
     <a-modal hideCancel v-model:visible="searchData.tagModal.show" @ok="() => { searchData.tagModal.show = false }">
         <template #title>
             搜索标签

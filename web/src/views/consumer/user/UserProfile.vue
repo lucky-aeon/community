@@ -1,21 +1,4 @@
 <template>
-  <a-card direction="vertical" size="large">
-    <a-space :size="54">
-      <a-avatar
-          :trigger-icon-style="{ color: '#3491FA' }"
-          :auto-fix-font-size="false"
-          @click="toast"
-          :style="{ backgroundColor: '#168CFF' }"
-      >
-        A
-        <template #trigger-icon>
-          <IconCamera />
-        </template>
-      </a-avatar>
-      <a-descriptions :data="userInfo" align="right" />
-    </a-space>
-  </a-card>
-
   <a-tabs default-active-key="1">
     <a-tab-pane key="1" title="Tab 1">
       <a-space direction="horizontal" size="large" :style="{width: '600px'}" >
@@ -72,14 +55,11 @@
 </template>
 
 <script setup>
-import {getUserInfo, saveUserInfo} from '@/apis/user'
+import { getUserInfo, saveUserInfo } from '@/apis/user';
 import { reactive, ref } from 'vue';
-import { IconCamera, IconEdit, IconUser } from '@arco-design/web-vue/es/icon';
 
 
-const toast = function () {
-  this.$message.info('Uploading...');
-}
+
 const userInfo = ref([])
 const form = ref({
   name: ""
@@ -99,15 +79,15 @@ getUserInfo().then(({data})=>{
   }];
   form.value = data
 })
-const editUserInfo = ({values, errors}) => {
-  saveUserInfo("info",values).then(({data})=>{
+const editUserInfo = ({values}) => {
+  saveUserInfo("info",values).then(()=>{
 
   })
 }
-const editPswd = ({values, errors}) => {
+const editPswd = ({values}) => {
   console.log(values)
 
-  saveUserInfo("pass",values).then(({data})=>{
+  saveUserInfo("pass",values).then(()=>{
   })
 }
 </script>

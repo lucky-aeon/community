@@ -100,7 +100,7 @@ func (a *CommentDao) GetRootCommentsCountByArticleID(rootId int) int64 {
 // 获取文章评论总数
 func (a *CommentDao) GetCommentsCountByArticleID(businessId int) int64 {
 	var count int64
-	model.Comment().Where("business_id", businessId).Count(&count)
+	model.Comment().Where(&model.Comments{BusinessId: businessId}).Count(&count)
 	return count
 }
 

@@ -2,6 +2,8 @@ package services
 
 import (
 	"errors"
+	mapset "github.com/deckarep/golang-set/v2"
+	"strings"
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/server/model"
 )
@@ -29,13 +31,14 @@ func (*ArticleTagService) QueryList(page, limit int, title string) (result map[s
 
 func (*ArticleTagService) CreateTag(tag model.ArticleTags) (result *model.ArticleTags, err error) {
 	db := model.ArticleTag()
-	// 暂时先count代替查重
-	var count int64
-	db.Where("tag_name = ?", tag.TagName, tag.UserId).Count(&count)
-	if count == 0 {
-		db.Create(&tag)
+	// 暂时先count代替查重,后面用索引去重
+	tagName := tag.TagName
+	tagName = strings.ToLower(tagName)
+	db.Where("tag_name = ?", tagName).First(&tag)
+	if tag.Id != 0 {
+		return &tag, nil
 	}
-
+	model.ArticleTag().Save(&tag)
 	model.ArticleTagUserRelation().Create(&model.ArticleTagUserRelations{UserId: tag.UserId, TagId: tag.Id})
 	return &tag, nil
 }
@@ -64,6 +67,17 @@ func (a *ArticleTagService) GetTagArticleCount(userId int) []model.TagArticleCou
 	if len(tagAcount) == 0 {
 		return []model.TagArticleCount{}
 	}
+	setTagIds := mapset.NewSet[int]()
+	for i := range tagAcount {
+		setTagIds.Add(tagAcount[i].TagId)
+	}
+	for i := range tagsIds {
+		id := tagsIds[i]
+		if !setTagIds.Contains(id) {
+			tagAcount = append(tagAcount, model.TagArticleCount{TagId: id, ArticleCount: 0})
+		}
+	}
+
 	var articleTags []model.ArticleTags
 	model.ArticleTag().Where("id in ?", tagsIds).Select("id", "tag_name").Find(&articleTags)
 

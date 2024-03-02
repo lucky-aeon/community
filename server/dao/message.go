@@ -46,15 +46,16 @@ func (*MessageDao) DeleteMessageLogs(id []int) {
 }
 
 // 保存消息
-func (*MessageDao) SaveMessage(from, types int, to []int, content string) {
+func (*MessageDao) SaveMessage(from, types, businessId int, to []int, content string) {
 	var msgs []*model.MessageStates
 	for i := range to {
 		state := &model.MessageStates{
-			From:    from,
-			To:      to[i],
-			Content: content,
-			Type:    types,
-			State:   1,
+			From:      from,
+			To:        to[i],
+			Content:   content,
+			Type:      types,
+			State:     1,
+			ArticleId: businessId,
 		}
 		msgs = append(msgs, state)
 	}
@@ -81,6 +82,7 @@ func (d *MessageDao) ListMessage(page, limit, userId, types, state int) []*model
 
 func (d *MessageDao) CountMessage(userId int, types int) int64 {
 	var count int64
-	model.MessageState().Where("`to` = ? and type = ?", userId, types).Count(&count)
+
+	model.MessageState().Where(model.MessageStates{To: userId, Type: types}).Count(&count)
 	return count
 }

@@ -86,7 +86,7 @@ func listCommentsByRootId(ctx *gin.Context) {
 
 }
 
-// 查询文章下的所有评论(管理端)
+// 查询用户文章下的所有评论，文章id为空则查询所有(管理端)
 func listAllCommentsByArticleId(ctx *gin.Context) {
 	articleId, err := strconv.Atoi(ctx.Param("articleId"))
 	p, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))

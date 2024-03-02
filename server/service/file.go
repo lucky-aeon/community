@@ -32,9 +32,9 @@ func (s *FileService) PageFiles(p, limit, userId int) (files []model.Files, coun
 	for i := range files {
 		uIds = append(uIds, files[i].UserId)
 	}
-	nameMap := uS.ListByIdsSelectIdNameMap(uIds)
+	nameMap := uS.ListByIdsToMap(uIds)
 	for i := range files {
-		files[i].UserName = nameMap[files[i].UserId]
+		files[i].UserName = nameMap[files[i].UserId].Name
 		files[i].SizeName = humanize.Bytes(uint64(files[i].Size))
 		files[i].FileKey = utils.BuildFileUrl(files[i].FileKey)
 	}

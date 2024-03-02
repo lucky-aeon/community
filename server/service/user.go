@@ -42,13 +42,13 @@ func (*UserService) ListByIdsSelectEmail(id ...int) []string {
 	return userDao.ListByIds(id...)
 }
 
-func (s *UserService) ListByIdsSelectIdNameMap(ids []int) map[int]string {
+func (s *UserService) ListByIdsToMap(ids []int) map[int]model.Users {
 
-	m := make(map[int]string)
+	m := make(map[int]model.Users)
 	users := userDao.ListByIdsSelectIdName(ids)
 	for i := range users {
 		user := users[i]
-		m[user.ID] = user.Name
+		m[user.ID] = user
 	}
 	return m
 }

@@ -27,7 +27,7 @@
       >
       </a-col>
     </a-row>
-    <a-table row-key="name" :columns="columns" :data="commentData" :row-selection="rowSelection"
+    <a-table row-key="name" :columns="columns" :data="memberData" :row-selection="rowSelection"
              v-model:selectedKeys="selectedKeys" :pagination="pagination" >
       <template #optional="{ record, rowIndex }">
         <a-space>
@@ -75,7 +75,7 @@ const handleCancel = () => {
 }
 
 function updateComment(id){
-  const comment = commentData.value[id]
+  const comment = memberData.value[id]
   visible.value = true;
   form.id = comment.id
   form.name = comment.name
@@ -83,9 +83,9 @@ function updateComment(id){
 }
 
 function delComment(id) {
-  deleteMember(commentData.value[id].id).then(({ok})=>{
+  deleteMember(memberData.value[id].id).then(({ok})=>{
     if (ok) {
-      commentData.value.splice(id,1)
+      memberData.value.splice(id,1)
     }
   })
 }
@@ -122,10 +122,10 @@ const columns = [
   }
 ]
 
-const commentData = ref([])
+const memberData = ref([])
 const getCommentList = ()=>{
   listAllMember().then(({data})=>{
-    commentData.value = data.data
+    memberData.value = data.data
   })
 }
 getCommentList()

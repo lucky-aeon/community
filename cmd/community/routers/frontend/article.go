@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+	"xhyovo.cn/community/pkg/constant"
 
 	"xhyovo.cn/community/pkg/utils"
 
@@ -76,11 +77,13 @@ func articleSave(c *gin.Context) {
 		return
 	}
 	o.UserId = middleware.GetUserId(c)
-	if err := articleService.SaveArticle(o); err != nil {
+	id, err := articleService.SaveArticle(o)
+	if err != nil {
 		result.Err(utils.GetValidateErr(o, err)).Json(c)
 		return
 	}
-	result.OkWithMsg(nil, "发布成功").Json(c)
+
+	result.OkWithMsg(id, constant.GetArticleMsg(o.State)).Json(c)
 }
 
 func articleLike(c *gin.Context) {

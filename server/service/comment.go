@@ -65,7 +65,7 @@ func (*CommentsService) GetCommentsByArticleID(page, limit, businessId int) ([]*
 		userIds = append(userIds, comment.FromUserId)
 	}
 
-	setCommentUserNameAndArticleTitle(comments)
+	setCommentUserInfoAndArticleTitle(comments)
 
 	ChildCommentNumberMap := commentDao.GetCommentsCountByRootId(parentIds)
 	for i := range parentComments {
@@ -76,7 +76,8 @@ func (*CommentsService) GetCommentsByArticleID(page, limit, businessId int) ([]*
 	return parentComments, count
 }
 
-func setCommentUserNameAndArticleTitle(comments []*model.Comments) {
+// 设置用户的昵称和头像
+func setCommentUserInfoAndArticleTitle(comments []*model.Comments) {
 	userIds := mapset.NewSetWithSize[int](len(comments))
 	articleIds := mapset.NewSetWithSize[int](len(comments))
 	for i := range comments {
@@ -90,7 +91,7 @@ func setCommentUserNameAndArticleTitle(comments []*model.Comments) {
 		return
 	}
 	var u UserService
-	userNameMap := u.ListByIdsSelectIdNameMap(userIds.ToSlice())
+	userNameMap := u.ListByIdsToMap(userIds.ToSlice())
 
 	var a ArticleService
 	articleTitleMap := a.ListByIdsSelectIdTitleMap(articleIds.ToSlice())
@@ -98,9 +99,10 @@ func setCommentUserNameAndArticleTitle(comments []*model.Comments) {
 	for i := range comments {
 		comment := comments[i]
 		comment.ArticleTitle = articleTitleMap[comment.BusinessId]
-		comment.FromUserName = userNameMap[comment.FromUserId]
+		comment.FromUserName = userNameMap[comment.FromUserId].Name
+		comment.FromUserAvatar = userNameMap[comment.FromUserId].Avatar
 		if comment.ParentId != 0 {
-			comment.ToUserName = userNameMap[comment.ToUserId]
+			comment.ToUserName = userNameMap[comment.ToUserId].Name
 		}
 	}
 }
@@ -111,7 +113,7 @@ func (*CommentsService) GetAllCommentsByArticleID(page, limit, userId, businessI
 	if count == 0 {
 		return comments, count
 	}
-	setCommentUserNameAndArticleTitle(comments)
+	setCommentUserInfoAndArticleTitle(comments)
 	return comments, count
 }
 
@@ -146,6 +148,6 @@ func (a *CommentsService) PageComment(p, limit int) (comments []*model.Comments,
 	model.Comment().Limit(limit).Offset((p - 1) * limit).Find(&comments)
 
 	model.Comment().Count(&count)
-	setCommentUserNameAndArticleTitle(comments)
+	setCommentUserInfoAndArticleTitle(comments)
 	return comments, count
 }

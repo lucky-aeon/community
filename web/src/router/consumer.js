@@ -1,10 +1,9 @@
 // 用户前台路由
 
-import File from "@/views/admin/file/File.vue";
-import Member from "@/views/admin/member/Member.vue";
 import ArticleListVue from '@/views/consumer/article/ArticleList.vue';
 import ArticleMainVue from '@/views/consumer/article/ArticleMain.vue';
-import Message from "@/views/consumer/message/Message.vue";
+import Member from "@/views/admin/member/Member.vue";
+import File from "@/views/admin/file/File.vue";
 
 
 const ConsumerRouters = [
@@ -46,13 +45,12 @@ const ConsumerRouters = [
             {
                 path: "comment",
                 component: () => import('@/views/consumer/user/CommentManager.vue'),
-
+            },
+            {
+                path: "message",
+                component: ()=> import('@/views/consumer/user/UserMessage.vue')
             }
         ]
-    },
-    {
-        path: "/message",
-        component: Message
     },
     {
         path: "/member",

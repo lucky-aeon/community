@@ -12,6 +12,7 @@ type MessageLogs struct {
 	From      int       `json:"from"`
 	To        int       `json:"to"`
 	Type      int       `json:"type"`
+	ArticleId int       `json:"articleId"`
 	CreatedAt time.Time `json:"createdAt"`
 	DeletedAt time.Time `json:"deletedAt"`
 }

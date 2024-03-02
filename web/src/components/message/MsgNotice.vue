@@ -10,7 +10,7 @@
       <a-list-item class="list-demo-item" :style="{padding: '5px'}" action-layout="vertical"
                    @click="router.push(`/article/view/${item.articleId}`)" >
         <template #actions>
-          <span class="arco-typography time-text">${item.createdAt}</span>
+          <span class="arco-typography time-text">{{item.createdAt}}</span>
         </template>
         <a-list-item-meta
             :description="item.content"
@@ -28,8 +28,14 @@ import {reactive, ref, watch} from 'vue'
 import { apiListMsg } from '@/apis/message.js'
 import router from "@/router/index.js";
 const props = defineProps({
-  MsgType: ()=> 1,
-  MsgState: () => 1
+  msgType: {
+    type: Number,
+    default: 1
+  },
+  msgState: {
+    type: Number,
+    default: 1
+  }
 })
 const dataSource = ref([])
 const  count = ref()
@@ -39,15 +45,14 @@ const paginationProps = reactive({
   total: count
 })
 const getMsg = ()=>{
-  apiListMsg(props.MsgType,props.MsgState).then(({data})=>{
+  apiListMsg(props.msgType,props.msgState).then(({data})=>{
     dataSource.value = data.data
     count.value = data.count
   })
 }
-watch(()=>props.MsgType, (n)=>{
-  console.log("????", n)
+watch(()=>props, ()=>{
   getMsg()
-})
+}, {deep: true, immediate: true})
 </script>
 
 <style scoped>

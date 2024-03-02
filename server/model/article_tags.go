@@ -1,21 +1,20 @@
 package model
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 	"xhyovo.cn/community/pkg/mysql"
+	"xhyovo.cn/community/pkg/time"
 )
 
 // 文章标签
 type ArticleTags struct {
-	Id          int        `json:"id"`
-	TagName     string     `json:"tag" binding:"required" msg:"标签不能未空"`
-	Description string     `json:"desc"`
-	UserId      int        `json:"user_id"`
-	CreatedAt   time.Time  `json:"created_at"`
-	UpdatedAt   time.Time  `json:"updated_at"`
-	DeletedAt   *time.Time `gorm:"index"`
+	Id          int             `json:"id"`
+	TagName     string          `json:"tag" binding:"required" msg:"标签不能未空"`
+	Description string          `json:"desc"`
+	UserId      int             `json:"user_id"`
+	CreatedAt   time.LocalTime  `json:"created_at"`
+	UpdatedAt   time.LocalTime  `json:"updated_at"`
+	DeletedAt   *time.LocalTime `gorm:"index"`
 }
 type ArticleTagSimple struct {
 	TagId          int    `json:"id" gorm:"column:id"`

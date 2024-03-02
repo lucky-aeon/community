@@ -106,6 +106,6 @@ func (a *CommentDao) GetCommentsCountByArticleID(businessId int) int64 {
 
 func (a *CommentDao) ExistById(id int, userId int, businessId int, rootId int) bool {
 	var count int64
-	model.Comment().Where("id = ? and from_user_id = ? and business_id = ? and root_id", id, userId, businessId, rootId).Count(&count)
+	model.Comment().Where("id = ? and from_user_id = ? and business_id = ? and root_id = ?", id, userId, businessId, rootId).Count(&count)
 	return count == 1
 }

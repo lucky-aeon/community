@@ -2,9 +2,6 @@ package services
 
 import (
 	"errors"
-	"strconv"
-	"strings"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"xhyovo.cn/community/pkg/constant"
@@ -174,7 +171,7 @@ func (a *ArticleService) ArticlesLikeCount(ids []int) (count int64) {
 	return
 }
 
-func (a *ArticleService) SaveArticle(article model.Articles) error {
+func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
 
 	id := article.ID
 	typeO := article.Type
@@ -182,22 +179,22 @@ func (a *ArticleService) SaveArticle(article model.Articles) error {
 	var typeS TypeService
 	// 分类是否存在
 	if !typeS.Exist(typeO) {
-		return errors.New("分类不存在")
+		return 0, errors.New("分类不存在")
 	}
 	// 状态是否存在
 	oldState := article.State
 	if oldState < 0 || oldState > 5 {
-		return errors.New("状态不存在")
+		return 0, errors.New("状态不存在")
 	}
 
 	// 根据分类选择状态：QA分类没有发布,普通分类只有草稿和发布
 	if typeO == 1 && oldState == constant.Published {
-		return errors.New("QA分类状态不能选择已发布")
+		return 0, errors.New("QA分类状态不能选择已发布")
 	} else {
 		// 普通分类校验状态
 		if oldState == constant.Pending || oldState == constant.Resolved || oldState == constant.PrivateQuestion {
-			msg := constant.GetArticleMsg(oldState)
-			return errors.New("普通分类不支持该状态:" + msg)
+			msg := constant.GetArticleName(oldState)
+			return 0, errors.New("普通分类不支持该状态:" + msg)
 		}
 		flag = true
 	}
@@ -209,11 +206,11 @@ func (a *ArticleService) SaveArticle(article model.Articles) error {
 		// 修改 一级分类不能修改,如果parent不同则修改了一级分类
 		newTypeParentId := typeS.GetById(typeO).ParentId
 		if oldTypeParentId != newTypeParentId {
-			return errors.New("修改的分类只能属于同一级分类下")
+			return 0, errors.New("修改的分类只能属于同一级分类下")
 		}
 		// 老文章状态如果为非草稿状态，则新文章不可修改为草稿状态
 		if oldState != constant.Draft && article.State == constant.Draft {
-			return errors.New("旧文章状态不可从非草稿转为草稿")
+			return 0, errors.New("旧文章状态不可从非草稿转为草稿")
 		}
 	}
 	article.Like = 0
@@ -223,17 +220,15 @@ func (a *ArticleService) SaveArticle(article model.Articles) error {
 	db := model.ArticleTagRelation
 	db().Where("article_id = ?", id).Delete(nil)
 	var tags []model.ArticleTagRelations
-	tagList := strings.Split(article.Tags, ",")
-	for i := range tagList {
-		atoi, _ := strconv.Atoi(tagList[i])
-		tags = append(tags, model.ArticleTagRelations{ArticleId: id, TagId: atoi})
+	for i := range article.Tags {
+		tags = append(tags, model.ArticleTagRelations{ArticleId: id, TagId: article.Tags[i]})
 	}
 	db().Create(&tags)
 	if flag {
 		var subscriptionService SubscriptionService
 		subscriptionService.ConstantAtSend(event.ArticleAt, id, article.UserId, article.Content)
 	}
-	return nil
+	return id, nil
 }
 
 func (a *ArticleService) Delete(articleId, userId int) (err error) {

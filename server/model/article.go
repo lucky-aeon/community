@@ -18,7 +18,7 @@ type Articles struct {
 	State     int        `json:"state"` // 状态:草稿/发布/待解决/已解决/私密提问
 	Like      int        `json:"like"`
 	Type      int        `json:"type"`
-	Tags      string     `json:"tags" gorm:"-"`
+	Tags      []int      `json:"tags" gorm:"-"`
 	Users     `gorm:"-" json:"user"`
 }
 

@@ -7,12 +7,10 @@
       v-if="dataSource.length"
   >
     <template #item="{ item }">
-      <a-list-item class="list-demo-item" :style="{padding: '5px'}" action-layout="vertical">
+      <a-list-item class="list-demo-item" :style="{padding: '5px'}" action-layout="vertical"
+                   @click="router.push(`/article/view/${item.articleId}`)" >
         <template #actions>
-          <a-typography-text type="secondary">
-            2024-01-01
-          </a-typography-text>
-
+          <span class="arco-typography time-text">${item.createdAt}</span>
         </template>
         <a-list-item-meta
             :description="item.content"
@@ -26,19 +24,29 @@
 </template>
 
 <script setup>
-import {reactive, ref} from 'vue'
-// import { IconPlus, IconCheckCircle } from '@arco-design/web-vue/es/icon';
+import {reactive, ref, watch} from 'vue'
 import { apiListMsg } from '@/apis/message.js'
-
+import router from "@/router/index.js";
+const props = defineProps({
+  MsgType: ()=> 1,
+  MsgState: () => 1
+})
 const dataSource = ref([])
 const  count = ref()
-apiListMsg(1,0).then(({data})=>{
-  dataSource.value = data.data
-  count.value = data.count
-})
+
 const paginationProps = reactive({
   defaultPageSize: 15,
   total: count
+})
+const getMsg = ()=>{
+  apiListMsg(props.MsgType,props.MsgState).then(({data})=>{
+    dataSource.value = data.data
+    count.value = data.count
+  })
+}
+watch(()=>props.MsgType, (n)=>{
+  console.log("????", n)
+  getMsg()
 })
 </script>
 
@@ -51,8 +59,7 @@ const paginationProps = reactive({
 }
 
 .list-demo-action-layout .list-demo-item {
-  padding: 0px;
-  line-height: normal;
+  padding: 20px 0;
   border-bottom: 1px solid var(--color-fill-3);
 }
 
@@ -62,5 +69,10 @@ const paginationProps = reactive({
 
 .list-demo-action-layout .arco-list-item-action .arco-icon {
   margin: 0 4px;
+}
+.list-demo-item:hover {
+  transition: background-color 0.3s ease;
+  background-color: #f4f4f491;
+  cursor: pointer;
 }
 </style>

@@ -64,7 +64,14 @@ func deleteArticleTags(c *gin.Context) {
 
 // 获取标签引用的文章
 func getTagArticleCount(c *gin.Context) {
-	userId := middleware.GetUserId(c)
+	param := c.Query("userId")
+	var userId int
+	if param == "" {
+		userId = middleware.GetUserId(c)
+	} else {
+		userId, _ = strconv.Atoi(param)
+	}
+
 	tagArticleCount := articleTagService.GetTagArticleCount(userId)
 	result.Ok(tagArticleCount, "").Json(c)
 }

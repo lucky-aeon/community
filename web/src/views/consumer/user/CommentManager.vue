@@ -1,54 +1,80 @@
 <template>
-  <a-space direction="vertical" size="large" fill>
-    <div>
-      <span>OnlyCurrent: </span>
-      <a-switch v-model="rowSelection.onlyCurrent" />
+  <a-list
+      class="list-demo-action-layout"
+      :bordered="false"
+      :data="commentData"
+      :pagination-props="page"
+  >
+    <template #item="{ item ,index}">
+      <a-list-item class="list-demo-item" action-layout="vertical">
+        <template #actions>
+          <span>{{item.createdAt}}</span>
+          <a-button @click="reply()" type="text">
+            <icon-message/>回复
+          </a-button>
+          <a-button @click="del(index)" type="text">
+            <icon-delete />
+          </a-button>
+        </template>
+
+        <a-list-item-meta
+            :title="`${item.fromUserName}  ${item.toUserName==''? '' : '回复@'+item.toUserName} `"
+            :description="item.content"
+        >
+          <template #avatar>
+            <a-avatar shape="square">
+              <img alt="avatar" :src="item.fromUserAvatar" />
+            </a-avatar>
+          </template>
+        </a-list-item-meta>
+
+      </a-list-item>
+    </template>
+  </a-list>
+  <a-modal title="评论回复" v-model:visible="replyEdit.show" :modal-style="{ minWidth: '800px', maxHeight: '90%' }" :body-style="{ padding: '0 0 0', height: '100%'}"
+           ok-text="回复" mask-closable="false" @ok="replyRq">
+    <div style="height: 350px">
+      <markdown-edit v-model="replyEdit.data" />
     </div>
-    <a-table row-key="name" :columns="columns" :data="commentData" :row-selection="rowSelection"
-             v-model:selectedKeys="selectedKeys" :pagination="pagination" />
-  </a-space>
+  </a-modal>
 </template>
 
 <script setup>
-import { listAllCommentsByArticleId } from '@/apis/comment.js';
+import { IconMessage,IconDelete } from '@arco-design/web-vue/es/icon';
+import { listAllCommentsByArticleId,deleteComment } from '@/apis/comment.js';
 import { reactive, ref } from 'vue';
+import MarkdownEdit from "@/components/MarkdownEdit.vue";
 
-const selectedKeys = ref(['Jane Doe', 'Alisa Ross']);
+function replyRq(){
 
-const rowSelection = reactive({
-  type: 'checkbox',
-  showCheckedAll: true,
-  onlyCurrent: false,
-});
-const pagination = {pageSize: 5}
+}
+const replyEdit = reactive({
+  show: false,
+  data: ""
+})
+function reply(){
+  console.log(123)
+  replyEdit.show = true
+}
 
-const columns = [
-  {
-    title:"id",
-    dataIndex: "id"
-  },
-  {
-    title: 'fromUserName',
-    dataIndex: 'fromUserName',
-  },
-  {
-    title: 'toUserName',
-    dataIndex: 'toUserName',
-  },
-  {
-    title: 'content',
-    dataIndex: 'content',
-  },
-  {
-    title: 'articleTitle',
-    dataIndex: 'articleTitle',
-  },
-]
-// 你data是什么数据？对的上的数据 哈哈哈哈哈哈哈？咋这么多data，哪个data ？？？？ 行不行，
+function del(index){
+  deleteComment(commentData.value[index].id).then(({ok})=>{
+    if (ok) {
+      commentData.value.splice(index,1)
+    }
+  })
+
+
+}
+
 const commentData = ref([])
+const count = ref([])
 listAllCommentsByArticleId(0).then(({data})=>{
-  // 你是会写变量名 ？
-  // data.value = data.data 都是dat你要给谁？ 我一开始写的是body我不管 ？？？？？我tm
   commentData.value = data.data
+  count.value = data.count
+})
+const page = reactive({
+  defaultPageSize: 10,
+  total: count.value
 })
 </script>

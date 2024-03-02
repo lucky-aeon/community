@@ -23,6 +23,7 @@ type Comments struct {
 	FromUserName       string      `json:"fromUserName" gorm:"-"`
 	ToUserName         string      `json:"toUserName" gorm:"-"`
 	ArticleTitle       string      `json:"articleTitle" gorm:"-"`
+	FromUserAvatar     string      `json:"fromUserAvatar"`
 }
 
 type ChildCommentNumber struct {

@@ -68,7 +68,7 @@ func (d *UserDao) ListByIds(id ...int) []string {
 
 func (d *UserDao) ListByIdsSelectIdName(ids []int) []model.Users {
 	var users []model.Users
-	model.User().Where("id in ?", ids).Select("id,name").Find(&users)
+	model.User().Where("id in ?", ids).Select("id,name,account,`desc`,avatar").Find(&users)
 	return users
 }
 

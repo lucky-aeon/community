@@ -99,15 +99,8 @@
               <router-link to="/user/comment">
                 <a-menu-item>评论</a-menu-item>
               </router-link>
-            </a-sub-menu>
-            <a-sub-menu key="2">
-              <template #icon><icon-apps></icon-apps></template>
-              <template #title>消息</template>
-              <router-link to="/notice">
-                <a-menu-item>通知</a-menu-item>
-              </router-link>
-              <router-link to="/at">
-                <a-menu-item>@我</a-menu-item>
+              <router-link to="/user/message">
+                <a-menu-item>消息</a-menu-item>
               </router-link>
             </a-sub-menu>
             <a-sub-menu key="3">

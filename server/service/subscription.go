@@ -30,7 +30,7 @@ func (*SubscriptionService) ListSubscription(userId, eventId, page, limit int) [
 	articleMap := articleService.ListByIdsSelectIdTitleMap(articleIds)
 
 	var userService UserService
-	nameMap := userService.ListByIdsSelectIdNameMap(userIds)
+	nameMap := userService.ListByIdsToMap(userIds)
 
 	for i := range subscriptions {
 		v := &subscriptions[i]
@@ -38,7 +38,7 @@ func (*SubscriptionService) ListSubscription(userId, eventId, page, limit int) [
 		if v.EventId == event.CommentUpdateEvent {
 			v.BusinessName = articleMap[businessId]
 		} else if v.EventId == event.UserFollowingEvent {
-			v.BusinessName = nameMap[businessId]
+			v.BusinessName = nameMap[businessId].Name
 		}
 		v.EventName = event.GetMsg(v.EventId)
 	}

@@ -2,11 +2,7 @@
 
 import ArticleListVue from '@/views/consumer/article/ArticleList.vue';
 import ArticleMainVue from '@/views/consumer/article/ArticleMain.vue';
-import Comments from "@/views/consumer/comment/Comment.vue";
-import Notice from "@/views/consumer/message/Notice.vue"
-import At from "@/views/consumer/message/At.vue"
 import Member from "@/views/admin/member/Member.vue";
-import UserInfo from "@/views/consumer/user/UserInfo.vue";
 import File from "@/views/admin/file/File.vue";
 
 
@@ -49,23 +45,12 @@ const ConsumerRouters = [
             {
                 path: "comment",
                 component: () => import('@/views/consumer/user/CommentManager.vue'),
-
-            }
-        ]
-    },
-    {
-        path: "/message",
-        children: [
-            {
-                path: "/notice",
-                component: Notice
             },
             {
-                path: "/at",
-               component: At
+                path: "message",
+                component: ()=> import('@/views/consumer/user/UserMessage.vue')
             }
         ]
-
     },
     {
         path: "/member",

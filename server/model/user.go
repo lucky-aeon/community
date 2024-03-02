@@ -1,19 +1,18 @@
 package model
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 	"xhyovo.cn/community/pkg/mysql"
+	"xhyovo.cn/community/pkg/time"
 )
 
 type Users struct {
-	ID         int        `json:"id"`
-	CreatedAt  time.Time  `json:"createdAt,omitempty"`
-	UpdatedAt  time.Time  `json:"updatedAt,omitempty"`
-	DeletedAt  *time.Time `json:"deletedAt,omitempty" gorm:"index"`
-	Name       string     `json:"name"`
-	Account    string     `json:"account,omitempty"`
+	ID         int             `json:"id"`
+	CreatedAt  time.LocalTime  `json:"createdAt,omitempty"`
+	UpdatedAt  time.LocalTime  `json:"updatedAt,omitempty"`
+	DeletedAt  *time.LocalTime `json:"deletedAt,omitempty" gorm:"index"`
+	Name       string          `json:"name"`
+	Account    string          `json:"account,omitempty"`
 	Password   string
 	InviteCode int    `json:"inviteCode,omitempty"`
 	Desc       string `json:"desc"`

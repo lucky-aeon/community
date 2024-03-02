@@ -2,7 +2,8 @@ package dao
 
 import (
 	"gorm.io/gorm"
-	"time"
+
+	"xhyovo.cn/community/pkg/time"
 
 	"xhyovo.cn/community/server/model"
 )

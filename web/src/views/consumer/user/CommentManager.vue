@@ -32,7 +32,7 @@
     </template>
   </a-list>
   <a-modal title="评论回复" v-model:visible="replyEdit.show" :modal-style="{ minWidth: '800px', maxHeight: '90%' }" :body-style="{ padding: '0 0 0', height: '100%'}"
-           ok-text="回复" mask-closable="false" @ok="replyRq">
+           ok-text="回复" :mask-closable="false" @ok="replyRq">
     <div style="height: 350px">
       <markdown-edit v-model="replyEdit.data" />
     </div>
@@ -81,7 +81,7 @@ function del(index){
 }
 
 const commentData = ref([])
-const count = ref([])
+const count = ref(0)
 listAllCommentsByArticleId(0).then(({data})=>{
   commentData.value = data.data
   count.value = data.count

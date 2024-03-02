@@ -86,7 +86,7 @@ func (s *SubscriptionService) Do(eventId, businessId, triggerId int, content str
 			}
 			messageTemplate := messageDao.GetMessageTemplate(eventId)
 			msg := m.GetMsg(messageTemplate, eventId, businessId)
-			m.SendMessages(sendId, constant.NOTICE, userIds, content) // todo确定内容
+			m.SendMessages(sendId, constant.NOTICE, businessId, userIds, content) // todo确定内容
 			email.Send(emails, msg, "技术鸭社区")
 		}
 
@@ -115,7 +115,7 @@ func (s *SubscriptionService) ConstantAtSend(eventId, businessId, triggerId int,
 			}
 			messageTemplate := messageDao.GetMessageTemplate(eventId)
 			msg := m.GetMsg(messageTemplate, eventId, businessId)
-			m.SendMessages(triggerId, constant.MENTION, ids, content)
+			m.SendMessages(triggerId, constant.MENTION, businessId, ids, content)
 			email.Send(emails, msg, "技术鸭社区")
 		}
 	}(eventId, businessId, triggerId, content)

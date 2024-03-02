@@ -11,8 +11,7 @@
           <span><icon-pen-fill />2024-01-01</span>
         </template>
         <a-list-item-meta
-            :title="item.title"
-            :description="item.description"
+            :title="item.content"
         >
         </a-list-item-meta>
       </a-list-item>
@@ -20,36 +19,21 @@
   </a-list>
 </template>
 
-<script>
-import { reactive } from 'vue'
-import { IconPlus, IconCheckCircle } from '@arco-design/web-vue/es/icon';
-import { listMsg} from '@/apis/message.js'
+<script setup>
+import {reactive, ref} from 'vue'
+// import { IconPlus, IconCheckCircle } from '@arco-design/web-vue/es/icon';
+import { apiListMsg } from '@/apis/message.js'
 
-
-const names = ['Socrates', 'Balzac', 'Plato'];
-const dataSource = new Array(5).fill(null).map((_, index) => {
-  return {
-    index: index,
-    title: names[index % names.length],
-    description:
-        '123',
-  };
-});
-
-export default {
-  setup() {
-    return {
-      IconPlus,
-      IconCheckCircle,
-      dataSource,
-      listMsg,
-      paginationProps: reactive({
-        defaultPageSize: 15,
-        total: dataSource.length
-      })
-    }
-  },
-}
+const dataSource = ref([])
+const  count = ref()
+apiListMsg(2,0).then(({data})=>{
+  dataSource.value = data.data
+  count.value = data.count
+})
+const paginationProps = reactive({
+  defaultPageSize: 15,
+  total: count
+})
 </script>
 
 <style scoped>

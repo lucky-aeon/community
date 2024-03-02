@@ -52,13 +52,15 @@ func (*MessageService) ListMessageLogs(page, limit int) []*model.MessageLogs {
 	return messageDao.ListMessageLogs(page, limit)
 }
 
-func (*MessageService) AddMessageLogs(from int, to []int, content string) {
+func (*MessageService) AddMessageLogs(from, types, businessId int, to []int, content string) {
 	var messageLogs []*model.MessageLogs
 	for i := range to {
 		log := &model.MessageLogs{
-			From:    from,
-			To:      i,
-			Content: content,
+			From:      from,
+			To:        i,
+			Content:   content,
+			Type:      types,
+			ArticleId: businessId,
 		}
 		messageLogs = append(messageLogs, log)
 	}
@@ -69,18 +71,18 @@ func (*MessageService) DeleteMessageLogs(id []int) {
 	messageDao.DeleteMessageLogs(id)
 }
 
-func (m *MessageService) SendMessage(from, to, types int, content string) {
+func (m *MessageService) SendMessage(from, to, types, businessId int, content string) {
 
-	messageDao.SaveMessage(from, types, []int{to}, content)
+	messageDao.SaveMessage(from, types, businessId, []int{to}, content)
 	// 添加记录
-	m.AddMessageLogs(from, []int{to}, content)
+	m.AddMessageLogs(from, types, businessId, []int{to}, content)
 }
 
-func (m *MessageService) SendMessages(from, types int, to []int, content string) {
+func (m *MessageService) SendMessages(from, types, businessId int, to []int, content string) {
 
-	messageDao.SaveMessage(from, types, to, content)
+	messageDao.SaveMessage(from, types, businessId, to, content)
 	// 添加记录
-	m.AddMessageLogs(from, to, content)
+	m.AddMessageLogs(from, types, businessId, to, content)
 }
 
 func (*MessageService) ReadMessage(id []int, userId int) int64 {

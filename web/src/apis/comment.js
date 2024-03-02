@@ -7,3 +7,6 @@ export function listAllCommentsByArticleId(articleId) {
 export function deleteComment(id) {
   return axios.delete(`/community/comments/${id}`);
 }
+export function apiReply(data){
+  return axios.post("/community/comments/comment",data)
+}

@@ -9,7 +9,7 @@
       <a-list-item class="list-demo-item" action-layout="vertical">
         <template #actions>
           <span>{{item.createdAt}}</span>
-          <a-button @click="reply()" type="text">
+          <a-button @click="reply(item)" type="text">
             <icon-message/>回复
           </a-button>
           <a-button @click="del(index)" type="text">
@@ -41,19 +41,32 @@
 
 <script setup>
 import { IconMessage,IconDelete } from '@arco-design/web-vue/es/icon';
-import { listAllCommentsByArticleId,deleteComment } from '@/apis/comment.js';
+import { listAllCommentsByArticleId,deleteComment,apiReply } from '@/apis/comment.js';
 import { reactive, ref } from 'vue';
 import MarkdownEdit from "@/components/MarkdownEdit.vue";
 
-function replyRq(){
 
-}
 const replyEdit = reactive({
   show: false,
-  data: ""
+  data: "",
+  item:{}
 })
-function reply(){
-  console.log(123)
+
+
+function replyRq(){
+  const data1 = replyEdit.item
+  const replyComment = {
+    parentId:data1.parentId,
+    rootId:data1.rootId,
+    content:replyEdit.data,
+    articleId:data1.articleId,
+    toUserId:data1.FromUserId,
+  }
+  apiReply(replyComment)
+}
+
+function reply(item){
+  replyEdit.item = item
   replyEdit.show = true
 }
 

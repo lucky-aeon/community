@@ -34,3 +34,16 @@ export function apiTags(page = 1, limit = 10, title) {
 export function apiUserTagArticleCount() {
     return axios.get(`/community/tags/getTagArticleCount`)
 }
+
+/**
+ * 创建标签
+ * @param {string} tag 标签名
+ * @param {string} desc 标签描述
+ * @returns 响应体
+ */
+export function apiTagCreate(tag, desc) {
+    return axios.post(`/community/tags`, {
+        tag,
+        desc
+    })
+}

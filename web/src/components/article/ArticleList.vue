@@ -1,13 +1,27 @@
 <template>
     <a-list v-if="dataSource.length" class="list-demo-action-layout" :bordered="false">
-        <a-list-item v-for="item in dataSource" :key="item.id" @click="router.push(`/article/view/${item.id}`)"
-            class="list-demo-item" action-layout="vertical">
+        <a-list-item  v-for="(item, index) in dataSource" :key="item.id" @click="router.push(`/article/view/${item.id}`)"
+            class="list-demo-item" action-layout="horizontal">
             <template #actions>
-                <span><icon-user />{{ item.user.name || "未知" }}</span>
-                <span><icon-heart />83</span>
-                <span><icon-calendar />{{ item.updatedAt }}</span>
+                <a-button-group @click.stop="() => { }" v-if="userStore.userInfo.id == item.user.id">
+                    <a-button @click="editArticle = { id: item.id, show: true, index: index }">编辑</a-button>
+                    <a-dropdown :hide-on-select="false" :popup-max-height="false">
+                        <a-button :id="`editmoreButton${index}`">
+                            <template #icon>
+                                <icon-down />
+                            </template>
+                        </a-button>
+
+                        <template #content>
+                            <a-popconfirm popup-hover-stay @ok="deleteArticle(index)" content="你确定要删除该文章?">
+                                <a-doption>删除文章</a-doption>
+                            </a-popconfirm>
+                        </template>
+                    </a-dropdown>
+                </a-button-group>
             </template>
             <a-list-item-meta :title="item.title">
+
                 <template #description>
 
                     <a-tag size="small">
@@ -18,30 +32,42 @@
                         无标签
                     </a-tag>
                     <template v-else>
-                        <a-space><a-tag v-for="tagItem in item.tags.split(',')" :key="tagItem" color="blue" size="small">{{
-                            tagItem
-                        }}</a-tag>
+                        <a-space>
+                            <a-tag v-for="tagItem in item.tags.split(',')" :key="tagItem" color="blue" size="small">{{
+        tagItem }}</a-tag>
                         </a-space>
                     </template>
+                    <br />
+                    <span><icon-user />{{ item.user.name || "未知" }}</span>
+                    <a-divider direction="vertical" />
+                    <span><icon-heart />83</span>
+                    <a-divider direction="vertical" />
+                    <span><icon-calendar />{{ item.updatedAt }}</span>
                 </template>
+
                 <template #avatar>
-                    <a-avatar shape="square">
-                        <img alt="avatar" :src="item.user.avatar" />
+                    <a-avatar shape="square" :image-url="item.user.avatar">
                     </a-avatar>
                 </template>
             </a-list-item-meta>
         </a-list-item>
     </a-list>
     <AResult v-else title="no articles">
+
         <template #icon>
             <IconEmpty />
         </template>
     </AResult>
+    <ArtilceEdit v-model="editArticle.show" :article-id="editArticle.id" :call-response="refreshList" />
+
 </template>
+
 <script setup>
-import { apiArticleList } from '@/apis/article';
+import { apiArticleDelete, apiArticleList } from '@/apis/article';
+import ArtilceEdit from '@/components/article/ArticleEdit.vue';
 import router from '@/router';
-import { IconCalendar, IconEmpty, IconHeart, IconUser } from '@arco-design/web-vue/es/icon';
+import { useUserStore } from '@/stores/UserStore';
+import { IconCalendar, IconDown, IconEmpty, IconHeart, IconUser } from '@arco-design/web-vue/es/icon';
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -57,6 +83,12 @@ const { queryData } = defineProps({
     },
 
 })
+const editArticle = ref({
+    show: false,
+    id: 0,
+    index: 0
+})
+const userStore = useUserStore()
 const dataSource = ref([])
 dataSource.value = []
 const paginationProps = reactive({
@@ -66,11 +98,29 @@ const paginationProps = reactive({
     total: 9999
 })
 const route = useRoute()
+function refreshList(data, ok) {
+    if (!ok) {
+        return
+    }
+    let currentItem = dataSource.value[editArticle.value.index]
+    if (currentItem.id != data.id) {
+        return
+    }
+    currentItem.title = data.title
+    currentItem.type = data.type
+    currentItem.tags = data.tags.map(item => item.name).join(',')
+}
 function getArticleList() {
 
     apiArticleList(Object.assign(queryData, { context: route.query.context, tags: (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || [] }), paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
         paginationProps.total = data.total
         dataSource.value.push(...data.list)
+    })
+}
+function deleteArticle(index) {
+    apiArticleDelete(dataSource.value[index]).then(({ok})=>{
+        if(!ok) return
+        dataSource.value.splice(index, 1)
     })
 }
 const scroll = () => {
@@ -102,7 +152,7 @@ watch(() => route.fullPath, () => {
     getArticleList()
 })
 </script>
-  
+
 <style scoped>
 .list-demo-action-layout .image-area {
     width: 183px;

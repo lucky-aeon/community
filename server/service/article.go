@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"xhyovo.cn/community/pkg/constant"
@@ -52,7 +53,7 @@ func (*ArticleService) GetArticleData(id int) (data *model.ArticleData, err erro
 func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, page data.QueryPage, sort data.ListSortStrategy) (result []*model.ArticleData, total int64, err error) {
 	query := mysql.GetInstance().Table("articles").
 		Select("articles.id, articles.title, articles.state, articles.`like`, "+
-			"tp.title as type_title, tp.flag_name as type_flag, "+
+			"tp.id as type_id, tp.title as type_title, tp.flag_name as type_flag, "+
 			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, "+
 			"articles.created_at, articles.updated_at, GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
 		Joins("LEFT JOIN article_tag_relations as atr on atr.article_id = articles.id").
@@ -97,7 +98,7 @@ func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, p
 		tags := ""
 		rows.Scan(
 			&item.ID, &item.Title, &item.State, &item.Like,
-			&itemType.TypeTitle, &itemType.TypeFlag,
+			&itemType.TypeId, &itemType.TypeTitle, &itemType.TypeFlag,
 			&itemUser.UName, &itemUser.UId, &itemUser.UAvatar,
 			&item.CreatedAt, &item.UpdatedAt, &tags,
 		)

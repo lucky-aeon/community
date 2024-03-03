@@ -124,7 +124,7 @@ const [model] = defineModel({
 })
 function refreshMarkdown() {
     if (!cherryInstance) return
-    cherryInstance.setValue(model.value)
+    cherryInstance.setValue(model.value, true)
     props.previewOnly ? cherryInstance.switchModel("previewOnly") : cherryInstance.switchModel("editOnly")
 }
 onMounted(() => {
@@ -137,8 +137,7 @@ watch(() => props.previewOnly, (n) => {
     console.log(n)
     refreshMarkdown()
 }, { immediate: true, deep: true })
-watch(() => props.showNav, (n) => {
-    console.log(n)
+watch(() => props.showNav, () => {
     refreshMarkdown()
 }, { immediate: true, deep: true })
 watch(model, ()=>{
@@ -152,7 +151,10 @@ watch(model, ()=>{
     width: 100%;
     height: 100%;
 }
-
+.cherry-previewer {
+    background-color: white;
+    padding-top: 5px;
+}
 .cherry-flex-toc {
     position: fixed
 }

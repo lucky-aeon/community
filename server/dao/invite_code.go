@@ -21,9 +21,10 @@ func (*InviteCode) Exist(code int) bool {
 	return count == 1
 }
 
-func (*InviteCode) Del(code int) {
+func (*InviteCode) Del(code int) int64 {
 
-	model.InviteCode().Where("code = ?", code).Delete(&model.InviteCodes{})
+	tx := model.InviteCode().Where("code = ? and state = 0", code).Delete(&model.InviteCodes{})
+	return tx.RowsAffected
 }
 
 func (*InviteCode) SetState(id int) {

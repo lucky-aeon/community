@@ -105,6 +105,14 @@
               </router-link>
 
             </a-sub-menu>
+            <a-sub-menu key="5">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>邀请码</template>
+              <router-link to="/code">
+                <a-menu-item>邀请码</a-menu-item>
+              </router-link>
+
+            </a-sub-menu>
           </a-menu>
 
         </a-layout-sider>

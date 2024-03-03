@@ -70,11 +70,9 @@ func (*CodeService) GenerateCode(m model.GenerateCode) error {
 }
 
 func (*CodeService) DestroyCode(code int) error {
-	var u UserService
-	if res := u.CheckCodeUsed(code); res {
+	if codeDao.Del(code) == 0 {
 		return errors.New("邀请码被使用，无法删除")
 	}
-	codeDao.Del(code)
 	return nil
 }
 

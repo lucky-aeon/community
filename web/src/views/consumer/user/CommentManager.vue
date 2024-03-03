@@ -4,6 +4,7 @@
       :bordered="false"
       :data="commentData"
       :pagination-props="page"
+      @page-change="getListData"
   >
     <template #item="{ item ,index}">
       <a-list-item class="list-demo-item" action-layout="vertical">
@@ -79,15 +80,18 @@ function del(index){
 
 
 }
-
-const commentData = ref([])
-const count = ref(0)
-listAllCommentsByArticleId(0).then(({data})=>{
-  commentData.value = data.data
-  count.value = data.count
-})
-const page = reactive({
+const page = ref({
   defaultPageSize: 10,
-  total: count.value
+  total: 0,
+  current:1
 })
+const commentData = ref([])
+function  getListData(current){
+  page.value.current = current
+  listAllCommentsByArticleId(0,current,page.value.defaultPageSize).then(({data})=>{
+    commentData.value = data.data
+    page.value.total = data.count
+  })
+}
+getListData()
 </script>

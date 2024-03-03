@@ -8,7 +8,7 @@ import (
 )
 
 type InviteCodes struct {
-	ID         int            `gorm:"primaryKey"`
+	ID         int            `gorm:"primaryKey" json:"id"`
 	MemberId   int            `json:"memberId"`
 	Code       int            `json:"code"`
 	State      bool           `json:"state"` // 状态: false 未使用 true 已使用

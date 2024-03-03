@@ -35,7 +35,7 @@ func generate(ctx *gin.Context) {
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
-	result.Ok(nil, "生成成功").Json(ctx)
+	result.OkWithMsg(nil, "生成成功").Json(ctx)
 }
 
 func deleteCode(ctx *gin.Context) {
@@ -53,5 +53,5 @@ func deleteCode(ctx *gin.Context) {
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
-	result.Ok(nil, "删除成功").Json(ctx)
+	result.OkWithMsg(nil, "删除成功").Json(ctx)
 }

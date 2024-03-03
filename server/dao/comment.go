@@ -33,12 +33,13 @@ func (a *CommentDao) Create(comment *model.Comments) error {
 // 查询文章下的所有评论
 func (a *CommentDao) GetAllCommentsByArticleID(page, limit, fromUserId, businessId int) ([]*model.Comments, int64) {
 	var comments []*model.Comments
+	var count int64
 	comment := &model.Comments{
 		FromUserId: fromUserId,
 		BusinessId: businessId,
 	}
-	model.Comment().Where(&comment).Order("created_at").Limit(limit).Offset((page - 1) * limit).Find(&comments)
-	count := a.GetCommentsCountByArticleID(businessId)
+	model.Comment().Where(&comment).Order("created_at desc").Limit(limit).Offset((page - 1) * limit).Find(&comments)
+	model.Comment().Where("from_user_id = ? or to_user_id = ?", fromUserId, fromUserId).Count(&count)
 	return comments, count
 }
 
@@ -62,7 +63,7 @@ func (a *CommentDao) GetCommentsByArticleID(page, limit, businessId int) ([]*mod
 	// 查询所有根评论,只想要根评论
 	var parentIds []int
 	var comments []*model.Comments
-	model.Comment().Where("business_id", businessId).Order("created_at").Select("id").Group("root_id").Limit(limit).Offset(page - 1*limit).Find(&parentIds)
+	model.Comment().Where("business_id", businessId).Order("created_at desc").Select("id").Group("root_id").Limit(limit).Offset(page - 1*limit).Find(&parentIds)
 
 	if len(parentIds) == 0 {
 		return comments, 0
@@ -108,4 +109,9 @@ func (a *CommentDao) ExistById(id int, userId int, businessId int, rootId int) b
 	var count int64
 	model.Comment().Where("id = ? and from_user_id = ? and business_id = ? and root_id = ?", id, userId, businessId, rootId).Count(&count)
 	return count == 1
+}
+
+func (a *CommentDao) GetByParentId(parentId int) (comment model.Comments) {
+	model.Comment().Where("parent_id = ?", parentId).First(&comment)
+	return
 }

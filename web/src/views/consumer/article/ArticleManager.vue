@@ -11,7 +11,7 @@
         <ACol :span="4">
             <ASpace direction="vertical" style="width: 100%;">
                 <ACard size="small" hoverable>
-                    <AButton long type="primary">发布文章</AButton>
+                    <AButton long type="primary" @click="editArticle.show=true">发布文章</AButton>
                 </ACard>
 
                 <ACard title="标签" extra="2 个">
@@ -22,14 +22,14 @@
             </ASpace>
         </ACol>
     </ARow>
-    <ArticleEditCom />
+    <ArticleEditCom v-model="editArticle.show" :article-id="editArticle.currentId"/>
 </template>
 <script setup>
 import { apiGetUserStatistics } from "@/apis/user";
 import ArticleEditCom from "@/components/article/ArticleEdit.vue";
 import ArticleListCom from "@/components/article/ArticleList.vue";
 import { useUserStore } from "@/stores/UserStore";
-import { ref } from "vue";
+import { reactive, ref } from "vue";
 // const IconFont = Icon.addFromIconFontCn({ src: 'https://at.alicdn.com/t/c/font_4443211_9ji0rjy60kw.js' });
 const userStore = useUserStore()
 const queryData = ref({
@@ -43,6 +43,10 @@ const userStatistics = ref({
     likeCount: 0,
     articleCount: 0
 });
+const editArticle = reactive({
+    show: false,
+    currentId: 0
+})
 apiGetUserStatistics().then(({ data }) => {
     userStatistics.value = data
 })

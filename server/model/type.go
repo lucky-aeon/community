@@ -22,6 +22,7 @@ type Types struct {
 }
 
 type TypeSimple struct {
+	TypeId    int    `json:"id" gorm:"column:id"`
 	TypeFlag  string `json:"flag" gorm:"column:flag_name"` // flag name
 	TypeTitle string `json:"title" gorm:"column:title"`    // title
 }

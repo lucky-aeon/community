@@ -28,5 +28,12 @@ export function apiArticleUpdate(data, add = false) {
     if (add) {
         data.id = 0
     }
+    if(data.tags && data.tags.length>0) {
+        data.tags = data.tags.map(item=> item.value.TagId)
+    }
     return axios.post(`/community/articles/update`, data)
+}
+
+export function apiArticleDelete(id) {
+    return axios.delete(`/community/articles/${id}`)
 }

@@ -147,7 +147,7 @@ onMounted(() => {
   apiArticleView(route.params.id).then(({ data }) => {
     articleData.value = data
     nextTick(() => {
-      cherryConfig.value = articleData.value.desc
+      cherryConfig.value = articleData.value.content
       new Cherry(cherryConfig);
     })
   })

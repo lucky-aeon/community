@@ -1,10 +1,11 @@
 <template>
-    <div id="markdownedit-container"></div>
+    <div :id="`markdownedit-container${markId}`"></div>
 </template>
 <script setup>
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
-import { onMounted, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
+const markId = ref(Math.random().toString())
 const props = defineProps({
     previewOnly: {
         type: Boolean,
@@ -32,7 +33,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
 });
 var cherryInstance = undefined
 var cherryConfig = {
-    id: 'markdownedit-container',
+    id: 'markdownedit-container'+markId.value,
     value: '# welcome to cherry editor! \n awdwadad',
     externals: {
         echarts: window.echarts,
@@ -140,6 +141,9 @@ watch(() => props.showNav, (n) => {
     console.log(n)
     refreshMarkdown()
 }, { immediate: true, deep: true })
+watch(model, ()=>{
+    refreshMarkdown()
+})
 </script>
 
 <style>

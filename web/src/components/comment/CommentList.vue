@@ -1,6 +1,8 @@
 <template>
     <a-card :bordered="false">
-        <comment-item v-for="comment in articleCommentList" :key="comment.id"/>
+        <comment-item :callback="getRootComment" v-for="comment in articleCommentList" :comment="comment" :key="comment.id"/>
+        <a-divider/>
+        <a-pagination @change="getRootComment" :total="paginationData.total" v-model:page-size="paginationData.pageSize" v-model:current="paginationData.current" show-page-size/>
     </a-card>
 </template>
 <script setup>
@@ -14,12 +16,19 @@ const props = defineProps({
     }
 })
 const articleCommentList = ref([])
+const paginationData = ref({
+    current: 1,
+    total: 0,
+    pageSize: 5
+    
+})
 function getRootComment() {
-    apiGetArticleComment(props.articleId).then(({data, ok})=>{
-    if(!ok) {
+    apiGetArticleComment(props.articleId, paginationData.value.current, paginationData.value.pageSize).then(({data, ok})=>{
+    if(!ok || !data.data) {
         return
     }
-    articleCommentList.value.push(...data)
+    paginationData.value.total = data.count
+    articleCommentList.value = data.data
 })
 }
 onMounted(()=>{

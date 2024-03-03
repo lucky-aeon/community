@@ -1,26 +1,40 @@
-
 <template>
-    <a-comment author="Socrates" datetime="发表评论">
+    <a-comment :author="userStore.userInfo.name" datetime="发表评论">
         <template #content>
-            <MarkdownEdit :show-nav="false" style="margin-top: 5px;height: 100%;" v-model="commentData"/>
+            <MarkdownEdit :show-nav="false" style="margin-top: 5px;height: 100%;" v-model="commentData" />
+            <a-button long @click="pushComment()">发布评论</a-button>
         </template>
+
         <template #avatar>
-            <a-avatar>
-                <img alt="avatar"
-                    src="https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/3ee5f13fb09879ecb5185e440cef6eb9.png~tplv-uwbnlip3yd-webp.webp" />
+            <a-avatar :image-url="userStore.userInfo.avatar">
             </a-avatar>
         </template>
     </a-comment>
 </template>
+
 <script setup>
+import { apiPublishArticleComment } from '@/apis/comment';
+import { useUserStore } from '@/stores/UserStore';
 import { ref } from 'vue';
 import MarkdownEdit from '../MarkdownEdit.vue';
 const props = defineProps({
     articleId: {
         type: Number,
         default: 0,
+    },
+    parentId: {
+        type: Number,
+        default: 0,
+    },
+    rootComment: {
+        type: Number,
+        default: () => 0
     }
 })
+const userStore = useUserStore()
 const commentData = ref("")
-
+function pushComment() {
+    console.log(props)
+    apiPublishArticleComment(props.articleId, props.parentId, commentData.value, props.rootComment)
+}
 </script>

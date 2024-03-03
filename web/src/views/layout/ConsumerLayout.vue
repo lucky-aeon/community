@@ -114,19 +114,13 @@
   </div>
 </template>
 <script lang="ts" setup>
-import {reactive, ref} from 'vue'
-import { Tooltip, Typography } from '@arco-design/web-vue';
+import { apiClearUnReadMsg } from '@/apis/message.js';
+import MsgNotice from "@/components/message/MsgNotice.vue";
 import { useUserStore } from "@/stores/UserStore";
 import { IconApps, IconNotification } from "@arco-design/web-vue/es/icon";
+import { ref } from 'vue';
 import { RouterView } from "vue-router";
-import MsgNotice from "@/components/message/MsgNotice.vue";
-import { apiClearUnReadMsg} from '@/apis/message.js';
 
-interface TabItem {
-  key: string;
-  title: string;
-  avatar?: string;
-}
 const msgType = ref(1)
 const refBtn = ref();
 const setPopoverVisible = () => {

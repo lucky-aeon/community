@@ -17,7 +17,7 @@ type Users struct {
 	InviteCode int    `json:"inviteCode,omitempty"`
 	Desc       string `json:"desc"`
 	Avatar     string `json:"avatar"`
-	Subscribe  bool   `json:"subscribe"`
+	Subscribe  bool   `json:"subscribe" gorm:"force"`
 }
 
 type UserSimple struct {

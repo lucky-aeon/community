@@ -85,8 +85,12 @@ func articleSave(c *gin.Context) {
 		result.Err(utils.GetValidateErr(o, err)).Json(c)
 		return
 	}
-
-	result.OkWithMsg(id, constant.GetArticleMsg(o.State)).Json(c)
+	articleData, err := articleService.GetArticleData(id)
+	if err != nil {
+		result.Err(err.Error()).Json(c)
+		return
+	}
+	result.OkWithMsg(articleData, constant.GetArticleMsg(o.State)).Json(c)
 }
 
 func articleLike(c *gin.Context) {

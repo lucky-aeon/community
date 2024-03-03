@@ -1,12 +1,7 @@
 import axios from 'axios';
 
-/**
- * 获取文章下的所有评论
- * @param {number} articleId 文章id
- * @returns 
- */
-export function listAllCommentsByArticleId(articleId) {
-  return axios.get(`/community/comments/allCommentsByArticleId/${articleId}`);
+export function listAllCommentsByArticleId(articleId,page,limit) {
+  return axios.get(`/community/comments/allCommentsByArticleId/${articleId}?page=${page}&limit=${limit}`);
 }
 
 /**

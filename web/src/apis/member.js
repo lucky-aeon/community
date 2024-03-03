@@ -5,7 +5,6 @@ export function listAllMember() {
 }
 
 export function saveMember(member) {
-    console.log(member)
     return axios.post(`/community/admin/member`,member);
 }
 

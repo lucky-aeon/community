@@ -1,5 +1,5 @@
 <template>
-  <a-table :columns="columns" :data="fileData">
+  <a-table :columns="columns" :bordered="false" :data="fileData" @page-change="getFileList" :pagination-props="page">
 
 
     <template #fileKey="{ record }">
@@ -40,9 +40,17 @@ const columns = [{
 
 
 const fileData = ref([])
-const getFileList = ()=>{
-  apiAdminFile().then(({data})=>{
+const page = ref({
+  defaultPageSize: 1,
+  total: 0,
+  current:1
+})
+function getFileList(current){
+  page.value.current = current
+  apiAdminFile(page.value.current = current,page.value.defaultPageSize).then(({data})=>{
     fileData.value = data.data
+    page.value.total = data.count
+
   })
 }
 getFileList()

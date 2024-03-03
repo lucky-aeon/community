@@ -24,9 +24,13 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 		return errors.New("文章不存在")
 	}
 
+	parentId := comment.ParentId
 	// 父评论是否存在
-	if comment.ParentId != 0 && commentDao.ExistById(comment.ParentId, comment.FromUserId, comment.BusinessId, comment.RootId) {
-		return errors.New("回复评论不存在")
+	if parentId != 0 {
+		parentComment := commentDao.GetByParentId(parentId)
+		comment.ToUserId = parentComment.FromUserId
+		comment.RootId = parentComment.RootId
+		comment.BusinessId = parentComment.BusinessId
 	}
 
 	commentDao.AddComment(comment)

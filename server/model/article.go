@@ -30,7 +30,7 @@ type ArticleData struct {
 	Tags       any    `json:"tags"`
 	TypeSimple `json:"type"`
 	UserSimple `json:"user"`
-	Desc       string         `json:"desc,omitempty"`
+	Desc       string         `json:"content,omitempty"`
 	CreatedAt  time.LocalTime `json:"createdAt"`
 	UpdatedAt  time.LocalTime `json:"updatedAt"`
 }

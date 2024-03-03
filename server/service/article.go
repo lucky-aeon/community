@@ -7,6 +7,7 @@ import (
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/data"
 	"xhyovo.cn/community/pkg/mysql"
+	"xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
 )
@@ -15,9 +16,10 @@ type ArticleService struct {
 }
 
 func (*ArticleService) GetArticleData(id int) (data *model.ArticleData, err error) {
-	a, err := articleDao.QuerySingle(model.Articles{ID: id})
-	if err != nil {
-		return nil, err
+	var a model.Articles
+	model.Article().Where("id = ? and state != ?", id, constant.Draft).First(&a)
+	if a.ID == 0 {
+		return nil, errors.New("文章不存在")
 	}
 	var tags []*model.ArticleTagSimple
 	model.ArticleTag().Joins("LEFT JOIN article_tag_relations as atr ON atr.tag_id = article_tags.id").
@@ -49,14 +51,15 @@ func (*ArticleService) GetArticleData(id int) (data *model.ArticleData, err erro
 
 func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, page data.QueryPage, sort data.ListSortStrategy) (result []*model.ArticleData, total int64, err error) {
 	query := mysql.GetInstance().Table("articles").
-		Select("articles.id, articles.title, articles.state, articles.`like`, " +
-			"tp.title as type_title, tp.flag_name as type_flag, " +
-			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, " +
+		Select("articles.id, articles.title, articles.state, articles.`like`, "+
+			"tp.title as type_title, tp.flag_name as type_flag, "+
+			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, "+
 			"articles.created_at, articles.updated_at, GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
 		Joins("LEFT JOIN article_tag_relations as atr on atr.article_id = articles.id").
 		Joins("LEFT JOIN article_tags as atg on atg.id = atr.tag_id").
 		Joins("LEFT JOIN types as tp on tp.id = articles.type").
-		Joins("LEFT JOIN users as u on u.id = articles.user_id")
+		Joins("LEFT JOIN users as u on u.id = articles.user_id").
+		Where("articles.state != ?", constant.Draft)
 	if article != nil {
 		if article.Type > 0 {
 			query.Where("articles.type = ?", article.Type)
@@ -213,6 +216,7 @@ func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
 			return 0, errors.New("旧文章状态不可从非草稿转为草稿")
 		}
 	}
+	article.UpdatedAt = time.Now()
 	article.Like = 0
 	mysql.GetInstance().Save(&article)
 	id = article.ID

@@ -13,6 +13,16 @@
                         v-model="form.desc"
                         show-word-limit />
           </a-form-item>
+          <a-form-item field="desc" label="订阅站点消息" >
+              <a-switch v-model="form.subscribe" :checked-value="true" :unchecked-value="false" type="round">
+                <template #checked>
+                  订阅
+                </template>
+                <template #unchecked>
+                  未订阅
+                </template>
+              </a-switch>
+          </a-form-item>
           <a-form-item>
             <a-space>
               <a-button html-type="submit">Submit</a-button>
@@ -57,7 +67,6 @@
 <script setup>
 import { getUserInfo, saveUserInfo } from '@/apis/user';
 import { reactive, ref } from 'vue';
-
 
 
 const userInfo = ref([])

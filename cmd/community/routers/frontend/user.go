@@ -17,8 +17,9 @@ var (
 )
 
 type editUserForm struct {
-	Name string `binding:"required" form:"name" msg:"用户名不可为空"`
-	Desc string `form:"desc"`
+	Name      string `binding:"required" form:"name" msg:"用户名不可为空"`
+	Desc      string `form:"desc"`
+	Subscribe bool   `form:"subscribe"`
 }
 
 type editPasswordForm struct {
@@ -70,7 +71,7 @@ func updateUser(ctx *gin.Context) {
 			result.Err("描述长度不可超过200字").Json(ctx)
 			return
 		}
-		userService.UpdateUser(&model.Users{Name: form.Name, Desc: form.Desc, ID: userId})
+		userService.UpdateUser(&model.Users{Name: form.Name, Desc: form.Desc, ID: userId, Subscribe: form.Subscribe})
 	case "pass":
 		form := editPasswordForm{}
 		err := ctx.ShouldBind(&form)

@@ -18,13 +18,17 @@
           <a-menu-item key="4">Cooperation</a-menu-item>
           <AButtonGroup style="float: right;" >
 
-            <a-tooltip content="消息通知">
+
+            <a-tooltip content="消息通知" >
+              <a-badge :count="9" :offset="[1, -1]">
             <AButton type="text"><icon-notification size="large"
                                                     class="nav-btn"
                                                     type="outline"
                                                     :shape="'circle'"
                                                     @click="setPopoverVisible"/></AButton>
+              </a-badge>
             </a-tooltip>
+
             <a-popover
                 trigger="click"
                 :arrow-style="{ display: 'none' }"
@@ -34,39 +38,18 @@
               <div ref="refBtn" class="ref-btn"></div>
               <template #content>
                 <a-spin style="display: block">
-                  <a-tabs default-active-key="notice" type="rounded" destroy-on-hide>
-                    <a-tab-pane v-for="item in tabList" :key="item.key">
-                      <template #title>
-                        <span> {{ item.title }} </span>
-                      </template>
-                      <a-card :body-style="{padding: '10px'}">
-                        <MsgNotice>
-                          <template #empty>
-                            <a-empty/>
-                          </template>
-                        </MsgNotice>
-                        <template #actions>
-                          <a-space
-                              fill
-                              :size="0"
-                          >
-                            <div class="footer-wrap">
-                              <a-link >已读</a-link>
-                            </div>
-                            <div class="footer-wrap">
-                              <a-link>查看更多</a-link>
-                            </div>
-                          </a-space>
-                        </template>
-                      </a-card>
+                  <a-tabs v-model:active-key="msgType">
+                    <a-tab-pane :key="1" title="通知">
+                    </a-tab-pane>
+                    <a-tab-pane :key="2" title="@我">
                     </a-tab-pane>
                     <template #extra>
-                      <a-button type="text">
+                      <a-button type="text" @click="clearMsg">
                         清空
                       </a-button>
                     </template>
                   </a-tabs>
-
+                  <msg-notice :msg-type="msgType" :msg-state="1"/>
                 </a-spin>
               </template>
             </a-popover>
@@ -130,30 +113,21 @@
     </a-layout>
   </div>
 </template>
-<script lang="ts"setup>
+<script lang="ts" setup>
 import {reactive, ref} from 'vue'
 import { Tooltip, Typography } from '@arco-design/web-vue';
 import { useUserStore } from "@/stores/UserStore";
 import { IconApps, IconNotification } from "@arco-design/web-vue/es/icon";
 import { RouterView } from "vue-router";
 import MsgNotice from "@/components/message/MsgNotice.vue";
+import { apiClearUnReadMsg} from '@/apis/message.js';
 
 interface TabItem {
   key: string;
   title: string;
   avatar?: string;
 }
-const tabList: TabItem[] = [
-  {
-    key: 'notice',
-    title: '通知',
-  },
-  {
-    key: 'todo',
-    title: '@',
-  },
-];
-
+const msgType = ref(1)
 const refBtn = ref();
 const setPopoverVisible = () => {
   const event = new MouseEvent('click', {
@@ -166,6 +140,11 @@ const setPopoverVisible = () => {
 
 const userStore = useUserStore()
 userStore.getMenu()
+
+function clearMsg(){
+  apiClearUnReadMsg(msgType.value)
+}
+
 </script>
 <style scoped>
 .layout-demo {

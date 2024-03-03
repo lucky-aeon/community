@@ -34,7 +34,7 @@ const props = defineProps({
   },
   msgState: {
     type: Number,
-    default: 1
+    default: 0
   }
 })
 const dataSource = ref([])

@@ -6,15 +6,25 @@
     </a-tab-pane>
     <a-tab-pane :key="2" title="@我">
     </a-tab-pane>
+    <template #extra>
+      <a-button type="text" @click="clearMsg">
+        清空
+      </a-button>
+    </template>
   </a-tabs>
   <msg-notice :msg-type="msgType"/>
 
 </template>
 <script setup>
 import MsgNotice from "@/components/message/MsgNotice.vue";
+import { apiClearUnReadMsg} from '@/apis/message.js';
+
 import {ref} from "vue";
 
 const msgType = ref(1)
+function clearMsg(){
+  apiClearUnReadMsg(msgType.value)
+}
 </script>
 <style scoped>
 

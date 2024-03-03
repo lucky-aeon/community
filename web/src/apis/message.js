@@ -8,3 +8,6 @@ export function apiClearUnReadMsg(type){
     return axios.post(`/community/message/UnReadMsg/${type}`);
 }
 
+export function apiGetUnReadCount() {
+    return axios.get(`/community/message/unReader/count`)
+}

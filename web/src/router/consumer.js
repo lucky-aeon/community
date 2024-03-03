@@ -1,9 +1,9 @@
 // 用户前台路由
 
+import File from "@/views/admin/file/File.vue";
+import Member from "@/views/admin/member/Member.vue";
 import ArticleListVue from '@/views/consumer/article/ArticleList.vue';
 import ArticleMainVue from '@/views/consumer/article/ArticleMain.vue';
-import Member from "@/views/admin/member/Member.vue";
-import File from "@/views/admin/file/File.vue";
 
 
 const ConsumerRouters = [

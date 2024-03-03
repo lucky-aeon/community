@@ -32,11 +32,15 @@
       </div>
     </a-page-header>
     <div id="markdown-container"></div>
+    <comment-edit :article-id="articleData.id"/>
+    <comment-list style="margin-top: 10px;" :article-id="articleData.id"/>
   </div>
 </template>
 
 <script setup>
 import { apiArticleView } from '@/apis/article';
+import CommentEdit from '@/components/comment/CommentEdit.vue';
+import CommentList from '@/components/comment/CommentList.vue';
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
 import { nextTick, onMounted, ref } from 'vue';

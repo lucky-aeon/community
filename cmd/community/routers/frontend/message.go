@@ -12,9 +12,18 @@ import (
 
 func InitMessageRouters(r *gin.Engine) {
 	group := r.Group("/community/message")
+	group.GET("/unReader/count", getUnReadMsgCount)
 	group.GET("", listMsg)
 	group.POST("/read", readMsg)
+	group.DELETE("/UnReadMsg/:type", clearUnReadMsg)
 
+}
+
+func getUnReadMsgCount(ctx *gin.Context) {
+	userId := middleware.GetUserId(ctx)
+	var msgService services.MessageService
+	count := msgService.GetUnReadMessageCountByUserId(userId)
+	result.Ok(count, "").Json(ctx)
 }
 
 // 查看用户未读消息
@@ -40,4 +49,16 @@ func readMsg(ctx *gin.Context) {
 	var msgService services.MessageService
 	number := msgService.ReadMessage(ids, middleware.GetUserId(ctx))
 	result.OkWithMsg(nil, fmt.Sprintf("已读%d消息", number)).Json(ctx)
+}
+
+// 清除未读消息
+func clearUnReadMsg(ctx *gin.Context) {
+	msgType, err := strconv.Atoi(ctx.Param("type"))
+	if err != nil {
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	var msgService services.MessageService
+	msgService.ClearUnReadMessage(msgType, middleware.GetUserId(ctx))
+	result.OkWithMsg(nil, "已清空").Json(ctx)
 }

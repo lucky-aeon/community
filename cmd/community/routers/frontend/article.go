@@ -41,7 +41,10 @@ func InitArticleRouter(r *gin.Engine) {
 func articlePageBySearch(ctx *gin.Context) {
 	// 获取所有分类
 	searchArticle := new(SearchArticle)
-	ctx.ShouldBindBodyWith(searchArticle, binding.JSON)
+	if err := ctx.ShouldBindBodyWith(searchArticle, binding.JSON); err != nil {
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
 
 	result.Page(articleService.PageByClassfily(searchArticle.Tags, &model.Articles{
 		Title:   searchArticle.Context,

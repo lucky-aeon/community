@@ -120,3 +120,12 @@ func (m *MessageService) GetMsg(template string, eventId, businessId int) string
 func (*MessageService) GetMessageTemplateVar() map[string]map[string]string {
 	return messageTemplateVar
 }
+
+func (m *MessageService) ClearUnReadMessage(msgType, userId int) {
+	model.MessageState().Where("`to` = ? and type = ?", userId, msgType).Update("state", 0)
+}
+
+func (m *MessageService) GetUnReadMessageCountByUserId(userId int) (count int64) {
+	model.MessageState().Where("`to` = ? and state = 1", userId).Count(&count)
+	return
+}

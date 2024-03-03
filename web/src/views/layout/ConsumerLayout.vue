@@ -85,6 +85,9 @@
               <router-link to="/user/message">
                 <a-menu-item>消息</a-menu-item>
               </router-link>
+              <router-link to="/user/subscribe">
+                <a-menu-item>订阅内容</a-menu-item>
+              </router-link>
             </a-sub-menu>
             <a-sub-menu key="3">
               <template #icon><icon-apps></icon-apps></template>

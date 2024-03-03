@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 )
@@ -55,8 +56,7 @@ func (*UserDao) CreateUser(account, name, pswd string, ininviteCode int) int {
 }
 
 func (d *UserDao) UpdateUser(user *model.Users) {
-
-	model.User().Where("id = ?", user.ID).Updates(&user)
+	mysql.GetInstance().Save(&user)
 }
 
 func (d *UserDao) ListByIds(id ...int) []string {

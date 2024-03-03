@@ -49,6 +49,10 @@ const ConsumerRouters = [
             {
                 path: "message",
                 component: ()=> import('@/views/consumer/user/UserMessage.vue')
+            },
+            {
+                path: "subscribe",
+                component: () => import('@/views/consumer/user/UserSubscribe.vue'),
             }
         ]
     },

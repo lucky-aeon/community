@@ -9,24 +9,25 @@
     <template #item="{ item }">
       <a-list-item class="list-demo-item" :style="{padding: '5px'}" action-layout="vertical"
                    @click="router.push(`/article/view/${item.articleId}`)" >
+      
         <template #actions>
           <span class="arco-typography time-text">{{item.createdAt}}</span>
         </template>
+        <a-badge :count="item.state?0:1" dot>
         <a-list-item-meta
             :description="item.content"
         >
-        </a-list-item-meta>
+        </a-list-item-meta></a-badge>
       </a-list-item>
     </template>
   </a-list>
-  <slot name="empty" v-else>
-  </slot>
+  <a-empty v-else/>
 </template>
 
 <script setup>
-import {reactive, ref, watch} from 'vue'
-import { apiListMsg } from '@/apis/message.js'
+import { apiListMsg } from '@/apis/message.js';
 import router from "@/router/index.js";
+import { reactive, ref, watch } from 'vue';
 const props = defineProps({
   msgType: {
     type: Number,

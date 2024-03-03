@@ -5,36 +5,29 @@
         <a-menu class="line" mode="horizontal" :default-selected-keys="['1']">
           <a-menu-item key="0" :style="{ padding: 0, marginRight: '38px' }" disabled>
             <div :style="{
-              width: '80px',
-              height: '30px',
-              borderRadius: '2px',
-              background: 'var(--color-fill-3)',
-              cursor: 'text',
-            }" />
+          width: '80px',
+          height: '30px',
+          borderRadius: '2px',
+          background: 'var(--color-fill-3)',
+          cursor: 'text',
+        }" />
           </a-menu-item>
           <a-menu-item key="1">Home</a-menu-item>
           <a-menu-item key="2">Solution</a-menu-item>
           <a-menu-item key="3">Cloud Service</a-menu-item>
           <a-menu-item key="4">Cooperation</a-menu-item>
-          <AButtonGroup style="float: right;" >
+          <AButtonGroup style="float: right;">
 
 
-            <a-tooltip content="消息通知" >
-              <a-badge :count="9" :offset="[1, -1]">
-            <AButton type="text"><icon-notification size="large"
-                                                    class="nav-btn"
-                                                    type="outline"
-                                                    :shape="'circle'"
-                                                    @click="setPopoverVisible"/></AButton>
-              </a-badge>
+            <a-tooltip content="消息通知">
+
+              <AButton type="text"><a-badge :count="currentUnReadCount" :offset="[5, -5]"><icon-notification size="large" class="nav-btn"
+                    type="outline" :shape="'circle'" @click="setPopoverVisible" /></a-badge></AButton>
+
             </a-tooltip>
 
-            <a-popover
-                trigger="click"
-                :arrow-style="{ display: 'none' }"
-                :content-style="{ padding: 0, minWidth: '400px' }"
-                content-class="message-popover"
-            >
+            <a-popover trigger="click" :arrow-style="{ display: 'none' }"
+              :content-style="{ padding: 0, minWidth: '400px' }" content-class="message-popover">
               <div ref="refBtn" class="ref-btn"></div>
               <template #content>
                 <a-spin style="display: block">
@@ -49,7 +42,7 @@
                       </a-button>
                     </template>
                   </a-tabs>
-                  <msg-notice :msg-type="msgType" :msg-state="1"/>
+                  <msg-notice :msg-type="msgType" :msg-state="1" />
                 </a-spin>
               </template>
             </a-popover>
@@ -62,13 +55,17 @@
         <a-layout-sider style="height: 100%;" :width="220" collapsible>
           <a-menu :style="{ height: '100%' }" :default-open-keys="['0']" :default-selected-keys="['0_2']">
             <a-sub-menu v-for="item in userStore.menu" :key="item.name">
+
               <template #icon><icon-apps></icon-apps></template>
+
               <template #title>{{ item.meta.locale }}</template>
               <router-link v-for="child in item.children" :key="child.name" :to="child.path">
                 <a-menu-item>{{ child.meta.locale }}</a-menu-item></router-link>
             </a-sub-menu>
             <a-sub-menu key="0">
+
               <template #icon><icon-apps></icon-apps></template>
+
               <template #title>个人空间</template>
               <router-link to="/user">
                 <a-menu-item>工作台</a-menu-item>
@@ -90,7 +87,9 @@
               </router-link>
             </a-sub-menu>
             <a-sub-menu key="3">
+
               <template #icon><icon-apps></icon-apps></template>
+
               <template #title>等级</template>
               <router-link to="/member">
                 <a-menu-item>等级</a-menu-item>
@@ -98,7 +97,9 @@
 
             </a-sub-menu>
             <a-sub-menu key="4">
+
               <template #icon><icon-apps></icon-apps></template>
+
               <template #title>文件</template>
               <router-link to="/file">
                 <a-menu-item>文件</a-menu-item>
@@ -124,13 +125,15 @@
     </a-layout>
   </div>
 </template>
-<script lang="ts" setup>
-import { apiClearUnReadMsg } from '@/apis/message.js';
+
+<script setup>
+import { apiClearUnReadMsg, apiGetUnReadCount } from '@/apis/message.js';
 import MsgNotice from "@/components/message/MsgNotice.vue";
 import { useUserStore } from "@/stores/UserStore";
+import { isLogin } from '@/utils/auth';
 import { IconApps, IconNotification } from "@arco-design/web-vue/es/icon";
-import { ref } from 'vue';
-import { RouterView } from "vue-router";
+import { ref, watch } from 'vue';
+import { RouterView, useRoute } from "vue-router";
 
 const msgType = ref(1)
 const refBtn = ref();
@@ -144,13 +147,23 @@ const setPopoverVisible = () => {
 };
 
 const userStore = useUserStore()
+const currentUnReadCount = ref(0)
 userStore.getMenu()
-
-function clearMsg(){
+const route = useRoute()
+function clearMsg() {
   apiClearUnReadMsg(msgType.value)
 }
+watch(() => route.path, () => {
+  if (isLogin()) {
+    apiGetUnReadCount().then(({ data, ok }) => {
+      if (!ok) return
+      currentUnReadCount.value = data
+    })
+  }
+},{ immediate: true})
 
 </script>
+
 <style scoped>
 .layout-demo {
   height: 100%;

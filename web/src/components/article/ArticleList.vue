@@ -40,7 +40,7 @@
                     <br />
                     <span><icon-user />{{ item.user.name || "未知" }}</span>
                     <a-divider direction="vertical" />
-                    <span><icon-heart />83</span>
+                    <span><icon-heart />{{item.like}}</span>
                     <a-divider direction="vertical" />
                     <span><icon-calendar />{{ item.updatedAt }}</span>
                 </template>

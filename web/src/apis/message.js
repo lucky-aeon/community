@@ -5,7 +5,7 @@ export function apiListMsg(type, state) {
 }
 
 export function apiClearUnReadMsg(type){
-    return axios.post(`/community/message/UnReadMsg/${type}`);
+    return axios.delete(`/community/message/UnReadMsg/${type}`);
 }
 
 export function apiGetUnReadCount() {

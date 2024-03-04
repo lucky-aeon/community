@@ -63,7 +63,7 @@ func (a *ArticleTagService) GetTagArticleCount(userId int) []model.TagArticleCou
 	}
 	var tagAcount []model.TagArticleCount
 	db := mysql.GetInstance()
-	db.Raw("select tag_id,count(article_id) as article_count from article_tag_relations WHERE tag_id in(?) GROUP BY tag_id", tagsIds).Scan(&tagAcount)
+	db.Raw("select tag_id,count(article_id) as article_count from article_tag_relations WHERE tag_id in(?) and user_id = ? GROUP BY tag_id", tagsIds, userId).Scan(&tagAcount)
 	if len(tagAcount) == 0 {
 		return []model.TagArticleCount{}
 	}

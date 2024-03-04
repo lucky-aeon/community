@@ -17,7 +17,24 @@
       </template>
       <template #extra>
         <a-space>
-          <a-button type="primary">喜欢</a-button>
+          <AButtonGroup>
+            <AButton @click="like(articleData.id)">
+              <icon-thumb-up-fill  size="large"  v-if="likeState" />
+              <icon-thumb-up  size="large" v-else />{{articleData.like}}
+            </AButton>
+
+          </AButtonGroup>
+          <a-dropdown-button>
+            订阅
+            <template #icon>
+              <icon-down />
+            </template>
+            <template #content>
+              <a-doption @click="subscribe(1,articleData.id)">{{articleSubscribe}}</a-doption>
+              <a-doption @click="subscribe(2,articleData.user.id)">{{userSubscribe}}</a-doption>
+            </template>
+          </a-dropdown-button>
+
         </a-space>
       </template>
       <div>
@@ -38,13 +55,16 @@
 </template>
 
 <script setup>
-import { apiArticleView } from '@/apis/article';
+import { IconThumbUp,IconThumbUpFill, IconDown } from '@arco-design/web-vue/es/icon';
+import {apiArticleLike, apiArticleLikeState, apiArticleView} from '@/apis/article';
 import CommentEdit from '@/components/comment/CommentEdit.vue';
 import CommentList from '@/components/comment/CommentList.vue';
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
 import { nextTick, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import {IconNotification} from "@arco-design/web-vue/es/icon/index.js";
+import {apiSubscribe, apiSubscribeState,} from "@/apis/apiSubscribe.js";
 var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
   makeHtml(str) {
     console.warn('custom hook', 'hello');
@@ -146,6 +166,11 @@ var cherryConfig = {
 
 const articleData = ref(null)
 const route = useRoute()
+const likeState = ref(true)
+
+const articleSubscribe = ref("订阅文章")
+
+const userSubscribe = ref("订阅用户")
 
 onMounted(() => {
   apiArticleView(route.params.id).then(({ data }) => {
@@ -154,11 +179,46 @@ onMounted(() => {
       cherryConfig.value = articleData.value.content
       new Cherry(cherryConfig);
     })
+    const id = articleData.value.id
+    apiArticleLikeState(id).then((data)=>{
+      likeState.value = data.data
+    })
+    apiSubscribeState(1,id).then((data)=>{
+      articleSubscribe.value = data.data ? "文章已订阅" : "订阅文章"
+    })
+    apiSubscribeState(2,id).then((data)=>{
+      userSubscribe.value = data.data ? "用户已订阅" : "订阅用户"
+    })
   })
+
 })
+
+function like(id){
+  apiArticleLike(id).then((data)=>{
+    articleData.value.like += (data.data ? 1 :-1)
+    likeState.value = data.data
+    console.log(articleData.value.like)
+  })
+
+}
+
+function subscribe(eventId,businessId){
+  apiSubscribe(eventId,businessId).then((data)=>{
+    if (eventId == 1){
+      articleSubscribe.value = data.data ? "文章已订阅" : "订阅文章"
+    }else {
+      userSubscribe.value = data.data ? "用户已订阅" : "订阅用户"
+    }
+  })
+}
+
+
 </script>
 
 <style>
+.arco-dropdown-open .arco-icon-down {
+  transform: rotate(180deg);
+}
 .cherry {
   box-shadow: none;
 }

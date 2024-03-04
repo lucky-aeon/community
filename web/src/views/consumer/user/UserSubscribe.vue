@@ -9,7 +9,7 @@
 </template>
 
 <script setup>
-import * as apiSubscribe from '@/apis/subscribe';
+import * as apiSubscribe from '@/apis/apiSubscribe.js';
 import { ref } from 'vue';
 const columns = [
     {
@@ -45,7 +45,7 @@ function refreshList() {
 refreshList()
 
 function subscribe(eventId, businessId) {
-    apiSubscribe.subscribe(eventId, businessId).then(({ok})=>{
+    apiSubscribe.apiSubscribe(eventId, businessId).then(({ok})=>{
         if(!ok) return
         refreshList()
     })

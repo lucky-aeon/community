@@ -25,7 +25,7 @@ func (*ArticleService) GetArticleData(id int) (data *model.ArticleData, err erro
 	var tags []*model.ArticleTagSimple
 	model.ArticleTag().Joins("LEFT JOIN article_tag_relations as atr ON atr.tag_id = article_tags.id").
 		Where("atr.article_id = ?", a.ID).Find(&tags)
-	us, err := userDao.QueryUserSimple(&model.Users{ID: a.ID})
+	us, err := userDao.QueryUserSimple(&model.Users{ID: a.UserId})
 	if err != nil {
 		us = model.UserSimple{
 			UId:     0,
@@ -165,7 +165,7 @@ func (a *ArticleService) PublishArticleCount(userId int) (count int64) {
 }
 
 func (a *ArticleService) PublishArticlesSelectId(userId int) (id []int) {
-	model.Article().Where("user_id").Select("id").Find(&id)
+	model.Article().Where("user_id = ?", userId).Select("id").Find(&id)
 	return
 }
 
@@ -226,7 +226,7 @@ func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
 	db().Where("article_id = ?", id).Delete(nil)
 	var tags []model.ArticleTagRelations
 	for i := range article.Tags {
-		tags = append(tags, model.ArticleTagRelations{ArticleId: id, TagId: article.Tags[i]})
+		tags = append(tags, model.ArticleTagRelations{ArticleId: id, TagId: article.Tags[i], UserId: article.UserId})
 	}
 	db().Create(&tags)
 	if flag {
@@ -244,4 +244,10 @@ func (a *ArticleService) Delete(articleId, userId int) (err error) {
 	// 删除文章标签表
 	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
 	return
+}
+
+func (a *ArticleService) GetLikeState(articleId, userId int) bool {
+	var count int64
+	model.ArticleLike().Where("article_id  = ? and user_id = ?", articleId, userId).Count(&count)
+	return count == 1
 }

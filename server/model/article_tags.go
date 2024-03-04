@@ -26,6 +26,7 @@ type ArticleTagSimple struct {
 type ArticleTagRelations struct {
 	ArticleId int `json:"article_id"`
 	TagId     int `json:"tag_id"`
+	UserId    int `json:"user_id"`
 }
 type ArticleTagUserRelations struct {
 	UserId int `json:"user_id"`

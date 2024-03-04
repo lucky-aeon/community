@@ -13,7 +13,7 @@
         <template #actions>
           <span class="arco-typography time-text">{{item.createdAt}}</span>
         </template>
-        <a-badge :count="item.state?0:1" dot>
+        <a-badge :count="item.state" dot>
         <a-list-item-meta
             :description="item.content"
         >

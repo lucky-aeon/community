@@ -91,7 +91,7 @@ func (*MessageService) ReadMessage(id []int, userId int) int64 {
 
 func (m *MessageService) PageMessage(page, limit, userId, types, state int) (msgs []*model.MessageStates, count int64) {
 	msgs = messageDao.ListMessage(page, limit, userId, types, state)
-	count = messageDao.CountMessage(userId, types)
+	count = messageDao.CountMessage(userId, types, state)
 	return msgs, count
 }
 

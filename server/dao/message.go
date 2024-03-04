@@ -80,9 +80,9 @@ func (d *MessageDao) ListMessage(page, limit, userId, types, state int) []*model
 	return message
 }
 
-func (d *MessageDao) CountMessage(userId int, types int) int64 {
+func (d *MessageDao) CountMessage(userId, types, state int) int64 {
 	var count int64
 
-	model.MessageState().Where(model.MessageStates{To: userId, Type: types}).Count(&count)
+	model.MessageState().Where(model.MessageStates{To: userId, Type: types, State: state}).Count(&count)
 	return count
 }

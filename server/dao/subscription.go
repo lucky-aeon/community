@@ -17,7 +17,7 @@ func (*SubscriptionDao) ListSubscription(userId, event, page, limit int) []model
 }
 
 // 查看对应事件订阅状态
-func (*SubscriptionDao) SubscriptionState(subscriptions *model.Subscriptions) bool {
+func (*SubscriptionDao) SubscriptionState(subscriptions *model.SubscriptionState) bool {
 	var count int64
 	model.Subscription().Where(subscriptions).Count(&count)
 	return count == 1

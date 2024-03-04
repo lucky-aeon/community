@@ -47,13 +47,20 @@ func (*SubscriptionService) ListSubscription(userId, eventId, page, limit int) [
 }
 
 // 查看对应事件订阅状态
-func (*SubscriptionService) SubscriptionState(subscriptions *model.Subscriptions) bool {
+func (*SubscriptionService) SubscriptionState(subscriptions *model.SubscriptionState) bool {
 
 	return subscriptionDao.SubscriptionState(subscriptions)
 }
 
 // 订阅/取消订阅
 func (*SubscriptionService) Subscribe(subscription *model.Subscriptions) bool {
+	businessId := subscription.BusinessId
+	if event.CommentUpdateEvent == subscription.EventId {
+		model.Article().Where("id = ?", businessId).Select("user_id").First(&subscription.SendId)
+	} else if event.UserFollowingEvent == subscription.EventId {
+		model.User().Where("id = ?", businessId).Select("id").First(&subscription.SendId)
+	}
+
 	return subscriptionDao.Subscribe(subscription)
 }
 

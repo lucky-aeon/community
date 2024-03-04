@@ -22,7 +22,7 @@ type JwtCustomClaims struct {
 func GetUserId(ctx *gin.Context) int {
 
 	//return ctx.Value(authorization).(int)
-	return 3
+	return 1
 }
 
 func Auth(ctx *gin.Context) {

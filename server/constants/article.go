@@ -1,13 +1,13 @@
 package constants
 
 const (
-	ArticleDarft = 0
+	ArticleDraft int = iota + 1
 
-	Publish = 1
+	Publish
 
-	Pending = 2
+	Pending
 
-	Resolved = 3
+	Resolved
 
-	Closed = 4
+	Closed
 )

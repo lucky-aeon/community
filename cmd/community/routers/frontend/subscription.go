@@ -32,7 +32,7 @@ func listSubscription(ctx *gin.Context) {
 // 查看对应事件订阅状态
 func subscriptionState(ctx *gin.Context) {
 	var su services.SubscriptionService
-	var subscription model.Subscriptions
+	var subscription model.SubscriptionState
 	if err := ctx.ShouldBindJSON(&subscription); err != nil {
 		result.Err(utils.GetValidateErr(subscription, err)).Json(ctx)
 		return
@@ -44,20 +44,26 @@ func subscriptionState(ctx *gin.Context) {
 
 // 订阅/取消订阅
 func subscribe(ctx *gin.Context) {
-	var su services.SubscriptionService
+
 	var subscription model.Subscriptions
 	if err := ctx.ShouldBindJSON(&subscription); err != nil {
 		result.Err(utils.GetValidateErr(subscription, err)).Json(ctx)
 	}
 	userId := middleware.GetUserId(ctx)
 	subscription.SubscriberId = userId
-	msg := ""
+
+	if subscription.EventId == event.UserFollowingEvent && subscription.BusinessId == userId {
+		result.Err("关注用户不能是自己").Json(ctx)
+		return
+	}
+	var su services.SubscriptionService
+	msg := "取消订阅"
+	flag := false
 	if su.Subscribe(&subscription) {
 		msg = "订阅成功"
-	} else {
-		msg = "取消订阅"
+		flag = true
 	}
-	result.OkWithMsg(nil, msg).Json(ctx)
+	result.OkWithMsg(flag, msg).Json(ctx)
 }
 
 func eventList(ctx *gin.Context) {

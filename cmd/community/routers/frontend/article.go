@@ -29,12 +29,14 @@ type SearchArticle struct {
 }
 
 func InitArticleRouter(r *gin.Engine) {
-	group := r.Group("/community")
-	group.GET("/articles/:id", articleGet)
-	group.POST("/articles", articlePageBySearch)
-	group.POST("/articles/update", articleSave)
-	group.DELETE("/articles/:id", articleDeleted)
-	group.POST("/articles/like", articleLike)
+	group := r.Group("/community/articles")
+	group.GET("/:id", articleGet)
+	group.POST("", articlePageBySearch)
+	group.POST("/update", articleSave)
+	group.DELETE("/:id", articleDeleted)
+	group.POST("/like", articleLike)
+	group.GET("/like/state/:articleId", articleLikeState)
+
 	group.Use(middleware.Auth)
 }
 
@@ -102,8 +104,22 @@ func articleLike(c *gin.Context) {
 	}
 	userId := middleware.GetUserId(c)
 	var msg string = "取消点赞"
+	var likeState bool = false
 	if articleService.Like(articleId, userId) {
 		msg = "点赞"
+		likeState = true
 	}
-	result.OkWithMsg(nil, msg).Json(c)
+	result.OkWithMsg(likeState, msg).Json(c)
+}
+
+func articleLikeState(c *gin.Context) {
+	v := c.Param("articleId")
+	articleId, err := strconv.Atoi(v)
+	if err != nil {
+		result.Err(err.Error()).Json(c)
+		return
+	}
+	userId := middleware.GetUserId(c)
+	state := articleService.GetLikeState(articleId, userId)
+	result.Ok(state, "").Json(c)
 }

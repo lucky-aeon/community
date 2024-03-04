@@ -1,10 +1,10 @@
 package event
 
 const (
-	CommentUpdateEvent = iota // 文章下评论更新事件
-	UserFollowingEvent        // 用户关注的人发布文章事件
-	ArticleAt                 // 文章中@
-	CommentAt                 // 评论中@
+	CommentUpdateEvent = iota + 1 // 文章下评论更新事件
+	UserFollowingEvent            // 用户关注的人发布文章事件
+	ArticleAt                     // 文章中@
+	CommentAt                     // 评论中@
 )
 
 var events []*event

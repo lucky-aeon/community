@@ -37,3 +37,10 @@ export function apiArticleUpdate(data, add = false) {
 export function apiArticleDelete(id) {
     return axios.delete(`/community/articles/${id}`)
 }
+
+export function apiArticleLike(id){
+    return axios.post(`/community/articles/like?articleId=${id}`)
+}
+export function apiArticleLikeState(id){
+    return axios.get(`/community/articles/like/state/${id}`)
+}

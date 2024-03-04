@@ -63,8 +63,7 @@ func deleteComment(ctx *gin.Context) {
 // 返回文章下的评论(文章页面展示)
 func listCommentsByArticleId(ctx *gin.Context) {
 	articleId, err := strconv.Atoi(ctx.Param("articleId"))
-	p, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "15"))
+	p, limit := page.GetPage(ctx)
 
 	if err != nil {
 		result.Err(err.Error()).Json(ctx)

@@ -63,7 +63,7 @@ func (a *CommentDao) GetCommentsByArticleID(page, limit, businessId int) ([]*mod
 	// 查询所有根评论,只想要根评论
 	var parentIds []int
 	var comments []*model.Comments
-	model.Comment().Where("business_id", businessId).Order("created_at desc").Select("id").Group("root_id").Limit(limit).Offset(page - 1*limit).Find(&parentIds)
+	model.Comment().Where("business_id", businessId).Order("created_at desc").Select("id").Group("root_id").Limit(limit).Offset((page - 1) * limit).Find(&parentIds)
 
 	if len(parentIds) == 0 {
 		return comments, 0

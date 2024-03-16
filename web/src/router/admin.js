@@ -3,7 +3,8 @@
 import Code from "@/views/admin/code/Code.vue";
 import File from "@/views/admin/file/File.vue";
 import Member from "@/views/admin/member/Member.vue";
-import Log from "@/views/admin/log/Log.vue";
+import OperLog from "@/views/admin/log/OperLog.vue";
+import LoginLog from "@/views/admin/log/LoginLog.vue";
 
 const AdminRouters = [
     {
@@ -19,9 +20,14 @@ const AdminRouters = [
         component: Code
     },
     {
-        path: "log",
-        component: Log
+        path: "oper/log",
+        component: OperLog
+    },
+    {
+        path: "login/log",
+        component: LoginLog
     }
+
 ]
 
 export default AdminRouters

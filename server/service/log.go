@@ -35,6 +35,19 @@ func (*LogServices) InsertOperLog(log model.OperLogs) {
 	model.OperLog().Create(&log)
 }
 
-func (*LogServices) DeletesOperLogs(ids []int) {
-	model.OperLog().Where("id ? in", ids).Delete(model.OperLogs{})
+func (*LogServices) InsertLoginLog(log model.LoginLogs) {
+	model.LoginLog().Create(&log)
+}
+
+func (s *LogServices) GetPageLoginPage(page, limit int, logSearch model.LogSearch) (logs []model.LoginLogs, count int64) {
+	db := model.LoginLog()
+	if logSearch.Account != "" {
+		db.Where("account like ?", "%"+logSearch.Account+"%")
+	}
+	if logSearch.Ip != "" {
+		db.Where("ip like ?", "%"+logSearch.Ip+"%")
+	}
+	db.Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
+	db.Count(&count)
+	return
 }

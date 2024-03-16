@@ -90,7 +90,7 @@ const operData = ref([])
 const getOperLogList = (searchData)=>{
   apiOperLogList(1,15,searchData).then(({data})=>{
 
-    let temp = data.data.map(e=>{
+    let temp = data.list.map(e=>{
       return {
         ...e,
         key: e.id,

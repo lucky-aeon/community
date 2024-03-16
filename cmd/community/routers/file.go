@@ -60,6 +60,8 @@ func get_gmt_iso8601(expire_end int64) string {
 }
 
 func getPolicy(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Methods", "POST")
+	ctx.Header("Access-Control-Allow-Origin", "*")
 	now := time.Now().Unix()
 	expire_end := now + expire_time
 	var tokenExpire = get_gmt_iso8601(expire_end)
@@ -85,11 +87,12 @@ func getPolicy(ctx *gin.Context) {
 	io.WriteString(h, debyte)
 	signedStr := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	body := fmt.Sprintf("filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}&userId=%d", userId)
+	body := fmt.Sprintf("{\"fileKey\":${object},\"size\":${size},\"mimeType\":${mimeType},\"x:userId\":%d}", userId)
+
 	var callbackParam CallbackParam
 	callbackParam.CallbackUrl = ossConfig.Callback
 	callbackParam.CallbackBody = body
-	callbackParam.CallbackBodyType = "application/x-www-form-urlencoded"
+	callbackParam.CallbackBodyType = "application/json"
 	callback_str, err := json.Marshal(callbackParam)
 	if err != nil {
 		result.Err(err.Error()).Json(ctx)

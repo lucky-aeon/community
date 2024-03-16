@@ -23,11 +23,17 @@ func (*UserService) GetUserById(id int) *model.Users {
 // get user information
 func (*UserService) GetUserSimpleById(id int) *model.UserSimple {
 	user := userDao.QueryUser(&model.Users{ID: id})
+	role := "none"
+	model.InviteCode().Where("code = ?", user.InviteCode).
+		Joins("JOIN member_infos ON member_infos.id = invite_codes.member_id").
+		Select("member_infos.name").Limit(1).Scan(&role)
 	return &model.UserSimple{
 		UId:     user.ID,
 		UName:   user.Name,
 		UDesc:   user.Desc,
 		UAvatar: utils.BuildFileUrl(user.Avatar),
+		Role:    role,
+		Account: user.Account,
 	}
 }
 

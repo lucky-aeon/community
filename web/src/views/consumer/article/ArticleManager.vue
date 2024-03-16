@@ -1,6 +1,6 @@
 <template>
     <ARow style="margin-top: 10px;" :gutter="10">
-        <ACol :span="20">
+        <ACol :span="19">
             <a-space size="small">
                 <ACard hoverable><a-statistic title="喜欢人数" :value="userStatistics.likeCount" show-group-separator /></ACard>
                 <ACard hoverable><a-statistic title="文章数量" :value="userStatistics.articleCount" show-group-separator />
@@ -8,15 +8,15 @@
             </a-space>
             <ArticleListCom style="margin-top: 10px;" :queryData="queryData" />
         </ACol>
-        <ACol :span="4">
+        <ACol :span="5">
             <ASpace direction="vertical" style="width: 100%;">
                 <ACard size="small" hoverable>
                     <AButton long type="primary" @click="editArticle.show=true">发布文章</AButton>
                 </ACard>
 
                 <ACard title="标签" extra="2 个">
-                    <ASpace>
-                        <ATag>标签</ATag>
+                    <ASpace wrap>
+                        <ATag v-for="tagItem in userStore.userTags" :key="tagItem.TagId">{{ tagItem.TagName }}({{ tagItem.ArticleCount }})</ATag>
                     </ASpace>
                 </ACard>
             </ASpace>

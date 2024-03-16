@@ -25,6 +25,8 @@ type UserSimple struct {
 	UName   string `json:"name" gorm:"column:name"`
 	UDesc   string `json:"desc" gorm:"column:desc"`
 	UAvatar string `json:"avatar" gorm:"column:avatar"`
+	Role    string `json:"role" gorm:"column:u_role"`
+	Account string `json:"account" gorm:"account"`
 }
 
 func User() *gorm.DB {

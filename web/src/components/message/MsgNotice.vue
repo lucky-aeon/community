@@ -36,6 +36,10 @@ const props = defineProps({
   msgState: {
     type: Number,
     default: 0
+  },
+  reload: {
+    type: Number,
+    default: 0
   }
 })
 const dataSource = ref([])

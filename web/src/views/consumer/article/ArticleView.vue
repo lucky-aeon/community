@@ -11,7 +11,10 @@
       </template>
       <template #subtitle>
         <a-space>
-          <span>作者: {{ articleData.user.name }}</span>
+          
+          <span><a-avatar :image-url="articleData.user.avatar" :style="{ marginRight: '8px', backgroundColor: '#165DFF' }" :size="28">
+                load
+              </a-avatar>{{ articleData.user.name }}</span>
           <span>时间: {{ articleData.updatedAt }}</span>
         </a-space>
       </template>
@@ -55,16 +58,15 @@
 </template>
 
 <script setup>
-import { IconThumbUp,IconThumbUpFill, IconDown } from '@arco-design/web-vue/es/icon';
-import {apiArticleLike, apiArticleLikeState, apiArticleView} from '@/apis/article';
+import { apiSubscribe, apiSubscribeState, } from "@/apis/apiSubscribe.js";
+import { apiArticleLike, apiArticleLikeState, apiArticleView } from '@/apis/article';
 import CommentEdit from '@/components/comment/CommentEdit.vue';
 import CommentList from '@/components/comment/CommentList.vue';
+import { IconDown, IconThumbUp, IconThumbUpFill } from '@arco-design/web-vue/es/icon';
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
 import { nextTick, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
-import {IconNotification} from "@arco-design/web-vue/es/icon/index.js";
-import {apiSubscribe, apiSubscribeState,} from "@/apis/apiSubscribe.js";
 var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
   makeHtml(str) {
     console.warn('custom hook', 'hello');
@@ -178,6 +180,7 @@ onMounted(() => {
     nextTick(() => {
       cherryConfig.value = articleData.value.content
       new Cherry(cherryConfig);
+      setTimeout(()=> window.scrollTo(0,0), 1)
     })
     const id = articleData.value.id
     apiArticleLikeState(id).then((data)=>{

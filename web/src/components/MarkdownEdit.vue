@@ -81,7 +81,7 @@ var cherryConfig = {
     },
     toolbars: {
         toc: (props.showNav ? {
-            updateLocationHash: true, // 要不要更新URL的hash
+            updateLocationHash: false, // 要不要更新URL的hash
             defaultModel: 'full', // pure: 精简模式/缩略模式，只有一排小点； full: 完整模式，会展示所有标题
         } : undefined),
       toolbarRight: ['fullScreen','|','theme'],

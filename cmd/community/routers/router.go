@@ -11,13 +11,14 @@ import (
 func InitFrontedRouter(r *gin.Engine) {
 
 	InitLoginRegisterRouters(r)
-	//r.Use(middleware.Auth) todo
+	//r.Use(middleware.Auth)
 	InitFileRouters(r)
 	frontend.InitUserRouters(r)
 	frontend.InitArticleRouter(r)
 	frontend.InitTypeRouters(r)
 	frontend.InitSubscriptionRouters(r)
 	frontend.InitMessageRouters(r)
+	frontend.InitArticleTagRouter(r)
 	backend.InitTypeRouters(r)
 	backend.InitCodeRouters(r)
 	backend.InitFileRouters(r)
@@ -26,5 +27,4 @@ func InitFrontedRouter(r *gin.Engine) {
 	backend.InitMemberRouters(r)
 	backend.InitMessageRouters(r)
 	InitCommentRouters(r)
-	frontend.InitArticleTagRouter(r)
 }

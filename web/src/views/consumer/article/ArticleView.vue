@@ -62,6 +62,7 @@ import { apiSubscribe, apiSubscribeState, } from "@/apis/apiSubscribe.js";
 import { apiArticleLike, apiArticleLikeState, apiArticleView } from '@/apis/article';
 import CommentEdit from '@/components/comment/CommentEdit.vue';
 import CommentList from '@/components/comment/CommentList.vue';
+import router from "@/router";
 import { IconDown, IconThumbUp, IconThumbUpFill } from '@arco-design/web-vue/es/icon';
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
@@ -175,7 +176,7 @@ const articleSubscribe = ref("订阅文章")
 const userSubscribe = ref("订阅用户")
 
 onMounted(() => {
-  apiArticleView(route.params.id).then(({ data }) => {
+  apiArticleView(route.params.id).then(({ data}) => {
     articleData.value = data
     nextTick(() => {
       cherryConfig.value = articleData.value.content
@@ -192,6 +193,8 @@ onMounted(() => {
     apiSubscribeState(2,id).then((data)=>{
       userSubscribe.value = data.data ? "用户已订阅" : "订阅用户"
     })
+  }).catch(()=>{
+    router.back()
   })
 
 })
@@ -200,7 +203,6 @@ function like(id){
   apiArticleLike(id).then((data)=>{
     articleData.value.like += (data.data ? 1 :-1)
     likeState.value = data.data
-    console.log(articleData.value.like)
   })
 
 }

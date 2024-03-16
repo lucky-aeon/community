@@ -6,23 +6,34 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
-	"strconv"
-	"xhyovo.cn/community/pkg/oss"
-	"xhyovo.cn/community/server/model"
-	services "xhyovo.cn/community/server/service"
-
+	"github.com/gin-gonic/gin"
 	"hash"
 	"io"
-
-	"github.com/gin-gonic/gin"
+	"log"
+	"strconv"
 	"time"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/config"
+	"xhyovo.cn/community/pkg/oss"
 	"xhyovo.cn/community/pkg/result"
+	xt "xhyovo.cn/community/pkg/time"
+	"xhyovo.cn/community/server/model"
+	services "xhyovo.cn/community/server/service"
 )
 
 var expire_time int64 = 30
+
+type EscapeError string
+
+func (e EscapeError) Error() string {
+	return "invalid URL escape " + strconv.Quote(string(e))
+}
+
+type InvalidHostError string
+
+func (e InvalidHostError) Error() string {
+	return "invalid character " + strconv.Quote(string(e)) + " in host name"
+}
 
 type ConfigStruct struct {
 	Expiration string     `json:"expiration"`
@@ -47,10 +58,9 @@ type CallbackParam struct {
 
 func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
-
 	group.GET("/policy", getPolicy)
 	group.GET("/singUrl", getUrl)
-	group.POST("/upload", upload)
+	group.POST("/upload", uploadCallback)
 }
 
 func get_gmt_iso8601(expire_end int64) string {
@@ -84,11 +94,12 @@ func getPolicy(ctx *gin.Context) {
 	io.WriteString(h, debyte)
 	signedStr := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	body := fmt.Sprintf("filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}&userId=%d", userId)
+	body := fmt.Sprintf("{\"fileKey\":${object},\"size\":${size},\"mimeType\":${mimeType},\"x:userId\":%d}", userId)
+
 	var callbackParam CallbackParam
 	callbackParam.CallbackUrl = ossConfig.Callback
 	callbackParam.CallbackBody = body
-	callbackParam.CallbackBodyType = "application/x-www-form-urlencoded"
+	callbackParam.CallbackBodyType = "application/json"
 	callback_str, err := json.Marshal(callbackParam)
 	if err != nil {
 		result.Err(err.Error()).Json(ctx)
@@ -98,7 +109,7 @@ func getPolicy(ctx *gin.Context) {
 
 	var policyToken PolicyToken
 	policyToken.AccessKeyId = ossConfig.AccessKey
-	policyToken.Host = "http://" + ossConfig.Bucket + "." + ossConfig.Endpoint
+	policyToken.Host = ossConfig.Endpoint
 	policyToken.Expire = expire_end
 	policyToken.Signature = string(signedStr)
 	policyToken.Directory = prefix
@@ -123,9 +134,10 @@ func getUrl(ctx *gin.Context) {
 	result.Ok(singUrl, "").Json(ctx)
 }
 
-func upload(ctx *gin.Context) {
+func uploadCallback(ctx *gin.Context) {
 
 	file := &model.Files{}
+
 	if err := ctx.ShouldBindJSON(&file); err != nil {
 		result.Err(err.Error()).Json(ctx)
 		return
@@ -146,7 +158,8 @@ func upload(ctx *gin.Context) {
 	}
 
 	file.UserId = middleware.GetUserId(ctx)
-
+	file.CreatedAt = xt.Now()
+	file.UpdatedAt = xt.Now()
 	var fileS services.FileService
 	fileS.Save(file)
 	result.Ok(nil, "").Json(ctx)

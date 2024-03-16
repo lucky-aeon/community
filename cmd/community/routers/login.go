@@ -3,6 +3,8 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/cache"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	services "xhyovo.cn/community/server/service"
@@ -16,7 +18,7 @@ type registerForm struct {
 }
 
 type loginForm struct {
-	Account  string `binding:"required" json:"account" msg:"账号不能为空"`
+	Account  string `binding:"email" json:"account" msg:"邮箱格式错误"`
 	Password string `binding:"required" json:"password" msg:"密码不能为空"`
 }
 
@@ -27,9 +29,16 @@ func InitLoginRegisterRouters(ctx *gin.Engine) {
 }
 
 func Login(c *gin.Context) {
+
 	var form loginForm
 	if err := c.ShouldBindJSON(&form); err != nil {
 		result.Err(utils.GetValidateErr(form, err)).Json(c)
+		return
+	}
+
+	key := constant.LIMIT_LOGIN + form.Account
+	if !cache.CountLimit(key, 5, constant.TTL_LIMIT_lOGIN) {
+		result.Err("操作次数过多,请稍后重试").Json(c)
 		return
 	}
 	user, err := services.Login(form.Account, form.Password)

@@ -1,6 +1,6 @@
 <template>
   <a-tabs default-active-key="1">
-    <a-tab-pane key="1" title="Tab 1">
+    <a-tab-pane key="1" title="个人信息">
       <a-space direction="horizontal" size="large" :style="{width: '600px'}" >
         <a-form :model="form" :style="{ width: '600px' }" @submit="editUserInfo">
           <a-form-item field="name" label="昵称" :rules="[{required:true,message:'name is required'}]">
@@ -32,7 +32,7 @@
         </a-form>
       </a-space>
     </a-tab-pane>
-    <a-tab-pane key="2" title="Tab 2">
+    <a-tab-pane key="2" title="账号管理">
       <a-space size="large" :style="{width: '600px'}" >
         <a-form :model="form1"  :style="{ width: '600px' }" @submit="editPswd">
           <a-form-item field="oldPassword" label="旧密码" :rules="[{required:true,message:'请输入旧密码'}]">

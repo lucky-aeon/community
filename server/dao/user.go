@@ -43,7 +43,10 @@ func (*UserDao) QueryUser(user *model.Users) *model.Users {
 }
 
 func (*UserDao) QueryUserSimple(user *model.Users) (result model.UserSimple, err error) {
-	err = model.User().Where(&user).Find(&result).Error
+	err = model.User().
+		Joins("JOIN invite_codes ON invite_codes.code = users.invite_code").
+		Joins("JOIN member_infos ON member_infos.id = invite_codes.member_id").
+		Select("users.*, member_infos.name as u_role").Where(&user).Find(&result).Error
 	result.UAvatar = utils.BuildFileUrl(result.UAvatar)
 	return
 }

@@ -1,4 +1,5 @@
 import usePermission from "@/stores/PermissionStore";
+import { useUserStore } from "@/stores/UserStore";
 import { isLogin } from "@/utils/auth";
 import LoginPageVue from "@/views/LoginPage.vue";
 import AdminLayout from "@/views/layout/AdminLayout.vue";
@@ -43,8 +44,12 @@ const router = createRouter({
     ]
 })
 router.beforeEach((to, _, next) => {
+    const userStore = useUserStore()
     async function crossroads() {
         const Permission = usePermission();
+        if (!userStore.userInfo.role) {
+            await userStore.refreshInfo()
+        }
         if (Permission.accessRouter(to)) next();
         else {
             Message.error("您的等级不够，没有权限访问该页面!")
@@ -55,16 +60,16 @@ router.beforeEach((to, _, next) => {
     if (to.meta.requiresAuth) {
         // 是否登录
         if (!isLogin()) {
-            console.log("???")
             next({ path: '/auth' })
             return
         } else {
+
             crossroads()
         }
     } else if (to.meta.requiresAnonymous && isLogin()) {
         next({ path: '/user' })
         return
-    }else{
+    } else {
         next()
         return
     }

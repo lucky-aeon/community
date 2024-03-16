@@ -30,14 +30,13 @@ type SearchArticle struct {
 
 func InitArticleRouter(r *gin.Engine) {
 	group := r.Group("/community/articles")
+	group.Use(middleware.OperLogger())
 	group.GET("/:id", articleGet)
 	group.POST("", articlePageBySearch)
 	group.POST("/update", articleSave)
 	group.DELETE("/:id", articleDeleted)
 	group.POST("/like", articleLike)
 	group.GET("/like/state/:articleId", articleLikeState)
-
-	group.Use(middleware.Auth)
 }
 
 func articlePageBySearch(ctx *gin.Context) {
@@ -62,7 +61,7 @@ func articleGet(c *gin.Context) {
 		result.Err("未找到相关文章").Json(c)
 		return
 	}
-	result.Auto(articleService.GetArticleData(articleId)).ErrMsg("未找到相关文章").Json(c)
+	result.Auto(articleService.GetArticleData(articleId, middleware.GetUserId(c))).ErrMsg("未找到相关文章").Json(c)
 }
 
 func articleDeleted(c *gin.Context) {
@@ -87,7 +86,7 @@ func articleSave(c *gin.Context) {
 		result.Err(utils.GetValidateErr(o, err)).Json(c)
 		return
 	}
-	articleData, err := articleService.GetArticleData(id)
+	articleData, err := articleService.GetArticleData(id, o.UserId)
 	if err != nil {
 		result.Err(err.Error()).Json(c)
 		return

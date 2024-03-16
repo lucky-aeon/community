@@ -14,7 +14,7 @@ import (
 
 func InitCommentRouters(g *gin.Engine) {
 	group := g.Group("/community/comments")
-
+	group.Use(middleware.OperLogger())
 	group.POST("/comment", comment)
 	group.DELETE("/:id", deleteComment)
 	group.GET("/byArticleId/:articleId", listCommentsByArticleId)

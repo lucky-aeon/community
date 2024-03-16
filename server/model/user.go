@@ -29,6 +29,11 @@ type UserSimple struct {
 	Account string `json:"account" gorm:"account"`
 }
 
+type LoginForm struct {
+	Account  string `binding:"email" json:"account" msg:"邮箱格式错误"`
+	Password string `binding:"required" json:"password" msg:"密码不能为空"`
+}
+
 func User() *gorm.DB {
 	return mysql.GetInstance().Model(&Users{})
 }

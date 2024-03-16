@@ -3,6 +3,7 @@ package middleware
 import (
 	"errors"
 	"time"
+	"xhyovo.cn/community/pkg/result"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
@@ -21,20 +22,19 @@ type JwtCustomClaims struct {
 
 func GetUserId(ctx *gin.Context) int {
 
-	//return ctx.Value(authorization).(int)
-	return 1
+	return ctx.Value(authorization).(int)
 }
 
 func Auth(ctx *gin.Context) {
-	/*token := ctx.GetHeader(authorization)
+	token := ctx.GetHeader(authorization)
 	claims, err := ParseToken(token)
 	if err != nil {
 		result.Err(err.Error()).Json(ctx)
+		ctx.Abort()
 		return
 	}
-	ctx.Set(authorization, claims.ID)*/
-	ctx.Set(authorization, 3)
-
+	ctx.Set(authorization, claims.ID)
+	ctx.Next()
 }
 func GenerateToken(id int, name string) (string, error) {
 	// 初始化

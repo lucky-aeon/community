@@ -3,6 +3,7 @@ package backend
 import (
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/pkg/utils/page"
@@ -12,6 +13,7 @@ import (
 
 func InitCodeRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/code")
+	group.Use(middleware.OperLogger())
 	group.GET("", listCode)
 	group.POST("/generate", generate)
 	group.DELETE("/:code", deleteCode)

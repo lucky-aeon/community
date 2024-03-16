@@ -6,34 +6,24 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"hash"
-	"io"
 	"log"
 	"strconv"
-	"time"
-	"xhyovo.cn/community/cmd/community/middleware"
-	"xhyovo.cn/community/pkg/config"
 	"xhyovo.cn/community/pkg/oss"
-	"xhyovo.cn/community/pkg/result"
 	xt "xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
+
+	"hash"
+	"io"
+
+	"github.com/gin-gonic/gin"
+	"time"
+	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/config"
+	"xhyovo.cn/community/pkg/result"
 )
 
 var expire_time int64 = 30
-
-type EscapeError string
-
-func (e EscapeError) Error() string {
-	return "invalid URL escape " + strconv.Quote(string(e))
-}
-
-type InvalidHostError string
-
-func (e InvalidHostError) Error() string {
-	return "invalid character " + strconv.Quote(string(e)) + " in host name"
-}
 
 type ConfigStruct struct {
 	Expiration string     `json:"expiration"`
@@ -58,6 +48,7 @@ type CallbackParam struct {
 
 func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
+	group.Use(middleware.OperLogger())
 	group.GET("/policy", getPolicy)
 	group.GET("/singUrl", getUrl)
 	group.POST("/upload", uploadCallback)
@@ -69,6 +60,8 @@ func get_gmt_iso8601(expire_end int64) string {
 }
 
 func getPolicy(ctx *gin.Context) {
+	ctx.Header("Access-Control-Allow-Methods", "POST")
+	ctx.Header("Access-Control-Allow-Origin", "*")
 	now := time.Now().Unix()
 	expire_end := now + expire_time
 	var tokenExpire = get_gmt_iso8601(expire_end)

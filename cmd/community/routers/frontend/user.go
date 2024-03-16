@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+
 	"xhyovo.cn/community/cmd/community/middleware"
 
 	services "xhyovo.cn/community/server/service"
@@ -49,7 +50,7 @@ func getUserInfo(ctx *gin.Context) {
 	if err != nil {
 		uId = middleware.GetUserId(ctx)
 	}
-	user := userService.GetUserById(uId)
+	user := userService.GetUserSimpleById(uId)
 
 	result.Ok(user, "").Json(ctx)
 }

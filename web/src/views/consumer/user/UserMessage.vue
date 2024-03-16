@@ -12,18 +12,19 @@
       </a-button>
     </template>
   </a-tabs>
-  <msg-notice :msg-type="msgType"/>
+  <msg-notice :msg-type="msgType" :reload="msgReload"/>
 
 </template>
 <script setup>
+import { apiClearUnReadMsg } from '@/apis/message.js';
 import MsgNotice from "@/components/message/MsgNotice.vue";
-import { apiClearUnReadMsg} from '@/apis/message.js';
 
-import {ref} from "vue";
+import { ref } from "vue";
 
 const msgType = ref(1)
+const msgReload = ref(0)
 function clearMsg(){
-  apiClearUnReadMsg(msgType.value)
+  apiClearUnReadMsg(msgType.value).then(({ok})=> {if(ok) {msgReload.value++}})
 }
 </script>
 <style scoped>

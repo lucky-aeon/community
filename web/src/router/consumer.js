@@ -1,10 +1,8 @@
 // 用户前台路由
 
-import File from "@/views/admin/file/File.vue";
-import Member from "@/views/admin/member/Member.vue";
 import ArticleListVue from '@/views/consumer/article/ArticleList.vue';
 import ArticleMainVue from '@/views/consumer/article/ArticleMain.vue';
-import Code from "@/views/admin/code/Code.vue";
+
 
 
 const ConsumerRouters = [
@@ -56,18 +54,6 @@ const ConsumerRouters = [
                 component: () => import('@/views/consumer/user/UserSubscribe.vue'),
             }
         ]
-    },
-    {
-        path: "/member",
-        component: Member
-    },
-    {
-        path: "/file",
-        component: File
-    },
-    {
-        path: "/code",
-        component: Code
     }
 ]
 export default ConsumerRouters

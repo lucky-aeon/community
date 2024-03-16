@@ -16,10 +16,10 @@ import (
 type ArticleService struct {
 }
 
-func (*ArticleService) GetArticleData(id int) (data *model.ArticleData, err error) {
+func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, err error) {
 	var a model.Articles
-	model.Article().Where("id = ? and state != ?", id, constant.Draft).First(&a)
-	if a.ID == 0 {
+	model.Article().Where("id = ?", id).First(&a)
+	if a.ID == 0 && a.UserId != userId && a.State == constant.Draft {
 		return nil, errors.New("文章不存在")
 	}
 	var tags []*model.ArticleTagSimple

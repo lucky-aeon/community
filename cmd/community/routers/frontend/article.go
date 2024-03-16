@@ -62,7 +62,7 @@ func articleGet(c *gin.Context) {
 		result.Err("未找到相关文章").Json(c)
 		return
 	}
-	result.Auto(articleService.GetArticleData(articleId)).ErrMsg("未找到相关文章").Json(c)
+	result.Auto(articleService.GetArticleData(articleId, middleware.GetUserId(c))).ErrMsg("未找到相关文章").Json(c)
 }
 
 func articleDeleted(c *gin.Context) {
@@ -87,7 +87,7 @@ func articleSave(c *gin.Context) {
 		result.Err(utils.GetValidateErr(o, err)).Json(c)
 		return
 	}
-	articleData, err := articleService.GetArticleData(id)
+	articleData, err := articleService.GetArticleData(id, o.UserId)
 	if err != nil {
 		result.Err(err.Error()).Json(c)
 		return

@@ -55,6 +55,7 @@ router.beforeEach((to, _, next) => {
     if (to.meta.requiresAuth) {
         // 是否登录
         if (!isLogin()) {
+            console.log("???")
             next({ path: '/auth' })
             return
         } else {
@@ -62,6 +63,9 @@ router.beforeEach((to, _, next) => {
         }
     } else if (to.meta.requiresAnonymous && isLogin()) {
         next({ path: '/user' })
+        return
+    }else{
+        next()
         return
     }
 })

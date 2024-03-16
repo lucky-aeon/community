@@ -6,34 +6,24 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"hash"
-	"io"
 	"log"
 	"strconv"
-	"time"
-	"xhyovo.cn/community/cmd/community/middleware"
-	"xhyovo.cn/community/pkg/config"
 	"xhyovo.cn/community/pkg/oss"
-	"xhyovo.cn/community/pkg/result"
 	xt "xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
+
+	"hash"
+	"io"
+
+	"github.com/gin-gonic/gin"
+	"time"
+	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/config"
+	"xhyovo.cn/community/pkg/result"
 )
 
 var expire_time int64 = 30
-
-type EscapeError string
-
-func (e EscapeError) Error() string {
-	return "invalid URL escape " + strconv.Quote(string(e))
-}
-
-type InvalidHostError string
-
-func (e InvalidHostError) Error() string {
-	return "invalid character " + strconv.Quote(string(e)) + " in host name"
-}
 
 type ConfigStruct struct {
 	Expiration string     `json:"expiration"`
@@ -58,6 +48,7 @@ type CallbackParam struct {
 
 func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
+	group.Use(middleware.OperLogger())
 	group.GET("/policy", getPolicy)
 	group.GET("/singUrl", getUrl)
 	group.POST("/upload", uploadCallback)
@@ -94,12 +85,11 @@ func getPolicy(ctx *gin.Context) {
 	io.WriteString(h, debyte)
 	signedStr := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	body := fmt.Sprintf("{\"fileKey\":${object},\"size\":${size},\"mimeType\":${mimeType},\"x:userId\":%d}", userId)
-
+	body := fmt.Sprintf("filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}&userId=%d", userId)
 	var callbackParam CallbackParam
 	callbackParam.CallbackUrl = ossConfig.Callback
 	callbackParam.CallbackBody = body
-	callbackParam.CallbackBodyType = "application/json"
+	callbackParam.CallbackBodyType = "application/x-www-form-urlencoded"
 	callback_str, err := json.Marshal(callbackParam)
 	if err != nil {
 		result.Err(err.Error()).Json(ctx)

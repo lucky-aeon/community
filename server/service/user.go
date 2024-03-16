@@ -178,3 +178,9 @@ func (s *UserService) Statistics(userId int) (m map[string]interface{}) {
 	m["likeCount"] = likeCount
 	return
 }
+
+func (s *UserService) SearchNameSelectId(name string) (ids []int) {
+
+	model.User().Where("name like ?", "%"+name+"%").Select("id").Find(&ids)
+	return
+}

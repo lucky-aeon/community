@@ -1,21 +1,40 @@
 package services
 
-import "xhyovo.cn/community/server/model"
+import (
+	"xhyovo.cn/community/server/model"
+)
 
-type Log struct {
+type LogServices struct {
 }
 
-func (*Log) GetPageOperLog(page, limit int, begin, end string) (logs []model.OperLogs, count int64) {
+func (*LogServices) GetPageOperLog(page, limit int, logSearch model.LogSearch) (logs []model.OperLogs, count int64) {
 	db := model.OperLog()
-	db.Limit(limit).Where("created_at >= ? and created_at <= ?", begin, end).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
+	if logSearch.RequestMethod != "" {
+		db.Where("request_method = ?", logSearch.RequestMethod)
+	}
+	if logSearch.RequestInfo != "" {
+		db.Where("request_info like ?", "%s"+logSearch.RequestInfo+"%s")
+	}
+	if logSearch.Ip != "" {
+		db.Where("ip like ?", "%s"+logSearch.Ip+"%s")
+	}
+	if logSearch.StartTime != "" {
+		db.Where("created_at <= ? and ? >= created_at", logSearch.StartTime, logSearch.EndTime)
+	}
+	if logSearch.UserName != "" {
+		var userS UserService
+		ids := userS.SearchNameSelectId(logSearch.UserName)
+		db.Where("user_id in ?", ids)
+	}
+	db.Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
 	db.Count(&count)
 	return
 }
 
-func (*Log) InsertOperLog(log model.OperLogs) {
+func (*LogServices) InsertOperLog(log model.OperLogs) {
 	model.OperLog().Create(&log)
 }
 
-func (*Log) DeletesOperLogs(id []int) {
-	model.OperLog().Where("id ? in").Delete(model.OperLogs{})
+func (*LogServices) DeletesOperLogs(ids []int) {
+	model.OperLog().Where("id ? in", ids).Delete(model.OperLogs{})
 }

@@ -13,6 +13,7 @@ import (
 
 func InitSubscriptionRouters(r *gin.Engine) {
 	group := r.Group("/community")
+	group.Use(middleware.OperLogger())
 	group.GET("/subscription", listSubscription)
 	group.GET("/event", eventList)
 	group.POST("/subscription/state", subscriptionState)

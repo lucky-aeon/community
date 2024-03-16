@@ -5,12 +5,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"time"
+	xt "xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
 )
 
-var log services.Log
+var log services.LogServices
 
 // 自定义一个结构体，实现 gin.ResponseWriter interface
 type responseWriter struct {
@@ -51,13 +52,14 @@ func OperLogger() gin.HandlerFunc {
 		}
 
 		logs := model.OperLogs{
-			ExecAt:       execTime.String(),
-			RequestType:  c.Request.Method,
-			RequestInfo:  c.Request.URL.Path,
-			RequestBody:  string(reqBytes),
-			UserId:       GetUserId(c),
-			Ip:           utils.GetClientIP(c.Request),
-			ResponseData: body,
+			ExecAt:        execTime.String(),
+			RequestMethod: c.Request.Method,
+			RequestInfo:   c.Request.URL.Path,
+			RequestBody:   string(reqBytes),
+			UserId:        GetUserId(c),
+			Ip:            utils.GetClientIP(c.Request),
+			ResponseData:  body,
+			CreatedAt:     xt.Now(),
 		}
 
 		log.InsertOperLog(logs)

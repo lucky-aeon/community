@@ -18,8 +18,8 @@
 
             <a-tooltip content="消息通知">
 
-              <AButton type="text"><a-badge :count="currentUnReadCount" :offset="[5, -5]"><icon-notification size="large" class="nav-btn"
-                    type="outline" :shape="'circle'" @click="setPopoverVisible" /></a-badge></AButton>
+              <AButton type="text" @click="setPopoverVisible"><a-badge :count="currentUnReadCount" :offset="[5, -5]"><icon-notification size="large" class="nav-btn"
+                    type="outline" :shape="'circle'" /></a-badge></AButton>
 
             </a-tooltip>
 

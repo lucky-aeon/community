@@ -43,11 +43,15 @@ func (*LogServices) GetPageOperLog(page, limit int, logSearch model.LogSearch) (
 }
 
 func (*LogServices) InsertOperLog(log model.OperLogs) {
-	model.OperLog().Create(&log)
+	go func(log model.OperLogs) {
+		model.OperLog().Create(&log)
+	}(log)
 }
 
 func (*LogServices) InsertLoginLog(log model.LoginLogs) {
-	model.LoginLog().Create(&log)
+	go func(log model.LoginLogs) {
+		model.LoginLog().Create(&log)
+	}(log)
 }
 
 func (s *LogServices) GetPageLoginPage(page, limit int, logSearch model.LogSearch) (logs []model.LoginLogs, count int64) {

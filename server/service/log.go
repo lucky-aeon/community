@@ -14,10 +14,10 @@ func (*LogServices) GetPageOperLog(page, limit int, logSearch model.LogSearch) (
 		db.Where("request_method = ?", logSearch.RequestMethod)
 	}
 	if logSearch.RequestInfo != "" {
-		db.Where("request_info like ?", "%s"+logSearch.RequestInfo+"%s")
+		db.Where("request_info like ?", "%"+logSearch.RequestInfo+"%")
 	}
 	if logSearch.Ip != "" {
-		db.Where("ip like ?", "%s"+logSearch.Ip+"%s")
+		db.Where("ip like ?", "%"+logSearch.Ip+"%")
 	}
 	if logSearch.StartTime != "" {
 		db.Where("created_at <= ? and ? >= created_at", logSearch.StartTime, logSearch.EndTime)

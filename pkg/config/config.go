@@ -46,7 +46,7 @@ func GetInstance() *AppConfig {
 func Init() {
 	appConfig := &AppConfig{}
 
-	file, err := os.ReadFile("cmd/community/config.yaml")
+	file, err := os.ReadFile("config.yaml")
 	if err != nil {
 		panic(err.Error)
 	}

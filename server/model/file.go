@@ -17,7 +17,7 @@ type Files struct {
 	CreatedAt  time.LocalTime `json:"createdAt"`
 	UpdatedAt  time.LocalTime `json:"updatedAt"`
 	UserName   string         `json:"userName" gorm:"-"`
-	SizeName   string         `json:"sizeName"`
+	SizeName   string         `json:"sizeName" gorm:"-"`
 }
 
 func File() *gorm.DB {

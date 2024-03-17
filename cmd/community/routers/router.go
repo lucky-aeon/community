@@ -12,8 +12,8 @@ import (
 func InitFrontedRouter(r *gin.Engine) {
 
 	InitLoginRegisterRouters(r)
-	r.Use(middleware.Auth)
 	InitFileRouters(r)
+	r.Use(middleware.Auth)
 	frontend.InitUserRouters(r)
 	frontend.InitArticleRouter(r)
 	frontend.InitTypeRouters(r)

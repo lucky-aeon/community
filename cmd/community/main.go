@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
 	"log"
+
+	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/routers"
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/config"

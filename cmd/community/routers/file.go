@@ -6,16 +6,15 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"log"
+	"hash"
+	"io"
 	"net/http"
 	"strconv"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/oss"
 	xt "xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
-
-	"hash"
-	"io"
 
 	"github.com/gin-gonic/gin"
 	"time"
@@ -49,6 +48,7 @@ type CallbackParam struct {
 
 func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
+	group.Use(middleware.OperLogger())
 	group.GET("/policy", getPolicy)
 	group.GET("/singUrl", getUrl)
 	group.POST("/upload", uploadCallback)
@@ -66,9 +66,9 @@ func getPolicy(ctx *gin.Context) {
 	expire_end := now + expire_time
 	var tokenExpire = get_gmt_iso8601(expire_end)
 
-	var userId int = middleware.GetUserId(ctx)
+	var userId = middleware.GetUserId(ctx)
 
-	var prefix string = strconv.Itoa(userId) + "/"
+	var prefix = strconv.Itoa(userId) + "/"
 
 	//create post policy json
 	var cf ConfigStruct
@@ -81,6 +81,11 @@ func getPolicy(ctx *gin.Context) {
 
 	//calucate signature
 	r, err := json.Marshal(cf)
+	if err != nil {
+		log.Warnln(err.Error())
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
 	debyte := base64.StdEncoding.EncodeToString(r)
 	ossConfig := config.GetInstance().OssConfig
 	h := hmac.New(func() hash.Hash { return sha1.New() }, []byte(ossConfig.SecretKey))
@@ -95,6 +100,7 @@ func getPolicy(ctx *gin.Context) {
 	callbackParam.CallbackBodyType = "application/json"
 	callback_str, err := json.Marshal(callbackParam)
 	if err != nil {
+		log.Warnln(err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
@@ -104,12 +110,12 @@ func getPolicy(ctx *gin.Context) {
 	policyToken.AccessKeyId = ossConfig.AccessKey
 	policyToken.Host = ossConfig.Endpoint
 	policyToken.Expire = expire_end
-	policyToken.Signature = string(signedStr)
+	policyToken.Signature = signedStr
 	policyToken.Directory = prefix
-	policyToken.Policy = string(debyte)
-	policyToken.Callback = string(callbackBase64)
-	//response, err := json.Marshal(policyToken)
+	policyToken.Policy = debyte
+	policyToken.Callback = callbackBase64
 	if err != nil {
+		log.Warnln(err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
@@ -120,6 +126,7 @@ func getPolicy(ctx *gin.Context) {
 func getUrl(ctx *gin.Context) {
 	fileKey := ctx.Query("fileKey")
 	if fileKey == "" {
+		log.Warnf("用户id: %d 获取 %s 失败,因为 %s 为空", middleware.GetUserId(ctx), fileKey, fileKey)
 		result.Err("fileKey 为空").Json(ctx)
 		return
 	}
@@ -132,6 +139,7 @@ func uploadCallback(ctx *gin.Context) {
 	file := &model.Files{}
 
 	if err := ctx.ShouldBindJSON(&file); err != nil {
+		log.Warnf("用户id: %d 上传文件 callback 解析参数失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
@@ -140,13 +148,13 @@ func uploadCallback(ctx *gin.Context) {
 	bucket := oss.GetInstance()
 	exist, err := bucket.IsObjectExist(file.FileKey)
 	if err != nil {
+		log.Warnf("用户id: %d 判断文件为空失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)
-		log.Fatal("判断文件不存在出现异常:", err.Error())
 		return
 	}
 	if !exist {
+		log.Warnf("用户id: %d 判断文件为空", middleware.GetUserId(ctx))
 		result.Err("文件不存在").Json(ctx)
-		log.Fatal("文件不存在", err.Error())
 		return
 	}
 

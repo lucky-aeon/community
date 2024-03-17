@@ -29,7 +29,7 @@ func main() {
 
 	err := r.Run(":8080")
 	if err != nil {
-		log.Warn(err)
+		log.Errorln(err)
 	}
 
 }

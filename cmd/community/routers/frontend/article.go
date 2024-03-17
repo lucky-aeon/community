@@ -3,6 +3,7 @@ package frontend
 import (
 	"strconv"
 	"xhyovo.cn/community/pkg/constant"
+	"xhyovo.cn/community/pkg/log"
 
 	"xhyovo.cn/community/pkg/utils"
 
@@ -33,9 +34,9 @@ func InitArticleRouter(r *gin.Engine) {
 	group.Use(middleware.OperLogger())
 	group.GET("/:id", articleGet)
 	group.POST("", articlePageBySearch)
-	group.POST("/update", articleSave)
-	group.DELETE("/:id", articleDeleted)
-	group.POST("/like", articleLike)
+	group.POST("/update", articleSave, middleware.OperLogger())
+	group.DELETE("/:id", articleDeleted, middleware.OperLogger())
+	group.POST("/like", articleLike, middleware.OperLogger())
 	group.GET("/like/state/:articleId", articleLikeState)
 }
 
@@ -43,6 +44,7 @@ func articlePageBySearch(ctx *gin.Context) {
 	// 获取所有分类
 	searchArticle := new(SearchArticle)
 	if err := ctx.ShouldBindBodyWith(searchArticle, binding.JSON); err != nil {
+		log.Warnln("用户id: %d 分页获取文章参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
@@ -58,6 +60,7 @@ func articlePageBySearch(ctx *gin.Context) {
 func articleGet(c *gin.Context) {
 	articleId, err := strconv.Atoi(c.Params.ByName("id"))
 	if err != nil || articleId < 1 {
+		log.Warnln("用户id: %d 未找到相关文章,文章id: %d err: %s", middleware.GetUserId(c), articleId, err.Error())
 		result.Err("未找到相关文章").Json(c)
 		return
 	}
@@ -68,6 +71,7 @@ func articleDeleted(c *gin.Context) {
 	id := c.Param("id")
 	articleId, _ := strconv.Atoi(id)
 	if err := articleService.Delete(articleId, middleware.GetUserId(c)); err != nil {
+		log.Warnf("用户id: %d 删除文章失败,文章id: %d ,err: %s", middleware.GetUserId(c), articleId, err.Error())
 		result.Err(err.Error()).Json(c)
 		return
 	}
@@ -77,17 +81,20 @@ func articleDeleted(c *gin.Context) {
 func articleSave(c *gin.Context) {
 	var o model.Articles
 	if err := c.ShouldBindJSON(&o); err != nil {
+		log.Warnf("用户id: %d 保存文章解析文章失败 ,err: %s", middleware.GetUserId(c), err.Error())
 		result.Err(err.Error()).Json(c)
 		return
 	}
 	o.UserId = middleware.GetUserId(c)
 	id, err := articleService.SaveArticle(o)
 	if err != nil {
+		log.Warnf("用户id: %d 保存文章失败,err: %s", middleware.GetUserId(c), err.Error())
 		result.Err(utils.GetValidateErr(o, err)).Json(c)
 		return
 	}
 	articleData, err := articleService.GetArticleData(id, o.UserId)
 	if err != nil {
+		log.Warn("用户id: %d 获取文章失败,文章id: %d ,err: %s", middleware.GetUserId(c), id, err.Error())
 		result.Err(err.Error()).Json(c)
 		return
 	}
@@ -98,6 +105,7 @@ func articleLike(c *gin.Context) {
 	v := c.Query("articleId")
 	articleId, err := strconv.Atoi(v)
 	if err != nil {
+		log.Warnf("用户id: %d 点赞文章失败,文章id: %d ,err: %s", middleware.GetUserId(c), articleId, err.Error())
 		result.Err(err.Error()).Json(c)
 		return
 	}
@@ -115,6 +123,7 @@ func articleLikeState(c *gin.Context) {
 	v := c.Param("articleId")
 	articleId, err := strconv.Atoi(v)
 	if err != nil {
+		log.Warnln("用户id: %d 获取文章点赞状态解析id失败,文章id: %d ,err: %s", middleware.GetUserId(c), articleId, err.Error())
 		result.Err(err.Error()).Json(c)
 		return
 	}

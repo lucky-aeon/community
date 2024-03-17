@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
+	"xhyovo.cn/community/pkg/log"
 )
 
 var instance *gorm.DB
@@ -25,6 +26,7 @@ func Init(username, password, address, database string) {
 	})
 
 	if err != nil {
+		log.Errorf("初始化 db 失败,err: %s", err.Error())
 		panic(err.Error())
 	}
 }

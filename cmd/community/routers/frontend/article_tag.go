@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"xhyovo.cn/community/cmd/community/middleware"
 	ginutils "xhyovo.cn/community/pkg/gin"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
@@ -19,8 +20,8 @@ func InitArticleTagRouter(r *gin.Engine) {
 	rg := r.Group("/community/tags")
 	rg.GET("", getArticleTags)
 	rg.GET("/hot", getHotTags)
-	rg.POST("", saveArticleTags)
-	rg.DELETE("/:tagId", deleteArticleTags)
+	rg.POST("", saveArticleTags, middleware.OperLogger())
+	rg.DELETE("/:tagId", deleteArticleTags, middleware.OperLogger())
 	rg.GET("/getTagArticleCount", getTagArticleCount)
 }
 
@@ -38,12 +39,14 @@ func getHotTags(r *gin.Context) {
 func saveArticleTags(c *gin.Context) {
 	var articleTag model.ArticleTags
 	if err := c.ShouldBindJSON(&articleTag); err != nil {
+		log.Warnln("用户id: %d 添加文章标签参数解析解析失败 ,err: %s", middleware.GetUserId(c), err.Error())
 		result.Err(utils.GetValidateErr(articleTag, err)).Json(c)
 		return
 	}
 	articleTag.UserId = middleware.GetUserId(c)
 	tag, err := articleTagService.CreateTag(articleTag)
 	if err != nil {
+		log.Warn("用户id: %d 添加文章标签失败,err: %s", middleware.GetUserId(c), err.Error())
 		result.Err(err.Error()).Json(c)
 		return
 	}
@@ -56,6 +59,7 @@ func deleteArticleTags(c *gin.Context) {
 	userId := middleware.GetUserId(c)
 
 	if err := articleTagService.DeleteTag(atoi, userId); err != nil {
+		log.Warnf("用户id: %d 删除文章标签失败,标签id: %d,err: %s", userId, atoi, err.Error())
 		result.Err(err.Error()).Json(c)
 		return
 	}

@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
@@ -13,11 +14,10 @@ import (
 
 func InitSubscriptionRouters(r *gin.Engine) {
 	group := r.Group("/community")
-	group.Use(middleware.OperLogger())
 	group.GET("/subscription", listSubscription)
 	group.GET("/event", eventList)
 	group.POST("/subscription/state", subscriptionState)
-	group.POST("/subscribe", subscribe)
+	group.POST("/subscribe", subscribe, middleware.OperLogger())
 }
 
 // 查看订阅列表
@@ -35,6 +35,7 @@ func subscriptionState(ctx *gin.Context) {
 	var su services.SubscriptionService
 	var subscription model.SubscriptionState
 	if err := ctx.ShouldBindJSON(&subscription); err != nil {
+		log.Warnln("用户id: %d 查看事件订阅状态参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(utils.GetValidateErr(subscription, err)).Json(ctx)
 		return
 	}
@@ -48,7 +49,9 @@ func subscribe(ctx *gin.Context) {
 
 	var subscription model.Subscriptions
 	if err := ctx.ShouldBindJSON(&subscription); err != nil {
+		log.Warnf("用户id: %d 订阅事件参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(utils.GetValidateErr(subscription, err)).Json(ctx)
+		return
 	}
 	userId := middleware.GetUserId(ctx)
 	subscription.SubscriberId = userId

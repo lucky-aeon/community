@@ -13,7 +13,6 @@ func InitFrontedRouter(r *gin.Engine) {
 
 	InitLoginRegisterRouters(r)
 	r.Use(middleware.Auth)
-	r.Use(middleware.OperLogger())
 	InitFileRouters(r)
 	frontend.InitUserRouters(r)
 	frontend.InitArticleRouter(r)

@@ -1,6 +1,7 @@
 package services
 
 import (
+	mapset "github.com/deckarep/golang-set/v2"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -28,6 +29,16 @@ func (*LogServices) GetPageOperLog(page, limit int, logSearch model.LogSearch) (
 	}
 	db.Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
 	db.Count(&count)
+	set := mapset.NewSet[int]()
+
+	for _, lo := range logs {
+		set.Add(lo.UserId)
+	}
+	var u UserService
+	userMap := u.ListByIdsToMap(set.ToSlice())
+	for i := range logs {
+		logs[i].UserName = userMap[logs[i].UserId].Name
+	}
 	return
 }
 

@@ -2,7 +2,6 @@ package backend
 
 import (
 	"github.com/gin-gonic/gin"
-	"strings"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
 	"xhyovo.cn/community/server/model"
@@ -52,32 +51,4 @@ func listLoginLogs(ctx *gin.Context) {
 type DeviceInfo struct {
 	Device  string
 	Browser string
-}
-
-func parseUserAgent(userAgent string) *DeviceInfo {
-	deviceInfo := &DeviceInfo{}
-
-	// 解析设备类型
-	if strings.Contains(userAgent, "Mobile") {
-		deviceInfo.Device = "Mobile"
-	} else if strings.Contains(userAgent, "Tablet") {
-		deviceInfo.Device = "Tablet"
-	} else {
-		deviceInfo.Device = "Desktop"
-	}
-
-	// 解析浏览器信息
-	if strings.Contains(userAgent, "Chrome") {
-		deviceInfo.Browser = "Chrome"
-	} else if strings.Contains(userAgent, "Firefox") {
-		deviceInfo.Browser = "Firefox"
-	} else if strings.Contains(userAgent, "Safari") {
-		deviceInfo.Browser = "Safari"
-	} else if strings.Contains(userAgent, "Edge") {
-		deviceInfo.Browser = "Edge"
-	} else {
-		deviceInfo.Browser = "Unknown"
-	}
-
-	return deviceInfo
 }

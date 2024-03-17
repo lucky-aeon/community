@@ -4,9 +4,7 @@ package config
 
 import (
 	"os"
-	"xhyovo.cn/community/pkg/log"
-
-	"gopkg.in/yaml.v3"
+	"strconv"
 )
 
 type AppConfig struct {
@@ -45,19 +43,32 @@ func GetInstance() *AppConfig {
 }
 
 func Init() {
-	appConfig := &AppConfig{}
-
-	file, err := os.ReadFile("cmd/community/config.yaml")
-	if err != nil {
-		panic(err.Error)
+	pollCount, _ := strconv.Atoi(os.Getenv("POLLCOUNT"))
+	if pollCount == 0 {
+		pollCount = 10
 	}
-	configData := os.ExpandEnv(string(file))
-	err = yaml.Unmarshal([]byte(configData), &appConfig)
-	if err != nil {
-		log.Errorf("读取配置文件失败,err: %s", err.Error())
-		panic(err.Error())
+	appConfig := &AppConfig{
+		DbConfig: DbConfig{
+			Address:  os.Getenv("DB_HOST"),
+			Database: os.Getenv("DB_DATABASE"),
+			Username: os.Getenv("DB_USER"),
+			Password: os.Getenv("DB_PASS"),
+		},
+		OssConfig: OssConfig{
+			AccessKey: os.Getenv("OSS_ACCESS_KEY"),
+			Bucket:    os.Getenv("OSS_BUCKET"),
+			SecretKey: os.Getenv("OSS_SECRET_KEY"),
+			Endpoint:  os.Getenv("OSS_ENDPOINT"),
+			Callback:  os.Getenv("OSS_CALLBACK"),
+		},
+		EmailConfig: EmailConfig{
+			Address:   os.Getenv("ADDRESS"),
+			Username:  os.Getenv("USERNAME"),
+			Password:  os.Getenv("PASSWORD"),
+			Host:      os.Getenv("HOST"),
+			PollCount: pollCount,
+		},
 	}
-
 	instance = appConfig
 
 }

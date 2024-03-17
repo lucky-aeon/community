@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strconv"
 	"xhyovo.cn/community/pkg/oss"
 	xt "xhyovo.cn/community/pkg/time"
@@ -48,7 +49,6 @@ type CallbackParam struct {
 
 func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
-	group.Use(middleware.OperLogger())
 	group.GET("/policy", getPolicy)
 	group.GET("/singUrl", getUrl)
 	group.POST("/upload", uploadCallback)
@@ -124,7 +124,7 @@ func getUrl(ctx *gin.Context) {
 		return
 	}
 	singUrl := oss.SingUrl(fileKey)
-	result.Ok(singUrl, "").Json(ctx)
+	ctx.Redirect(http.StatusFound, singUrl)
 }
 
 func uploadCallback(ctx *gin.Context) {

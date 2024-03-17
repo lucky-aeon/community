@@ -15,7 +15,6 @@ type UserService struct {
 func (*UserService) GetUserById(id int) *model.Users {
 
 	user := userDao.QueryUser(&model.Users{ID: id})
-	user.Avatar = utils.BuildFileUrl(user.Avatar)
 	user.Password = ""
 	user.InviteCode = 0
 	return user
@@ -184,7 +183,6 @@ func Login(login model.LoginForm) (*model.Users, error) {
 	if user.ID == 0 {
 		return &model.Users{}, errors.New("登录失败！账号或密码错误")
 	}
-	user.Avatar = utils.BuildFileUrl(user.Avatar)
 
 	return user, nil
 }

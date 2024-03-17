@@ -5,10 +5,10 @@
     <template #fileKey="{ record }">
       <div style="width: 200px; height: 100px;">
       <template v-if="record.mimeType.includes('video')">
-        <video :src="record.fileKey" style="max-width: 100%; max-height: 100%;"></video>
+        <video :src="apiGetFile(record.fileKey)" style="max-width: 100%; max-height: 100%;"></video>
       </template>
       <template v-else>
-        <a-image :src="record.fileKey"  width="100%" height="100%">123</a-image>
+        <a-image :src="apiGetFile(record.fileKey)"  width="100%" height="100%">123</a-image>
       </template>
       </div>
     </template>
@@ -19,7 +19,7 @@
 
 <script setup>
 import {ref, render} from "vue";
-import {apiAdminFile} from "@/apis/file.js"
+import {apiAdminFile, apiGetFile} from "@/apis/file.js"
 
 const columns = [{
   title: '资源',
@@ -41,7 +41,7 @@ const columns = [{
 
 const fileData = ref([])
 const page = ref({
-  defaultPageSize: 1,
+  defaultPageSize: 15,
   total: 0,
   current:1
 })

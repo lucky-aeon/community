@@ -114,6 +114,9 @@ function getArticleList() {
 
     apiArticleList(Object.assign(queryData, { context: route.query.context, tags: (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || [] }), paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
         paginationProps.total = data.total
+        if(data.list == null) {
+            return
+        }
         dataSource.value.push(...data.list)
     })
 }

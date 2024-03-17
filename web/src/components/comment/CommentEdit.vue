@@ -34,7 +34,6 @@ const props = defineProps({
 const userStore = useUserStore()
 const commentData = ref("")
 function pushComment() {
-    console.log(props)
     apiPublishArticleComment(props.articleId, props.parentId, commentData.value, props.rootComment)
 }
 </script>

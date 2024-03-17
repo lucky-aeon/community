@@ -44,7 +44,7 @@
         </ARow>
     </div>
 
-        <router-view :articleData="currentArticleData">
+        <router-view :articleData="currentArticleData" style="margin: auto;max-width: 1100px !important;min-width: 600px;">
         </router-view>
     <a-modal hideCancel v-model:visible="searchData.tagModal.show" @ok="() => { searchData.tagModal.show = false }">
         <template #title>

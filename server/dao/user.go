@@ -2,7 +2,6 @@ package dao
 
 import (
 	"xhyovo.cn/community/pkg/mysql"
-	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -20,7 +19,6 @@ func (*UserDao) SetUserInfo(articles []*model.Articles) {
 	model.User().Find(&users, userIds)
 	var userMap = make(map[int]model.Users)
 	for _, user := range users {
-		user.Avatar = utils.BuildFileUrl(user.Avatar)
 		userMap[user.ID] = user
 	}
 	// articles set userinfo
@@ -47,7 +45,6 @@ func (*UserDao) QueryUserSimple(user *model.Users) (result model.UserSimple, err
 		Joins("JOIN invite_codes ON invite_codes.code = users.invite_code").
 		Joins("JOIN member_infos ON member_infos.id = invite_codes.member_id").
 		Select("users.*, member_infos.name as u_role").Where(&user).Find(&result).Error
-	result.UAvatar = utils.BuildFileUrl(result.UAvatar)
 	return
 }
 

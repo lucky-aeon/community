@@ -2,7 +2,6 @@ package services
 
 import (
 	"github.com/dustin/go-humanize"
-	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -36,7 +35,6 @@ func (s *FileService) PageFiles(p, limit, userId int) (files []model.Files, coun
 	for i := range files {
 		files[i].UserName = nameMap[files[i].UserId].Name
 		files[i].SizeName = humanize.Bytes(uint64(files[i].Size))
-		files[i].FileKey = utils.BuildFileUrl(files[i].FileKey)
 	}
 	count = fileDao.Count()
 

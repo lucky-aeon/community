@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
-	"xhyovo.cn/community/pkg/time"
+	xt "xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
@@ -34,7 +34,7 @@ func Login(c *gin.Context) {
 		Browser:   c.Request.UserAgent(),
 		Equipment: c.GetHeader("Sec-Ch-Ua-Platform"),
 		Ip:        utils.GetClientIP(c.Request),
-		CreatedAt: time.Now(),
+		CreatedAt: xt.Now(),
 	}
 	var logS services.LogServices
 	user, err := services.Login(login)
@@ -51,6 +51,7 @@ func Login(c *gin.Context) {
 		result.Err(err.Error()).Json(c)
 		return
 	}
+	c.SetCookie(middleware.AUTHORIZATION, token, 3600, "/", c.Request.Host, true, true)
 	loginLog.State = "登录成功"
 	logS.InsertLoginLog(loginLog)
 	result.OkWithMsg(map[string]string{"token": token}, "登录成功").Json(c)
@@ -65,7 +66,7 @@ func Register(c *gin.Context) {
 		Browser:   c.Request.UserAgent(),
 		Equipment: c.GetHeader("Sec-Ch-Ua-Platform"),
 		Ip:        utils.GetClientIP(c.Request),
-		CreatedAt: time.Now(),
+		CreatedAt: xt.Now(),
 	}
 	var logS services.LogServices
 	if err != nil {

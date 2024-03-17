@@ -33,6 +33,9 @@ func Init(endpoint, accessKey, accessSec, bucketN string) {
 }
 
 func SingUrl(fileKey string) string {
-	singUrl, _ := bucket.SignURL(fileKey, oss.HTTPGet, 60)
+	singUrl, err := bucket.SignURL(fileKey, oss.HTTPGet, 12000)
+	if err != nil {
+		log.Println(err)
+	}
 	return singUrl
 }

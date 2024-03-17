@@ -6,14 +6,17 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"hash"
 	"io"
 	"net/http"
 	"strconv"
+	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/oss"
 	xt "xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/server/model"
+	"xhyovo.cn/community/server/request"
 	services "xhyovo.cn/community/server/service"
 
 	"github.com/gin-gonic/gin"
@@ -49,9 +52,10 @@ type CallbackParam struct {
 func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
 	group.Use(middleware.OperLogger())
+	group.POST("/upload", uploadCallback)
+	group.Use(middleware.Auth)
 	group.GET("/policy", getPolicy)
 	group.GET("/singUrl", getUrl)
-	group.POST("/upload", uploadCallback)
 }
 
 func get_gmt_iso8601(expire_end int64) string {
@@ -92,7 +96,9 @@ func getPolicy(ctx *gin.Context) {
 	io.WriteString(h, debyte)
 	signedStr := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
-	body := fmt.Sprintf("{\"fileKey\":${object},\"size\":${size},\"mimeType\":${mimeType},\"x:userId\":%d}", userId)
+	uId := uuid.NewString()
+	cache.GetInstance().Set(uId, 1, 10*time.Second)
+	body := fmt.Sprintf("{\"fileKey\":${object},\"size\":${size},\"mimeType\":${mimeType},\"x:userId\":%d,\"x:uuid\":\"%s\"}", userId, uId)
 
 	var callbackParam CallbackParam
 	callbackParam.CallbackUrl = ossConfig.Callback
@@ -136,12 +142,25 @@ func getUrl(ctx *gin.Context) {
 
 func uploadCallback(ctx *gin.Context) {
 
-	file := &model.Files{}
+	callback := &request.OssCallback{}
 
-	if err := ctx.ShouldBindJSON(&file); err != nil {
-		log.Warnf("用户id: %d 上传文件 callback 解析参数失败,err: %s", middleware.GetUserId(ctx), err.Error())
+	if err := ctx.ShouldBindJSON(&callback); err != nil {
+		log.Warnf("上传文件 callback 解析参数失败,err: %s", err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
+	}
+	v, b := cache.GetInstance().Get(callback.Uuid)
+	if !b || v == nil {
+		log.Warnf("用户id: %d 上传文件 callback 解析uuid失败")
+		result.Err("文件上传 callback 失败").Json(ctx)
+		return
+	}
+
+	file := &model.Files{
+		FileKey: callback.FileKey,
+		Size:    callback.Size,
+		Format:  callback.MineType,
+		UserId:  callback.UserId,
 	}
 
 	// check fileKey not empty
@@ -158,7 +177,6 @@ func uploadCallback(ctx *gin.Context) {
 		return
 	}
 
-	file.UserId = middleware.GetUserId(ctx)
 	file.CreatedAt = xt.Now()
 	file.UpdatedAt = xt.Now()
 	var fileS services.FileService

@@ -1,0 +1,111 @@
+name: build
+
+on:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - main
+jobs:
+    get-latest-sources:
+        runs-on: ubuntu-latest
+        outputs:
+          latest-tag: ${{steps.tag.outputs.latest-tag}}
+        steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+
+        - name: get-tag
+          id: tag
+          run: |
+            git fetch --tags
+            latest_tag=$(git describe --abbrev=0 --tags)
+            git checkout $latest_tag
+            echo $(git branch --show-current)
+            echo "latest-tag=$latest_tag" >> "$GITHUB_OUTPUT"
+
+    build-back:
+        needs: get-latest-sources
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v3
+          with:
+            ref: ${{ needs.get-latest-sources.outputs.latest-tag }}
+        - name: Set up Go
+          uses: actions/setup-go@v4
+          with:
+            go-version: '1.19'
+    
+        - name: tidy
+          run: go mod tidy
+        - name: Test
+          run: go test -v ./...
+        - name: Build
+          run: |
+            echo $(git branch --show-current)
+            mkdir ./dist
+            GOOS=linux go build -o ./dist/community ./cmd/community
+        - name: Upload back files
+          uses: actions/upload-artifact@v4
+          with:
+            name: back-files
+            path: dist
+
+    build-front:
+        needs: get-latest-sources
+        runs-on: ubuntu-latest
+        steps:
+        - name: Checkout repository
+          uses: actions/checkout@v2
+          with:
+            ref: ${{ needs.get-latest-sources.outputs.latest-tag }}
+
+        - name: Set up Node.js
+          uses: actions/setup-node@v2
+          with:
+            node-version: 18
+
+        - name: Install dependencies
+          run: cd ./web && yarn install
+
+        - name: Build Vue project
+          run: |
+            echo $(git branch --show-current)
+            cd ./web
+            echo "web project root: $(pwd)"
+            yarn build
+            echo "web project root: $(pwd)"
+            mkdir -p ../dist/web
+            mv -v ./dist/* ../dist/web
+            cd ..
+        - name: Upload front files
+          uses: actions/upload-artifact@v4
+          with:
+            name: front-files
+            path: dist
+
+    push-tag:
+      needs: [get-latest-sources, build-front, build-back]
+      runs-on: ubuntu-latest
+      outputs:
+        build-file-name: ${{steps.package-build.outputs.build-file-name}}
+      steps:
+        - name: Download back-files
+          uses: actions/download-artifact@v4
+          with:
+            name: back-files
+        - name: Download front-files
+          uses: actions/download-artifact@v4
+          with:
+            name: front-files
+        - name: Package build
+          id: package-build
+          run: |
+           file_name=$(echo "community-${{ needs.get-latest-sources.outputs.latest-tag }}-linux.tar.gz")
+           echo "build-file-name=$file_name" >> "$GITHUB_OUTPUT"
+           tar -czvf "$file_name" ./*
+
+        - name: Release
+          uses: softprops/action-gh-release@v2)
+          with:
+            files: ${{steps.package-build.outputs.build-file-name}}

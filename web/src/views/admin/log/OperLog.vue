@@ -70,7 +70,7 @@ const columns = [
   },
   {
     title: '访问者',
-    dataIndex: 'userId',
+    dataIndex: 'userName',
   },
   {
     title: 'ip',

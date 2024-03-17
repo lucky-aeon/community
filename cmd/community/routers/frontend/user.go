@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+	"xhyovo.cn/community/pkg/log"
 
 	"xhyovo.cn/community/cmd/community/middleware"
 
@@ -65,11 +66,14 @@ func updateUser(ctx *gin.Context) {
 		err := ctx.ShouldBind(&form)
 
 		if err != nil {
+			log.Warnf("用户id: %d 修改信息参数解析失败,err: %s", userId, err.Error())
 			result.Err(utils.GetValidateErr(form, err)).Json(ctx)
 			return
 		}
 		if len(form.Desc) > 200 {
-			result.Err("描述长度不可超过200字").Json(ctx)
+			var msg = "描述长度不可超过200字"
+			log.Warnf("用户id: %d 修改信息失败,err: %s", userId, msg)
+			result.Err(msg).Json(ctx)
 			return
 		}
 		userService.UpdateUser(&model.Users{Name: form.Name, Desc: form.Desc, ID: userId, Subscribe: form.Subscribe})
@@ -77,17 +81,22 @@ func updateUser(ctx *gin.Context) {
 		form := editPasswordForm{}
 		err := ctx.ShouldBind(&form)
 		if err != nil {
+			log.Warnf("用户id: %d 修改密码参数解析失败,err: %s", userId, err.Error())
 			result.Err(utils.GetValidateErr(form, err)).Json(ctx)
 			return
 		}
 		// check 旧密码
 		if form.OldPassword != userService.GetUserById(userId).Password {
-			result.Err("旧密码不一致").Json(ctx)
+			var msg = "旧密码不一致"
+			log.Warnf("用户id: %d 修改密码失败,err: %s", userId, msg)
+			result.Err(msg).Json(ctx)
 			return
 		}
 		// check 新密码
 		if form.NewPassword != form.ConfirmPassword {
-			result.Err("两次新密码不一致").Json(ctx)
+			var msg = "两次新密码不一致"
+			log.Warnf("用户id: %d 修改密码失败,err: %s", userId, msg)
+			result.Err(msg).Json(ctx)
 			return
 		}
 		userService.UpdateUser(&model.Users{Password: form.ConfirmPassword, ID: userId})
@@ -97,6 +106,7 @@ func updateUser(ctx *gin.Context) {
 		}
 		object := &avatar{}
 		if err := ctx.ShouldBindJSON(&object); err != nil {
+			log.Warnf("用户id: %d 修改头像参数解析失败,err: %s", userId, err.Error())
 			result.Err(utils.GetValidateErr(object, err)).Json(ctx)
 			return
 		}

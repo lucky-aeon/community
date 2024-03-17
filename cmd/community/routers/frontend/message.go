@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"strconv"
 	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
 	services "xhyovo.cn/community/server/service"
@@ -14,8 +15,8 @@ func InitMessageRouters(r *gin.Engine) {
 	group := r.Group("/community/message")
 	group.GET("/unReader/count", getUnReadMsgCount)
 	group.GET("", listMsg)
-	group.POST("/read", readMsg)
-	group.DELETE("/UnReadMsg/:type", clearUnReadMsg)
+	group.POST("/read", readMsg, middleware.OperLogger())
+	group.DELETE("/UnReadMsg/:type", clearUnReadMsg, middleware.OperLogger())
 
 }
 
@@ -43,6 +44,7 @@ func listMsg(ctx *gin.Context) {
 func readMsg(ctx *gin.Context) {
 	var ids []int
 	if err := ctx.ShouldBindJSON(&ids); err != nil && len(ids) > 0 {
+		log.Warnf("用户id: %d 阅读消息参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
@@ -55,6 +57,7 @@ func readMsg(ctx *gin.Context) {
 func clearUnReadMsg(ctx *gin.Context) {
 	msgType, err := strconv.Atoi(ctx.Param("type"))
 	if err != nil {
+		log.Warnln("用户id: %d 清除未读消息参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}

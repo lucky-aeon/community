@@ -2,7 +2,7 @@ package oss
 
 import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"log"
+	"xhyovo.cn/community/pkg/log"
 )
 
 var bucket *oss.Bucket
@@ -20,13 +20,15 @@ func GetInstance() *oss.Bucket {
 func Init(endpoint, accessKey, accessSec, bucketN string) {
 	client, err := oss.New(endpoint, accessKey, accessSec)
 	if err != nil {
-		log.Fatalln(err.Error())
+		log.Errorf("初始化 oss 失败,err: %s", err.Error())
+		panic(err.Error())
 		return
 	}
 	bucket, err = client.Bucket(bucketN)
 
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Errorf("获取 oss bucket 失败,err: %s", err.Error())
+		panic(err.Error())
 		return
 	}
 	en = endpoint
@@ -35,7 +37,8 @@ func Init(endpoint, accessKey, accessSec, bucketN string) {
 func SingUrl(fileKey string) string {
 	singUrl, err := bucket.SignURL(fileKey, oss.HTTPGet, 12000)
 	if err != nil {
-		log.Println(err)
+		log.Errorf("获取 oss bucket 失败,err: %s", err.Error())
+		return ""
 	}
 	return singUrl
 }

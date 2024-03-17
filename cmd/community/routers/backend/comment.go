@@ -3,6 +3,8 @@ package backend
 import (
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
 	services "xhyovo.cn/community/server/service"
@@ -27,6 +29,7 @@ func deleteComment(ctx *gin.Context) {
 
 	var c services.CommentsService
 	if !c.DeleteComment(id, 0) {
+		log.Warnf("用户id: %d 删除评论失败", middleware.GetUserId(ctx))
 		result.Err("删除失败").Json(ctx)
 		return
 	}

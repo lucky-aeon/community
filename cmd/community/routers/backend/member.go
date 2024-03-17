@@ -3,6 +3,8 @@ package backend
 import (
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
 	"xhyovo.cn/community/server/model"
@@ -26,6 +28,7 @@ func saveMember(ctx *gin.Context) {
 	var m services.MemberInfoService
 	var member model.MemberInfos
 	if err := ctx.ShouldBindJSON(&member); err != nil {
+		log.Warnf("用户id: %d 添加等级参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
@@ -38,6 +41,7 @@ func deleteMember(ctx *gin.Context) {
 	id := ctx.Param("id")
 	atoi, _ := strconv.Atoi(id)
 	if err := m.DeleteMember(atoi); err != nil {
+		log.Warnf("用户id: %d 删除等级参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}

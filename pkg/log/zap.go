@@ -1,11 +1,10 @@
 package log
 
 import (
-	"github.com/gin-gonic/gin"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"time"
+	"os"
 )
 
 var log *zap.SugaredLogger
@@ -36,28 +35,8 @@ func setLoggerWrite() zapcore.WriteSyncer {
 }
 
 func Init() {
-	core := zapcore.NewCore(setJSONEncoder(), zapcore.NewMultiWriteSyncer(setLoggerWrite()), zap.InfoLevel)
+	core := zapcore.NewCore(setJSONEncoder(), zapcore.NewMultiWriteSyncer(setLoggerWrite(), os.Stdout), zap.InfoLevel)
 	log = zap.New(core, zap.AddCaller()).Sugar()
-}
-
-func GinLogger() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-		path := c.Request.URL.Path
-		query := c.Request.URL.RawQuery
-		c.Next()
-		cost := time.Since(start)
-		Info(path,
-			zap.Int("status", c.Writer.Status()),
-			zap.String("method", c.Request.Method),
-			zap.String("path", path),
-			zap.String("query", query),
-			zap.String("ip", c.ClientIP()),
-			zap.String("user-agent", c.Request.UserAgent()),
-			zap.String("errors", c.Errors.ByType(gin.ErrorTypePrivate).String()),
-			zap.Duration("cost", cost),
-		)
-	}
 }
 
 func Info(args ...interface{}) {

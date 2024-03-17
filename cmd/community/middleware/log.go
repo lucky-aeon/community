@@ -47,8 +47,8 @@ func OperLogger() gin.HandlerFunc {
 		latency := time.Since(t)
 		execTime := latency
 		body := writer.b.String()
-		if len(body) > 200 {
-			body = body[:200]
+		if len(body) > 100 {
+			body = body[:100]
 		}
 
 		logs := model.OperLogs{

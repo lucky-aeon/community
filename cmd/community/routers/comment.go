@@ -2,6 +2,7 @@ package routers
 
 import (
 	"strconv"
+	"xhyovo.cn/community/pkg/log"
 
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
@@ -15,8 +16,8 @@ import (
 func InitCommentRouters(g *gin.Engine) {
 	group := g.Group("/community/comments")
 	group.Use(middleware.OperLogger())
-	group.POST("/comment", comment)
-	group.DELETE("/:id", deleteComment)
+	group.POST("/comment", comment, middleware.OperLogger())
+	group.DELETE("/:id", deleteComment, middleware.OperLogger())
 	group.GET("/byArticleId/:articleId", listCommentsByArticleId)
 	group.GET("/byRootId/:rootId", listCommentsByRootId)
 	group.GET("/allCommentsByArticleId/:articleId", listAllCommentsByArticleId)
@@ -27,6 +28,7 @@ func comment(ctx *gin.Context) {
 	var comment model.Comments
 	userId := middleware.GetUserId(ctx)
 	if err := ctx.ShouldBindJSON(&comment); err != nil {
+		log.Warnf("用户id: %d 发布评论失败,err: %s", userId, err.Error())
 		result.Err(utils.GetValidateErr(comment, err)).Json(ctx)
 		return
 	}
@@ -36,6 +38,7 @@ func comment(ctx *gin.Context) {
 	err := commentsService.Comment(&comment)
 	msg := "评论成功"
 	if err != nil {
+		log.Warnf("用户id: %d 保存评论失败,err: %s", userId, err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
@@ -48,12 +51,14 @@ func deleteComment(ctx *gin.Context) {
 
 	userId := middleware.GetUserId(ctx)
 	if commentId == "" {
+		log.Warnf("用户id: %d 删除评论失败,err: %s", userId, "评论id为空")
 		result.Err("删除评论id不能为空").Json(ctx)
 		return
 	}
 	commentIdInt, _ := strconv.Atoi(commentId)
 	var commentsService services.CommentsService
 	if !commentsService.DeleteComment(commentIdInt, userId) {
+		log.Warnf("用户id: %d 删除评论失败", userId)
 		result.Err("删除失败").Json(ctx)
 		return
 	}
@@ -66,6 +71,7 @@ func listCommentsByArticleId(ctx *gin.Context) {
 	p, limit := page.GetPage(ctx)
 
 	if err != nil {
+		log.Warnf("用户id: %d 获取文章下的评论失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
@@ -92,6 +98,7 @@ func listAllCommentsByArticleId(ctx *gin.Context) {
 	p, limit := page.GetPage(ctx)
 
 	if err != nil {
+		log.Warnf("用户id: %d 查询用户文章下的所有评论失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err("文章不可为空").Json(ctx)
 		return
 	}

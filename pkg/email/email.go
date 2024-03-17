@@ -2,9 +2,9 @@ package email
 
 import (
 	"github.com/jordan-wright/email"
-	"log"
 	"net/smtp"
 	"time"
+	"xhyovo.cn/community/pkg/log"
 )
 
 var emailPoll *email.Pool
@@ -18,7 +18,8 @@ func Init(address, username, password, host string, pollCount int) {
 		smtp.PlainAuth("", username, password, host),
 	)
 	if err != nil {
-		log.Fatalln("email connect fail", err.Error())
+		log.Errorf("初始化 email 失败,err: %s", err.Error())
+		panic(err.Error())
 		return
 	}
 	emailPoll = p
@@ -36,6 +37,7 @@ func Send(to []string, content, subject string) {
 	e.Text = []byte(content)
 	err := emailPoll.Send(e, 10*time.Second)
 	if err != nil {
+		log.Warnf("发送邮箱失败,接收人: %v,err: %s", to, err.Error())
 		return
 	}
 }

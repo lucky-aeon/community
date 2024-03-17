@@ -4,6 +4,7 @@ package config
 
 import (
 	"os"
+	"xhyovo.cn/community/pkg/log"
 
 	"gopkg.in/yaml.v3"
 )
@@ -53,6 +54,7 @@ func Init() {
 	configData := os.ExpandEnv(string(file))
 	err = yaml.Unmarshal([]byte(configData), &appConfig)
 	if err != nil {
+		log.Errorf("读取配置文件失败,err: %s", err.Error())
 		panic(err.Error())
 	}
 

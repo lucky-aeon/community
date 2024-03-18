@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/log"
+	"xhyovo.cn/community/pkg/utils/page"
 
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/result"
@@ -13,20 +14,25 @@ import (
 )
 
 func InitTypeRouters(r *gin.Engine) {
-	group := r.Group("/community/admin/types")
+	group := r.Group("/community/admin/type")
+	group.GET("/parent", listParentTypes)
 	group.GET("", listType)
 	group.POST("", saveType)
-	group.PUT("", UpdateType)
 	group.DELETE(":id", deleteType)
 }
 
-func listType(ctx *gin.Context) {
-	parentId, err := strconv.Atoi(ctx.DefaultQuery("parentId", "0"))
-	if err != nil {
-		parentId = 0
-	}
+func listParentTypes(ctx *gin.Context) {
 	var typeService services.TypeService
-	result.Ok(typeService.List(parentId), "").Json(ctx)
+	types := typeService.ListParentTypes()
+	result.Ok(types, "").Json(ctx)
+}
+
+func listType(ctx *gin.Context) {
+	p, limit := page.GetPage(ctx)
+
+	var typeService services.TypeService
+	types, count := typeService.PageTypes(p, limit)
+	result.Page(types, count, nil).Json(ctx)
 }
 
 func saveType(ctx *gin.Context) {
@@ -41,13 +47,16 @@ func saveType(ctx *gin.Context) {
 	u, err := typeService.Save(&types)
 	if err != nil {
 		log.Warnf("用户id: %d 添加分类失败,err: %s", middleware.GetUserId(ctx), err.Error())
+		result.Err(utils.GetValidateErr(types, err)).Json(ctx)
+		return
 	}
-	result.Auto(u, err).ErrMsg("添加失败").OkMsg("添加成功").Json(ctx)
+	result.OkWithMsg(u, "保存成功").Json(ctx)
+
 }
 func UpdateType(ctx *gin.Context) {
 	var types model.Types
 	if err := ctx.ShouldBindJSON(&types); err != nil {
-		log.Warnf("用户id: %d 修改分类参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
+		log.Warnf("用户id: %d ,修改分类参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(utils.GetValidateErr(types, err)).Json(ctx)
 		return
 	}
@@ -55,8 +64,10 @@ func UpdateType(ctx *gin.Context) {
 	err := typeService.Update(&types)
 	if err != nil {
 		log.Warnf("用户id: %d 修改分类失败,err: %s", middleware.GetUserId(ctx), err.Error())
+		result.Err(err.Error()).Json(ctx)
+		return
 	}
-	result.Auto(nil, err).OkMsg("分类更新成功").Json(ctx)
+	result.OkWithMsg(nil, "分类更新成功").Json(ctx)
 }
 
 func deleteType(ctx *gin.Context) {

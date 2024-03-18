@@ -89,6 +89,13 @@
                 <a-menu-item>操作日志</a-menu-item>
               </router-link>
             </a-sub-menu>
+            <a-sub-menu key="7">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>分类</template>
+              <router-link to="/admin/type">
+                <a-menu-item>分类</a-menu-item>
+              </router-link>
+            </a-sub-menu>
           </a-menu>
 
         </a-layout-sider>

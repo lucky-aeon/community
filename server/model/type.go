@@ -14,11 +14,12 @@ type Types struct {
 	ParentId      int            `json:"parentId"`
 	Title         string         `json:"title"`
 	Desc          string         `json:"desc"`
-	State         int            `json:"state"`
+	State         bool           `gorm:"force" json:"state"`
 	Sort          int            `json:"sort"`
 	ArticleState  string         `json:"articleState"` // 分类下文章的状态
 	ArticleStates []string       `gorm:"-" json:"articleStates"`
-	FlagName      string
+	FlagName      string         `json:"flagName"`
+	Children      []Types        `gorm:"-" json:"children"`
 }
 
 type TypeSimple struct {

@@ -65,7 +65,9 @@ func (*MessageDao) SaveMessage(from, types, businessId int, to []int, content st
 
 // 删除用户收到的消息(确认消息),
 func (*MessageDao) ReadMessage(id []int, userId int) int64 {
-	tx := model.MessageState().Where("id in ? and `to` = ?", id, userId).Updates(&model.MessageStates{State: 1})
+	tx := model.MessageState().Where("id in ? and `to` = ?", id, userId).Updates(map[string]interface{}{
+		"state": 0,
+	})
 	return tx.RowsAffected
 }
 

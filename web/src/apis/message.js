@@ -11,3 +11,6 @@ export function apiClearUnReadMsg(type){
 export function apiGetUnReadCount() {
     return axios.get(`/community/message/unReader/count`)
 }
+export function apiPostRead(ids) {
+    return axios.post(`/community/message/read`, ids)
+}

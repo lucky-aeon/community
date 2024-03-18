@@ -123,7 +123,7 @@ func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content str
 			}
 			messageTemplate := messageDao.GetMessageTemplate(eventId)
 			msg := m.GetMsg(messageTemplate, b)
-			m.SendMessages(triggerId, constant.MENTION, b.UserId, ids, content)
+			m.SendMessages(triggerId, constant.MENTION, b.UserId, ids, msg)
 			email.Send(emails, msg, "技术鸭社区")
 		}
 	}(eventId, triggerId, content, b)

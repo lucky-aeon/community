@@ -70,11 +70,11 @@ func (*SubscriptionService) ListSubscriptionUserId(event, businessId int) []mode
 }
 
 // 触发订阅事件
-func (s *SubscriptionService) Do(eventId, businessId, triggerId int, content string) {
+func (s *SubscriptionService) Do(eventId int, b BusinessId) {
 
-	go func(eventId, businessId int, content string) {
+	go func(eventId int, b BusinessId) {
 
-		subscriptions := s.ListSubscriptionUserId(eventId, businessId)
+		subscriptions := s.ListSubscriptionUserId(eventId, b.CurrentBusinessId)
 		var m MessageService
 
 		if len(subscriptions) > 0 {
@@ -92,16 +92,17 @@ func (s *SubscriptionService) Do(eventId, businessId, triggerId int, content str
 				}
 			}
 			messageTemplate := messageDao.GetMessageTemplate(eventId)
-			msg := m.GetMsg(messageTemplate, eventId, businessId)
-			m.SendMessages(sendId, constant.NOTICE, businessId, userIds, content) // todo确定内容
+			msg := m.GetMsg(messageTemplate, b)
+			m.SendMessages(sendId, constant.NOTICE, b.ArticleId, userIds, msg) // todo确定内容
 			email.Send(emails, msg, "技术鸭社区")
 		}
 
-	}(eventId, businessId, content)
+	}(eventId, b)
 }
 
-func (s *SubscriptionService) ConstantAtSend(eventId, businessId, triggerId int, content string) {
-	go func(eventId, businessId, triggerId int, content string) {
+// 触发 @ 事件
+func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content string, b BusinessId) {
+	go func(eventId, triggerId int, content string, b BusinessId) {
 		var m MessageService
 		if strings.Contains(content, "@") {
 			mentionedUsers := extractMentionedUsers(content)
@@ -121,11 +122,11 @@ func (s *SubscriptionService) ConstantAtSend(eventId, businessId, triggerId int,
 				}
 			}
 			messageTemplate := messageDao.GetMessageTemplate(eventId)
-			msg := m.GetMsg(messageTemplate, eventId, businessId)
-			m.SendMessages(triggerId, constant.MENTION, businessId, ids, content)
+			msg := m.GetMsg(messageTemplate, b)
+			m.SendMessages(triggerId, constant.MENTION, b.UserId, ids, msg)
 			email.Send(emails, msg, "技术鸭社区")
 		}
-	}(eventId, businessId, triggerId, content)
+	}(eventId, triggerId, content, b)
 
 }
 

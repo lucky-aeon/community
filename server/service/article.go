@@ -69,7 +69,7 @@ func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, p
 			query.Where("articles.title like ?", "%"+article.Title+"%")
 		}
 		if len(article.Content) > 0 {
-			query.Where("articles.`desc` like ?", "%"+article.Content+"%")
+			query.Where("articles.content like ?", "%"+article.Content+"%")
 		}
 		if article.UserId > 0 {
 			query.Where("articles.user_id = ?", article.UserId)
@@ -179,7 +179,7 @@ func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
 
 	id := article.ID
 	typeO := article.Type
-	flag := false
+	flag := true
 	var typeS TypeService
 	// 分类是否存在
 	if !typeS.Exist(typeO) {
@@ -200,10 +200,10 @@ func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
 			msg := constant.GetArticleName(oldState)
 			return 0, errors.New("普通分类不支持该状态:" + msg)
 		}
-		flag = true
 	}
 	// 修改
 	if id != 0 {
+		flag = false
 		// 获取老文章
 		oldArticle := a.GetById(id)
 		oldTypeParentId := typeS.GetById(oldArticle.Type).ParentId
@@ -229,9 +229,14 @@ func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
 		tags = append(tags, model.ArticleTagRelations{ArticleId: id, TagId: article.Tags[i], UserId: article.UserId})
 	}
 	db().Create(&tags)
+	var subscriptionService SubscriptionService
 	if flag {
-		var subscriptionService SubscriptionService
-		subscriptionService.ConstantAtSend(event.ArticleAt, id, article.UserId, article.Content)
+		var b BusinessId
+		b.UserId = article.UserId
+		b.ArticleId = article.ID
+		b.CurrentBusinessId = article.UserId
+		subscriptionService.Do(event.UserFollowingEvent, b)
+		subscriptionService.ConstantAtSend(event.ArticleAt, id, article.Content, b)
 	}
 	return id, nil
 }

@@ -31,6 +31,14 @@ func init() {
 	}
 }
 
+// 发送消息中消息模板需要用到的业务id
+type BusinessId struct {
+	ArticleId         int
+	UserId            int
+	CommentId         int
+	CurrentBusinessId int // 当前主业务id
+}
+
 type MessageService struct {
 }
 
@@ -97,13 +105,14 @@ func (m *MessageService) PageMessage(page, limit, userId, types, state int) (msg
 
 // 人：你订阅的 xxx 用户发布了文章，文章标题：xxx
 // 文章：你订阅的 xxx 文章，被xxx评论了，评论内容：xxx
-func (m *MessageService) GetMsg(template string, eventId, businessId int) string {
+func (m *MessageService) GetMsg(template string, b BusinessId) string {
+	BusinessIdMap := businessIdToMap(b)
 	for s, v := range messageTemplateVar {
 		// 拼接 ${ + s + "." 如果存在则找
 		str := fmt.Sprintf("${%s.", s)
 		if strings.Contains(template, str) {
 			var objet map[string]interface{}
-			mysql.GetInstance().Table(s + "s").Find(&objet)
+			mysql.GetInstance().Table(s+"s").Where("id = ?", BusinessIdMap[s]).Find(&objet)
 			// 遍历 v 从key找template
 			for s2 := range v {
 				varTemlp := fmt.Sprintf("${%s}", s2)
@@ -115,6 +124,15 @@ func (m *MessageService) GetMsg(template string, eventId, businessId int) string
 		}
 	}
 	return template
+}
+
+func businessIdToMap(b BusinessId) map[string]int {
+	m := map[string]int{
+		"user":    b.UserId,
+		"article": b.ArticleId,
+		"comment": b.CommentId,
+	}
+	return m
 }
 
 func (*MessageService) GetMessageTemplateVar() map[string]map[string]string {

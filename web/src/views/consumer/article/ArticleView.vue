@@ -190,7 +190,7 @@ onMounted(() => {
     apiSubscribeState(1,id).then((data)=>{
       articleSubscribe.value = data.data ? "文章已订阅" : "订阅文章"
     })
-    apiSubscribeState(2,id).then((data)=>{
+    apiSubscribeState(2,articleData.value.user.id).then((data)=>{
       userSubscribe.value = data.data ? "用户已订阅" : "订阅用户"
     })
   }).catch(()=>{

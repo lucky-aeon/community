@@ -1,31 +1,23 @@
 <template>
-  <a-list
-      class="list-demo-action-layout"
-      :bordered="false"
-      :data="dataSource"
-      :pagination-props="paginationProps"
-      v-if="dataSource.length"
-  >
-    <template #item="{ item }">
-      <a-list-item class="list-demo-item" :style="{padding: '5px'}" action-layout="vertical"
-                   @click="router.push(`/article/view/${item.articleId}`)" >
-      
+  <a-list class="list-demo-action-layout" :bordered="false" :data="dataSource" :pagination-props="paginationProps"
+    v-if="dataSource.length">
+    <template #item="{ item, index }">
+      <a-list-item class="list-demo-item" :style="{ padding: '5px' }" action-layout="vertical" @click="handlerMsg(item, index)">
+
         <template #actions>
-          <span class="arco-typography time-text">{{item.createdAt}}</span>
+          <span class="arco-typography time-text">{{ item.createdAt }}</span>
         </template>
         <a-badge :count="item.state" dot>
-        <a-list-item-meta
-            :description="item.content"
-        >
-        </a-list-item-meta></a-badge>
+          <a-list-item-meta :description="item.content">
+          </a-list-item-meta></a-badge>
       </a-list-item>
     </template>
   </a-list>
-  <a-empty v-else/>
+  <a-empty v-else />
 </template>
 
 <script setup>
-import { apiListMsg } from '@/apis/message.js';
+import { apiListMsg, apiPostRead } from '@/apis/message.js';
 import router from "@/router/index.js";
 import { reactive, ref, watch } from 'vue';
 const props = defineProps({
@@ -43,21 +35,30 @@ const props = defineProps({
   }
 })
 const dataSource = ref([])
-const  count = ref()
+const count = ref()
 
 const paginationProps = reactive({
   defaultPageSize: 15,
   total: count
 })
-const getMsg = ()=>{
-  apiListMsg(props.msgType,props.msgState).then(({data})=>{
+const getMsg = () => {
+  apiListMsg(props.msgType, props.msgState).then(({ data }) => {
     dataSource.value = data.data
     count.value = data.count
   })
 }
-watch(()=>props, ()=>{
+const handlerMsg = (item) => {
+  if(item.state) {
+    apiPostRead([item.id]).then(({ok})=>{
+      if(!ok) return
+      getMsg()
+    })
+  }
+  router.push(`/article/view/${item.articleId}`)
+}
+watch(() => props, () => {
   getMsg()
-}, {deep: true, immediate: true})
+}, { deep: true, immediate: true })
 </script>
 
 <style scoped>
@@ -80,6 +81,7 @@ watch(()=>props, ()=>{
 .list-demo-action-layout .arco-list-item-action .arco-icon {
   margin: 0 4px;
 }
+
 .list-demo-item:hover {
   transition: background-color 0.3s ease;
   background-color: #f4f4f491;

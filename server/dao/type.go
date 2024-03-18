@@ -1,17 +1,20 @@
 package dao
 
-import "xhyovo.cn/community/server/model"
+import (
+	"xhyovo.cn/community/pkg/mysql"
+	"xhyovo.cn/community/server/model"
+)
 
 type Type struct {
 }
 
 func (t *Type) Save(types *model.Types) (int, error) {
-	d := model.Type().Create(&types)
+	d := mysql.GetInstance().Save(&types)
 	return types.ID, d.Error
 }
 
 func (t *Type) Update(types *model.Types) error {
-	return model.Type().Model(types).Updates(types).Error
+	return model.Type().Model(types).Save(types).Error
 }
 
 func (t *Type) Delete(id int) error {

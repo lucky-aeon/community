@@ -19,6 +19,7 @@
 <script setup>
 import { apiListMsg, apiPostRead } from '@/apis/message.js';
 import router from "@/router/index.js";
+import { useMessage } from '@/stores/MessageStore';
 import { reactive, ref, watch } from 'vue';
 const props = defineProps({
   msgType: {
@@ -41,7 +42,9 @@ const paginationProps = reactive({
   defaultPageSize: 15,
   total: count
 })
+const messageStore = useMessage()
 const getMsg = () => {
+  messageStore.getUnReadCount()
   apiListMsg(props.msgType, props.msgState).then(({ data }) => {
     dataSource.value = data.data
     count.value = data.count

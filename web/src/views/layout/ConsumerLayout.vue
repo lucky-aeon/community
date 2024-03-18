@@ -18,7 +18,7 @@
 
             <a-tooltip content="消息通知">
 
-              <AButton type="text" @click="setPopoverVisible"><a-badge :count="currentUnReadCount" :offset="[5, -5]"><icon-notification size="large" class="nav-btn"
+              <AButton type="text" @click="setPopoverVisible"><a-badge :count="messageStore.unReadCount" :offset="[5, -5]"><icon-notification size="large" class="nav-btn"
                     type="outline" :shape="'circle'" /></a-badge></AButton>
 
             </a-tooltip>
@@ -94,14 +94,14 @@
 </template>
 
 <script setup>
-import { apiClearUnReadMsg, apiGetUnReadCount } from '@/apis/message.js';
+import { apiClearUnReadMsg } from '@/apis/message.js';
 import MsgNotice from "@/components/message/MsgNotice.vue";
+import { useMessage } from '@/stores/MessageStore';
 import { useUserStore } from "@/stores/UserStore";
-import { isLogin } from '@/utils/auth';
 import { IconApps, IconNotification } from "@arco-design/web-vue/es/icon";
-import { ref, watch } from 'vue';
-import { RouterView, useRoute } from "vue-router";
-
+import { ref } from 'vue';
+import { RouterView } from "vue-router";
+const messageStore = useMessage()
 const msgType = ref(1)
 const msgReload = ref(0)
 const refBtn = ref();
@@ -115,20 +115,13 @@ const setPopoverVisible = () => {
 };
 
 const userStore = useUserStore()
-const currentUnReadCount = ref(0)
 userStore.getMenu()
-const route = useRoute()
+
+
 function clearMsg() {
   apiClearUnReadMsg(msgType.value).then(({ok})=> {if(ok) msgReload.value++})
 }
-watch(() => route.path, () => {
-  if (isLogin()) {
-    apiGetUnReadCount().then(({ data, ok }) => {
-      if (!ok) return
-      currentUnReadCount.value = data
-    })
-  }
-},{ immediate: true})
+
 
 </script>
 

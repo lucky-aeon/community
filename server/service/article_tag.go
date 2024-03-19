@@ -31,15 +31,15 @@ func (*ArticleTagService) QueryList(page, limit int, title string) (result map[s
 
 func (*ArticleTagService) CreateTag(tag model.ArticleTags) (result *model.ArticleTags, err error) {
 	db := model.ArticleTag()
-	// 暂时先count代替查重,后面用索引去重
 	tagName := tag.TagName
 	tagName = strings.ToLower(tagName)
-	db.Where("tag_name = ?", tagName).First(&tag)
-	if tag.Id != 0 {
-		return &tag, nil
+	var tagId int
+	db.Where("tag_name = ?", tagName).Select("id").First(&tagId)
+	if tagId == 0 {
+		model.ArticleTag().Save(&tag)
+		tagId = tag.Id
 	}
-	model.ArticleTag().Save(&tag)
-	model.ArticleTagUserRelation().Create(&model.ArticleTagUserRelations{UserId: tag.UserId, TagId: tag.Id})
+	model.ArticleTagUserRelation().Create(&model.ArticleTagUserRelations{UserId: tag.UserId, TagId: tagId})
 	return &tag, nil
 }
 

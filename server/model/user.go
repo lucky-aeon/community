@@ -21,12 +21,13 @@ type Users struct {
 }
 
 type UserSimple struct {
-	UId     int    `json:"id" gorm:"column:id"`
-	UName   string `json:"name" gorm:"column:name"`
-	UDesc   string `json:"desc" gorm:"column:desc"`
-	UAvatar string `json:"avatar" gorm:"column:avatar"`
-	Role    string `json:"role" gorm:"column:u_role"`
-	Account string `json:"account" gorm:"account"`
+	UId       int            `json:"id" gorm:"column:id"`
+	UName     string         `json:"name" gorm:"column:name"`
+	UDesc     string         `json:"desc" gorm:"column:desc"`
+	UAvatar   string         `json:"avatar" gorm:"column:avatar"`
+	Role      string         `json:"role" gorm:"column:u_role"`
+	Account   string         `json:"account" gorm:"account"`
+	CreatedAt time.LocalTime `json:"createdAt"`
 }
 
 type LoginForm struct {

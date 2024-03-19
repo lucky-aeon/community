@@ -32,6 +32,8 @@ const userInfo = computed(() => {
     if(!isLogin()) {
         return {}
     }
+    console.log("user info")
+  console.log(userStore.userInfo)
     return [{
         label: '账号',
         value: userStore.userInfo.account,

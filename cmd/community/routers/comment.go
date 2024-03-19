@@ -83,8 +83,7 @@ func listCommentsByArticleId(ctx *gin.Context) {
 // 查询根评论下的评论
 func listCommentsByRootId(ctx *gin.Context) {
 	rootId, _ := strconv.Atoi(ctx.Param("rootId"))
-	p, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "15"))
+	p, limit := page.GetPage(ctx)
 	var commentsService services.CommentsService
 	comments, count := commentsService.GetCommentsByRootID(p, limit, rootId)
 

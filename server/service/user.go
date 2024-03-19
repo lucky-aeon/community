@@ -44,6 +44,7 @@ func (s *UserService) ListByIdsToMap(ids []int) map[int]model.Users {
 	users := userDao.ListByIdsSelectIdName(ids)
 	for i := range users {
 		user := users[i]
+		user.Password = ""
 		m[user.ID] = user
 	}
 	return m

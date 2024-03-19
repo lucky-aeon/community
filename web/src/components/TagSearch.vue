@@ -1,17 +1,17 @@
 <template>
     <div style="width: 100%;">
-        <a-dropdown :style="{ width: '100%' }" popup-container="#tagSearchInputPop" @select="selectResult"
+        <a-dropdown :style="{ width: '100%' }" :popup-container="`#${randomId}`" @select="selectResult"
             :popup-max-height="true">
 
             <a-input-tag @press-enter="pressEnter" ref="inputRef" allow-clear unique-value v-model="tags"
                 v-model:input-value="inputData" placeholder="文章标签" />
 
 
-            <div style="position: relative;" id="tagSearchInputPop"></div>
+            <div style="position: relative;" :id="randomId"></div>
 
             <template #content>
                 <template v-if="userTags.length">
-                    <a-doption v-for="item in userTags" :key="item.label" :value="item">{{ item.label }}</a-doption>
+                    <a-doption v-for="item in userTags" :key="randomId+item.label" :value="item">{{ item.label }}</a-doption>
                 </template>
                 <a-empty v-else />
             </template>
@@ -46,6 +46,7 @@ const porps = defineProps({
         default: () => []
     }
 })
+const randomId = ref(`tagSearchInputPop-${Math.floor((Math.random()*100)+1)}`)
 const newTagData = ref({
     tag: "",
     desc: ""
@@ -99,7 +100,9 @@ function findUsedTag(value) {
     return userTags.value.find(item => item.lowerName === value.toLocaleLowerCase())
 }
 function pressEnter(v) {
-    tags.value.pop()
+    nextTick(()=>{
+        tags.value.pop()
+    })
     if (userTags.value.length > 0) {
         let temp = findUsedTag(v)
         if (temp) {
@@ -132,7 +135,6 @@ function handlerAskOk() {
     })
 }
 watch(() => porps.defaultData, (newV) => {
-    console.log(newV)
     tags.value =  userTags.value.filter(item => newV.find(sub => sub.toLocaleLowerCase() == item.lowerName))
 })
 </script>

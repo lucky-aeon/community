@@ -70,7 +70,7 @@ const props = defineProps({
     }
 })
 const visible = defineModel({require: true})
-const defaultData = { id: 0, content: "", type: null, tags: [] }
+const defaultData = { id: 0, content: "", type: null, tags: [], tagIds: []}
 const data = ref(Object.assign({}, defaultData))
 const fullScreen = ref(false);
 const artilceTypes = ref([])
@@ -101,7 +101,6 @@ apiGetArticleTypes().then(({ data, ok }) => {
     artilceTypes.value = data.map(item => ({ label: item.title, value: item.id }))
 })
 watch(()=> visible.value, (newV)=>{
-    console.log(newV, props.articleId)
     if(newV && props.articleId >0) {
         apiArticleView(props.articleId).then((res)=>{
             if(!res.ok) return

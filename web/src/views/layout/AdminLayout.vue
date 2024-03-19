@@ -96,6 +96,13 @@
                 <a-menu-item>分类</a-menu-item>
               </router-link>
             </a-sub-menu>
+            <a-sub-menu key="8">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>用户</template>
+              <router-link to="/admin/user">
+                <a-menu-item>用户</a-menu-item>
+              </router-link>
+            </a-sub-menu>
           </a-menu>
 
         </a-layout-sider>

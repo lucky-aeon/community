@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/viper"
 	"time"
+	"xhyovo.cn/community/pkg/result"
 )
 
 const AUTHORIZATION = "Authorization"
@@ -24,18 +25,17 @@ func GetUserId(ctx *gin.Context) int {
 }
 
 func Auth(ctx *gin.Context) {
-	//token := ctx.GetHeader(AUTHORIZATION)
-	//if len(token) == 0 {
-	//	token, _ = ctx.Cookie(AUTHORIZATION)
-	//}
-	//claims, err := ParseToken(token)
-	//if err != nil {
-	//	result.Err(err.Error()).Json(ctx)
-	//	ctx.Abort()
-	//	return
-	//}
-	//ctx.Set(AUTHORIZATION, claims.ID)
-	ctx.Set(AUTHORIZATION, 1)
+	token := ctx.GetHeader(AUTHORIZATION)
+	if len(token) == 0 {
+		token, _ = ctx.Cookie(AUTHORIZATION)
+	}
+	claims, err := ParseToken(token)
+	if err != nil {
+		result.Err(err.Error()).Json(ctx)
+		ctx.Abort()
+		return
+	}
+	ctx.Set(AUTHORIZATION, claims.ID)
 	ctx.Next()
 }
 func GenerateToken(id int, name string) (string, error) {

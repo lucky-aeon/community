@@ -131,7 +131,7 @@ func (s *UserService) CheckCodeUsed(code int) bool {
 }
 
 func (s *UserService) PageUsers(p, limit int) (users []model.Users, count int64) {
-	model.User().Offset(limit).Limit((p - 1) * limit).Find(&users)
+	model.User().Offset((p - 1) * limit).Limit(limit).Find(&users)
 	model.User().Count(&count)
 	return users, count
 }

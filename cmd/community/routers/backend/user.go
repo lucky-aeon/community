@@ -21,7 +21,7 @@ func listUser(ctx *gin.Context) {
 	var u services.UserService
 
 	users, count := u.PageUsers(p, limit)
-	result.Ok(page.New(users, count), "").Json(ctx)
+	result.Page(users, count, nil).Json(ctx)
 }
 
 func updateUser(ctx *gin.Context) {
@@ -35,4 +35,5 @@ func updateUser(ctx *gin.Context) {
 
 	var u services.UserService
 	u.UpdateUser(&user)
+	result.OkWithMsg(nil, "修改成功").Json(ctx)
 }

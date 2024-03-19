@@ -52,8 +52,12 @@
       </div>
     </a-page-header>
     <div id="markdown-container"></div>
-    <comment-edit :article-id="articleData.id"/>
-    <comment-list style="margin-top: 10px;" :article-id="articleData.id"/>
+    <comment-edit :callback="getRootComment" :article-id="articleData.id"/>
+    <a-card :bordered="false">
+        <comment-item v-for="comment in articleCommentList" :comment="comment" :key="comment.id"/>
+        <a-divider/>
+        <a-pagination @change="getRootComment" :total="paginationData.total" v-model:page-size="paginationData.pageSize" v-model:current="paginationData.current" show-page-size/>
+    </a-card>
   </div>
 </template>
 
@@ -61,7 +65,8 @@
 import { apiSubscribe, apiSubscribeState, } from "@/apis/apiSubscribe.js";
 import { apiArticleLike, apiArticleLikeState, apiArticleView } from '@/apis/article';
 import CommentEdit from '@/components/comment/CommentEdit.vue';
-import CommentList from '@/components/comment/CommentList.vue';
+import CommentItem from '@/components/comment/CommentItem.vue';
+import { apiGetArticleComment } from '@/apis/comment';
 import router from "@/router";
 import { IconDown, IconThumbUp, IconThumbUpFill } from '@arco-design/web-vue/es/icon';
 import Cherry from 'cherry-markdown';
@@ -174,7 +179,22 @@ const likeState = ref(true)
 const articleSubscribe = ref("订阅文章")
 
 const userSubscribe = ref("订阅用户")
-
+const articleCommentList = ref([])
+const paginationData = ref({
+    current: 1,
+    total: 0,
+    pageSize: 5
+    
+})
+function getRootComment() {
+    apiGetArticleComment(articleData.value.id, paginationData.value.current, paginationData.value.pageSize).then(({data, ok})=>{
+    if(!ok || !data.data) {
+        return
+    }
+    paginationData.value.total = data.count
+    articleCommentList.value = data.data
+})
+}
 onMounted(() => {
   apiArticleView(route.params.id).then(({ data}) => {
     articleData.value = data
@@ -193,6 +213,7 @@ onMounted(() => {
     apiSubscribeState(2,articleData.value.user.id).then((data)=>{
       userSubscribe.value = data.data ? "用户已订阅" : "订阅用户"
     })
+    getRootComment()
   }).catch(()=>{
     router.back()
   })

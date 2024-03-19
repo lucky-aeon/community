@@ -29,11 +29,19 @@ const props = defineProps({
     rootComment: {
         type: Number,
         default: () => 0
+    },
+    callback: {
+        type: Function,
+        default(){}
     }
 })
 const userStore = useUserStore()
 const commentData = ref("")
 function pushComment() {
-    apiPublishArticleComment(props.articleId, props.parentId, commentData.value, props.rootComment)
+    apiPublishArticleComment(props.articleId, props.parentId, commentData.value, props.rootComment).then(({ok})=>{
+        if(!ok) return
+        commentData.value = ""
+        props.callback()
+    })
 }
 </script>

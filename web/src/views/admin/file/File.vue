@@ -1,7 +1,6 @@
 <template>
+
   <a-table :columns="columns" :bordered="false" :data="fileData" @page-change="getFileList" :pagination-props="page">
-
-
     <template #fileKey="{ record }">
       <div style="width: 200px; height: 100px;">
       <template v-if="record.mimeType.includes('video')">

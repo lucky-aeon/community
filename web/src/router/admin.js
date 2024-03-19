@@ -6,6 +6,7 @@ import Member from "@/views/admin/member/Member.vue";
 import OperLog from "@/views/admin/log/OperLog.vue";
 import LoginLog from "@/views/admin/log/LoginLog.vue";
 import Type from "@/views/admin/type/Type.vue";
+import User from "@/views/admin/user/User.vue";
 
 const AdminRouters = [
     {
@@ -31,6 +32,10 @@ const AdminRouters = [
     {
         path: "type",
         component: Type
+    },
+    {
+        path: "user",
+        component: User
     }
 
 ]

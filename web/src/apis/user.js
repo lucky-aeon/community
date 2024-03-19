@@ -31,3 +31,11 @@ export function apiAuthAccount(authForm) {
 export function apiGetUserStatistics() {
   return axios.get(`/community/user/statistics`)
 }
+
+export function apiAdminListUsers() {
+  return axios.get(`/community/admin/user`)
+}
+
+export function apiAdminUpdateUsers(user) {
+  return axios.post(`/community/admin/user`,user)
+}

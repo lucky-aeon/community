@@ -45,5 +45,5 @@ export function apiPublishArticleComment(articleId, parentId, content, root=0) {
     data.parentId = parentId
     data.rootId = root
   }
-  axios.post(`/community/comments/comment`, data)
+  return axios.post(`/community/comments/comment`, data)
 }

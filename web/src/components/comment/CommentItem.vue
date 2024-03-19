@@ -30,8 +30,8 @@
             <a-avatar :image-url="comment.fromUserAvatar">
             </a-avatar>
         </template>
-        <CommentEdit :parent-id="comment.id" :article-id="comment.articleId" :root-comment="comment.rootId" v-if="replyEdit.show"/>
-        <CommentItem :callback="getSubCommentPage" v-for="item in subCommentData" :key="item.id" :comment="item"/>
+        <CommentEdit :callback="getSubCommentPage" :parent-id="comment.id" :article-id="comment.articleId" :root-comment="comment.rootId" v-if="replyEdit.show"/>
+        <CommentItem v-for="item in subCommentData" :key="item.id" :comment="item"/>
         <template v-if="comment.rootId==comment.id && comment.childCommentNumber>5">
             <a-button type="text" long v-if="!showPage" @click="getSubCommentPage()">展开评论</a-button>
             <APagination v-else-if="comment.childCommentNumber>5" @change="getSubCommentPage" size="small" :current="currentPage" :total="comment.childCommentNumber" />
@@ -52,10 +52,6 @@ const props = defineProps({
     comment: {
         type: Object,
         default: () => { }
-    },
-    callback: {
-        type: Object,
-        default: ()=> {}
     }
 })
 const replyEdit = ref({

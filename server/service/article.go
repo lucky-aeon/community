@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	mapset "github.com/deckarep/golang-set/v2"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -255,4 +256,22 @@ func (a *ArticleService) GetLikeState(articleId, userId int) bool {
 	var count int64
 	model.ArticleLike().Where("article_id  = ? and user_id = ?", articleId, userId).Count(&count)
 	return count == 1
+}
+
+func (a *ArticleService) PageArticles(p, limit int) (articles []model.Articles, count int64) {
+	model.Article().Limit(limit).Offset((p - 1) * limit).Find(&articles)
+	model.Article().Count(&count)
+
+	// 找到文章的userId
+	userIds := mapset.NewSet[int]()
+	for i := range articles {
+		userIds.Add(articles[i].UserId)
+	}
+
+	var u UserService
+	userMap := u.ListByIdsToMap(userIds.ToSlice())
+	for i := range articles {
+		articles[i].Users = userMap[articles[i].UserId]
+	}
+	return
 }

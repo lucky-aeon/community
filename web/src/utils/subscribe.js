@@ -2,7 +2,7 @@ const EventIds = [
 // id: 1, name: 文章评论
     "/article/view/",
 // id: 2, name: 用户关注
-    "/user/profile/"
+    "/user/"
 ]
 
 export function GetEventUrl(eventId, toId) {

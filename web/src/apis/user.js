@@ -4,7 +4,12 @@ export function getUserMenu() {
   return axios.get('/community/user/menu');
 }
 
-export function getUserInfo() {
+export function getUserInfo(id=undefined) {
+  if (id) {
+    return axios.get('/community/user/info', {
+      params: {id}
+    });
+  }
   return axios.get('/community/user/info');
 }
 

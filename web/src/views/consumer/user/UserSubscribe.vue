@@ -1,5 +1,5 @@
 <template>
-    <a-table :columns="columns" :data="dataSources" :pagination="pagination">
+    <a-table :columns="columns" :data="dataSources" :pagination="pagination" v-on:row-click="gotoObjectPage">
         <template #optional="{record }">
             <a-popconfirm content="确定要取消该订阅?" @ok="subscribe(record.eventId, record.businessId)">
                 <a-button>取消订阅</a-button>
@@ -10,6 +10,8 @@
 
 <script setup>
 import * as apiSubscribe from '@/apis/apiSubscribe.js';
+import router from '@/router';
+import { GetEventUrl } from '@/utils/subscribe';
 import { ref } from 'vue';
 const columns = [
     {
@@ -29,6 +31,7 @@ const columns = [
         slotName: 'optional'
     }
 ];
+
 const dataSources = ref([]);
 const pagination = ref({
     total: 0,
@@ -49,5 +52,9 @@ function subscribe(eventId, businessId) {
         if(!ok) return
         refreshList()
     })
+}
+
+function gotoObjectPage(record) {
+    router.push({path: GetEventUrl(record.eventId, record.businessId)})
 }
 </script>

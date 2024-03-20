@@ -20,7 +20,7 @@
 
 
     <a-table :columns="columns" :data="loginData"
-           :pagination="pagination" @page-change="getLoginLogList">
+             :pagination="pagination"  @page-change="getLoginLogList">
       <template #optional="{ record, rowIndex }">
 
 
@@ -31,7 +31,7 @@
 
 <script setup>
 import {apiLoginLogList} from '@/apis/log.js'
-import {reactive, ref, h} from 'vue';
+import {reactive, ref, h, onMounted} from 'vue';
 
 const searchData = ref({
   account:null,
@@ -40,7 +40,7 @@ const searchData = ref({
   endTime:""
 })
 
-const pagination = {pageSize: 15}
+
 
 const columns = [
   {
@@ -68,12 +68,21 @@ const columns = [
     dataIndex: 'createdAt',
   }
 ]
-
+const current = ref(1)
+const pagination = ref({
+  total: 0,
+  current: 1,
+  defaultPageSize: 10
+})
 const loginData = ref([])
-const getLoginLogList = (searchData)=>{
-  apiLoginLogList(1,15,searchData).then(({data})=>{
+function getLoginLogList (){
+  current.value = 2
+  apiLoginLogList(current.value,10).then(({data})=>{
     loginData.value = data.list
+    pagination.value.total = data.total
+
   })
+  console.log(current.value)
 }
 getLoginLogList()
 

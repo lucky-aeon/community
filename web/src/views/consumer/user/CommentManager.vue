@@ -86,7 +86,7 @@ const page = ref({
   current:1
 })
 const commentData = ref([])
-function  getListData(current){
+function getListData(current){
   page.value.current = current
   listAllCommentsByArticleId(0,current,page.value.defaultPageSize).then(({data})=>{
     commentData.value = data.data

@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 export function apiCodeList(page,limit,startTime,endTime) {
-    return axios.get(`/community/admin/code`,)
+    return axios.get(`/community/admin/code?page=${page}&limit=${limit}`,)
 }
 
 export function apiGenerateCode(code) {

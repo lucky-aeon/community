@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-export function listAllMember() {
-    return axios.get(`/community/admin/member`);
+export function listAllMember(page,limit) {
+    return axios.get(`/community/admin/member?page=${page}&limit=${limit}`);
 }
 
 export function saveMember(member) {

@@ -28,9 +28,13 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 	// 父评论是否存在
 	if parentId != 0 {
 		parentComment := commentDao.GetByParentId(parentId)
+		if parentComment.ID == 0 {
+			parentComment = commentDao.GetByRootId(parentId)
+		}
 		comment.ToUserId = parentComment.FromUserId
 		comment.RootId = parentComment.RootId
 		comment.BusinessId = parentComment.BusinessId
+		comment.RootId = parentComment.RootId
 	}
 
 	commentDao.AddComment(comment)
@@ -126,31 +130,17 @@ func (*CommentsService) GetAllCommentsByArticleID(page, limit, userId, businessI
 	return comments, count
 }
 
-// 查询指定评论下的评论
+// 查询根评论下的子评论
 func (*CommentsService) GetCommentsByRootID(page, limit, rootId int) ([]*model.Comments, int64) {
 
-	var parentComments []*model.Comments
-	commentsMap := make(map[int][]*model.Comments)
 	comments, count := commentDao.GetCommentsByCommentID(page, limit, rootId)
-
-	// 收集根评论
-	for i := range comments {
-		if comments[i].ParentId == 0 {
-			parentComments = append(parentComments, comments[i])
-		} else {
-			commentsMap[comments[i].RootId] = append(commentsMap[comments[i].RootId], comments[i])
-		}
-
-	}
 	// 如果根评论为空,说明是查询指定根评论下的子评论
-	if len(parentComments) == 0 {
+	if count == 0 {
 		return comments, count
 	}
-	for i := range parentComments {
-		parentComments[i].ChildComments = commentsMap[parentComments[i].RootId]
-	}
 
-	return parentComments, count
+	setCommentUserInfoAndArticleTitle(comments)
+	return comments, count
 }
 
 func (a *CommentsService) PageComment(p, limit int) (comments []*model.Comments, count int64) {

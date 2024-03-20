@@ -32,6 +32,14 @@ const ConsumerRouters = [
         },
         children: [
             {
+                path: ":userId",
+                name: "UserHome",
+                component: () => import('@/views/consumer/user/UserHome.vue'),
+                meta: {
+                    hideSelf: true
+                }
+            },
+            {
                 path: "profile",
                 name: "userProfile",
                 component: () => import('@/views/consumer/user/UserProfile.vue')

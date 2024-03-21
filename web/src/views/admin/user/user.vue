@@ -15,7 +15,7 @@
   <a-space direction="vertical" size="large" fill>
 
     <a-table row-key="id" :columns="columns" :data="userData" :row-selection="rowSelection"
-             v-model:selectedKeys="selectedKeys" :pagination="pagination" >
+             v-model:selectedKeys="selectedKeys" :pagination="pagination" @page-change="getAdminListUsers">
       <template #avatar="{ record, rowIndex }">
         <div style="width: 200px; height: 100px;">
         <a-image :src="apiGetFile(record.avatar)"  width="100%" height="100%">123</a-image>
@@ -80,7 +80,7 @@ const rowSelection = reactive({
   showCheckedAll: true,
   onlyCurrent: false,
 });
-const pagination = {pageSize: 15}
+
 
 const columns = [
   {
@@ -112,11 +112,17 @@ const columns = [
     slotName: 'optional'
   }
 ]
-
+const pagination = reactive({
+  total: 0,
+  current: 1,
+  defaultPageSize: 10
+})
 const userData = ref([])
-const getAdminListUsers = ()=>{
-  apiAdminListUsers().then(({data})=>{
+const getAdminListUsers = (current)=>{
+  pagination.current = current
+  apiAdminListUsers(current, pagination.defaultPageSize).then(({data})=>{
     userData.value = data.list
+    pagination.total = data.total
   })
 }
 getAdminListUsers()

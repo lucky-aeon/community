@@ -3,8 +3,8 @@ import axios from 'axios';
 export function apiListParentAllType() {
     return axios.get(`/community/admin/type/parent`);
 }
-export function apilistAllType() {
-    return axios.get(`/community/admin/type`);
+export function apilistAllType(current) {
+    return axios.get(`/community/admin/type?page=${current}`);
 }
 
 export function apiSaveType(member) {

@@ -78,7 +78,7 @@ const rowSelection = reactive({
   showCheckedAll: true,
   onlyCurrent: false,
 });
-const pagination = {pageSize: 15}
+
 
 const columns = [
   {
@@ -106,11 +106,18 @@ const columns = [
     slotName: 'optional'
   }
 ]
+const pagination = ref({
+  total: 0,
+  current: 1,
+  defaultPageSize: 10
+})
 
 const codeData = ref([])
-const getCodeList = ()=>{
-  apiCodeList(1,15).then(({data})=>{
-    codeData.value = data.data
+const getCodeList = (current)=>{
+  pagination.value.current = current
+  apiCodeList(current,pagination.value.defaultPageSize).then(({data})=>{
+    codeData.value = data.list
+    pagination.value.total = data.total
   })
 }
 

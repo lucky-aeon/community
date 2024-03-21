@@ -19,9 +19,10 @@ func InitMemberRouters(r *gin.Engine) {
 }
 
 func listMembers(ctx *gin.Context) {
+	p, limit := page.GetPage(ctx)
 	var m services.MemberInfoService
-	members := m.ListMember()
-	result.Ok(page.New(members, int64(len(members))), "").Json(ctx)
+	members, count := m.ListMembers(p, limit)
+	result.Page(members, count, nil).Json(ctx)
 }
 
 func saveMember(ctx *gin.Context) {

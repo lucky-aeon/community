@@ -32,7 +32,7 @@ func (s *TypeService) PageTypes(page, limit int) (types []model.Types, count int
 		}
 	}
 
-	// 根据根评论找子评论
+	// 根据根分类找子分类
 	for i := range types {
 		for i2 := range parentIds {
 			if types[i].ParentId == parentIds[i2].ID {

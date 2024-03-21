@@ -1,6 +1,7 @@
 package services
 
 import (
+	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/dustin/go-humanize"
 	"xhyovo.cn/community/server/model"
 )
@@ -22,16 +23,16 @@ func (*FileService) Deletes(userId, businessId, tenantId int) {
 
 func (s *FileService) PageFiles(p, limit, userId int) (files []model.Files, count int64) {
 
-	files = fileDao.PageFiles(p, limit, userId)
+	files = fileDao.PageFiles(p, limit)
 	if len(files) == 0 {
 		return []model.Files{}, 0
 	}
 	var uS UserService
-	var uIds = make([]int, 0)
+	userIds := mapset.NewSet[int]()
 	for i := range files {
-		uIds = append(uIds, files[i].UserId)
+		userIds.Add(files[i].UserId)
 	}
-	nameMap := uS.ListByIdsToMap(uIds)
+	nameMap := uS.ListByIdsToMap(userIds.ToSlice())
 	for i := range files {
 		files[i].UserName = nameMap[files[i].UserId].Name
 		files[i].SizeName = humanize.Bytes(uint64(files[i].Size))

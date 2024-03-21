@@ -37,8 +37,8 @@ export function apiGetUserStatistics() {
   return axios.get(`/community/user/statistics`)
 }
 
-export function apiAdminListUsers() {
-  return axios.get(`/community/admin/user`)
+export function apiAdminListUsers(page,limit) {
+  return axios.get(`/community/admin/user?page=${page}$limit=${limit}`)
 }
 
 export function apiAdminUpdateUsers(user) {

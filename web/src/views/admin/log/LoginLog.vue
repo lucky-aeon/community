@@ -68,25 +68,22 @@ const columns = [
     dataIndex: 'createdAt',
   }
 ]
-const current = ref(1)
 const pagination = ref({
   total: 0,
   current: 1,
   defaultPageSize: 10
 })
 const loginData = ref([])
-function getLoginLogList (){
-  current.value = 2
-  apiLoginLogList(current.value,10).then(({data})=>{
+function getLoginLogList (current,searchData){
+  pagination.value.current = current
+  apiLoginLogList(current,pagination.value.defaultPageSize,searchData).then(({data})=>{
     loginData.value = data.list
     pagination.value.total = data.total
-
   })
-  console.log(current.value)
 }
 getLoginLogList()
 
 function search(){
-  getLoginLogList(searchData.value)
+  getLoginLogList(pagination.value.current,searchData.value)
 }
 </script>

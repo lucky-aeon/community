@@ -23,7 +23,7 @@ func listCode(ctx *gin.Context) {
 	var c services.CodeService
 	p, limit := page.GetPage(ctx)
 	codes, count := c.PageCodes(p, limit)
-	result.Ok(page.New(codes, count), "").Json(ctx)
+	result.Page(codes, count, nil).Json(ctx)
 }
 
 func generate(ctx *gin.Context) {

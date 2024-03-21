@@ -42,7 +42,7 @@
       </a-col>
     </a-row>
     <a-table row-key="id" :columns="columns" :data="typeData" :row-selection="rowSelection"
-             v-model:selectedKeys="selectedKeys" :pagination="pagination" >
+             v-model:selectedKeys="selectedKeys" :pagination="pagination"  @page-change="getParentTypeList">
       <template #optional="{ record, rowIndex }">
         <a-space>
           <a-button type="primary" @click="updateType(record)">修改</a-button>
@@ -128,7 +128,7 @@ const rowSelection = reactive({
   showCheckedAll: true,
   onlyCurrent: false,
 });
-const pagination = {pageSize: 15}
+
 
 const columns = [
   {
@@ -164,17 +164,24 @@ const columns = [
     slotName: 'optional'
   }
 ]
-
+const pagination = reactive({
+  total: 0,
+  current: 1,
+  pageSize: 10
+})
 const typeData = ref([])
-const getTypeList = ()=>{
-  apilistAllType().then(({data})=>{
+const getTypeList = (current)=>{
+  pagination.current = current
+  apilistAllType(current).then(({data})=>{
     typeData.value = data.list
+    pagination.total = data.total
   })
 }
 getTypeList()
 
+
 const parentData = ref([])
-const getParentTypeList = ()=>{
+const getParentTypeList = (current)=>{
   apiListParentAllType().then(({data})=>{
     parentData.value=data
   })

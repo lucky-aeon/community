@@ -1,5 +1,5 @@
 <template>
-  <a-space direction="vertical" size="large" fill>
+  <a-space direction="vertical" size="large" >
 
     <a-form layout="inline">
       <a-form-item field="requestType" label="请求方法" >
@@ -33,7 +33,6 @@
     <a-table :columns="columns" :data="operData"
            :pagination="pagination" :expandable="expandable" @page-change="getOperLogList">
       <template #optional="{ record, rowIndex }">
-
 
       </template>
     </a-table>
@@ -85,18 +84,16 @@ const columns = [
     dataIndex: 'createdAt',
   }
 ]
-const currentPage = ref(0)
 
-const pagination = ref({
+const pagination = reactive({
   total: 0,
   current: 1,
   defaultPageSize: 10
 })
 const operData = ref([])
-function getOperLogList (current){
-  currentPage.value = currentPage.value+1
-  apiOperLogList(currentPage.value,pagination.value.defaultPageSize,searchData).then(({data})=>{
 
+const getOperLogList = async (current,searchData)=>{
+   await apiOperLogList(current,pagination.defaultPageSize,searchData).then(({data})=>{
     let temp = data.list.map(e=>{
       return {
         ...e,
@@ -109,8 +106,10 @@ function getOperLogList (current){
             })
       }
     })
-    operData.value = temp
-    pagination.value.total = data.total
+     pagination.current = current
+     pagination.total = data.total
+     operData.value = temp
+
   })
 }
 getOperLogList()
@@ -127,6 +126,6 @@ function  createLogDetail(log) {
 }
 
 function search(){
-  getOperLogList(searchData.value)
+  getOperLogList(pagination.current,searchData.value)
 }
 </script>

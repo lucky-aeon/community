@@ -1,6 +1,7 @@
 <template>
 
-  <a-table :columns="columns" :bordered="false" :data="fileData" @page-change="getFileList" :pagination-props="page">
+  <a-table :columns="columns" :bordered="false" :data="fileData"
+           @page-change="getFileList" :pagination="page">
     <template #fileKey="{ record }">
       <div style="width: 200px; height: 100px;">
       <template v-if="record.mimeType.includes('video')">
@@ -40,15 +41,15 @@ const columns = [{
 
 const fileData = ref([])
 const page = ref({
-  defaultPageSize: 15,
   total: 0,
-  current:1
+  current:1,
+  defaultPageSize: 10,
 })
 function getFileList(current){
   page.value.current = current
-  apiAdminFile(page.value.current = current,page.value.defaultPageSize).then(({data})=>{
-    fileData.value = data.data
-    page.value.total = data.count
+  apiAdminFile(page.value.current,page.value.defaultPageSize).then(({data})=>{
+    fileData.value = data.list
+    page.value.total = data.total
 
   })
 }

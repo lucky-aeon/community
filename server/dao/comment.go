@@ -34,11 +34,7 @@ func (a *CommentDao) Create(comment *model.Comments) error {
 func (a *CommentDao) GetAllCommentsByArticleID(page, limit, fromUserId, businessId int) ([]*model.Comments, int64) {
 	var comments []*model.Comments
 	var count int64
-	comment := &model.Comments{
-		FromUserId: fromUserId,
-		BusinessId: businessId,
-	}
-	model.Comment().Where(&comment).Order("created_at desc").Limit(limit).Offset((page - 1) * limit).Find(&comments)
+	model.Comment().Where("from_user_id = ? or to_user_id = ?", fromUserId, fromUserId).Order("created_at desc").Limit(limit).Offset((page - 1) * limit).Find(&comments)
 	model.Comment().Where("from_user_id = ? or to_user_id = ?", fromUserId, fromUserId).Count(&count)
 	return comments, count
 }
@@ -112,4 +108,10 @@ func (a *CommentDao) ExistById(id int, userId int, businessId int, rootId int) b
 func (a *CommentDao) GetByParentId(parentId int) (comment model.Comments) {
 	model.Comment().Where("parent_id = ?", parentId).First(&comment)
 	return
+}
+
+func (a *CommentDao) GetByRootId(rootId int) (comment model.Comments) {
+	model.Comment().Where("root_id = ?", rootId).First(&comment)
+	return
+
 }

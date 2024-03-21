@@ -54,7 +54,7 @@ const searchData = ref({
   endTime:""
 })
 
-const pagination = {pageSize: 15}
+
 const expandable = reactive({
   title: 'Expand',
   width: 80,
@@ -85,10 +85,17 @@ const columns = [
     dataIndex: 'createdAt',
   }
 ]
+const currentPage = ref(0)
 
+const pagination = ref({
+  total: 0,
+  current: 1,
+  defaultPageSize: 10
+})
 const operData = ref([])
-const getOperLogList = (searchData)=>{
-  apiOperLogList(1,15,searchData).then(({data})=>{
+function getOperLogList (current){
+  currentPage.value = currentPage.value+1
+  apiOperLogList(currentPage.value,pagination.value.defaultPageSize,searchData).then(({data})=>{
 
     let temp = data.list.map(e=>{
       return {
@@ -103,7 +110,7 @@ const getOperLogList = (searchData)=>{
       }
     })
     operData.value = temp
-    console.log(operData.value)
+    pagination.value.total = data.total
   })
 }
 getOperLogList()

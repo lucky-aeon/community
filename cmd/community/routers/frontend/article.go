@@ -31,7 +31,6 @@ type SearchArticle struct {
 
 func InitArticleRouter(r *gin.Engine) {
 	group := r.Group("/community/articles")
-	group.Use(middleware.OperLogger())
 	group.GET("/:id", articleGet)
 	group.POST("", articlePageBySearch)
 	group.POST("/update", articleSave, middleware.OperLogger())

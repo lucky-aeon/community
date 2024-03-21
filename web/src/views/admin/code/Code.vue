@@ -109,7 +109,7 @@ const columns = [
 
 const codeData = ref([])
 const getCodeList = ()=>{
-  apiCodeList().then(({data})=>{
+  apiCodeList(1,15).then(({data})=>{
     codeData.value = data.data
   })
 }

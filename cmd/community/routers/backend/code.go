@@ -14,10 +14,9 @@ import (
 
 func InitCodeRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/code")
-	group.Use(middleware.OperLogger())
 	group.GET("", listCode)
-	group.POST("/generate", generate)
-	group.DELETE("/:code", deleteCode)
+	group.POST("/generate", generate, middleware.OperLogger())
+	group.DELETE("/:code", deleteCode, middleware.OperLogger())
 }
 
 func listCode(ctx *gin.Context) {

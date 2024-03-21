@@ -28,7 +28,7 @@
       </a-col>
     </a-row>
     <a-table row-key="name" :columns="columns" :data="memberData" :row-selection="rowSelection"
-             v-model:selectedKeys="selectedKeys" :pagination="pagination" >
+             v-model:selectedKeys="selectedKeys" :pagination="pagination" @page-change="getMemberList">
       <template #optional="{ record, rowIndex }">
         <a-space>
           <a-button type="primary" @click="updateComment(rowIndex)">修改</a-button>
@@ -60,7 +60,7 @@ const handleClick = () => {
 const handleBeforeOk = (done) => {
   saveMember(form)
   done()
-  getCommentList()
+  getMemberList()
 };
 
 function clearForm(){
@@ -96,7 +96,7 @@ const rowSelection = reactive({
   showCheckedAll: true,
   onlyCurrent: false,
 });
-const pagination = {pageSize: 15}
+
 
 const columns = [
   {
@@ -120,12 +120,20 @@ const columns = [
     slotName: 'optional'
   }
 ]
+const pagination = reactive({
+  total: 0,
+  current: 1,
+  defaultPageSize: 10
+})
 
 const memberData = ref([])
-const getCommentList = ()=>{
-  listAllMember().then(({data})=>{
-    memberData.value = data.data
+const getMemberList = (current)=>{
+  pagination.current = current
+
+  listAllMember(current,pagination.defaultPageSize).then(({data})=>{
+    memberData.value = data.list
+    pagination.total = data.total
   })
 }
-getCommentList()
+getMemberList()
 </script>

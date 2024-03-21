@@ -37,13 +37,10 @@ func (*File) GetFileKeys(businessId int) []string {
 	return fileKeys
 }
 
-func (f *File) PageFiles(p, limit, userId int) []model.Files {
+func (f *File) PageFiles(p, limit int) []model.Files {
 
-	f1 := &model.Files{
-		UserId: userId,
-	}
 	var files []model.Files
-	model.File().Where(&f1).Offset((p - 1) * limit).Limit(limit).Order("created_at desc").Find(&files)
+	model.File().Offset((p - 1) * limit).Limit(limit).Order("created_at desc").Find(&files)
 
 	return files
 }

@@ -27,8 +27,12 @@ func (*LogServices) GetPageOperLog(page, limit int, logSearch model.LogSearch) (
 		ids := userS.SearchNameSelectId(logSearch.UserName)
 		db.Where("user_id in ?", ids)
 	}
-	db.Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
 	db.Count(&count)
+	if count == 0 {
+		return
+	}
+	db.Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
+
 	set := mapset.NewSet[int]()
 
 	for _, lo := range logs {
@@ -62,7 +66,10 @@ func (s *LogServices) GetPageLoginPage(page, limit int, logSearch model.LogSearc
 	if logSearch.Ip != "" {
 		db.Where("ip like ?", "%"+logSearch.Ip+"%")
 	}
-	db.Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
 	db.Count(&count)
+	if count == 0 {
+		return
+	}
+	db.Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
 	return
 }

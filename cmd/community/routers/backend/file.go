@@ -16,5 +16,6 @@ func listFiles(ctx *gin.Context) {
 	p, limit := page.GetPage(ctx)
 	var fileS services.FileService
 	files, count := fileS.PageFiles(p, limit, 0)
-	result.Ok(page.New(files, count), "").Json(ctx)
+
+	result.Page(files, count, nil).Json(ctx)
 }

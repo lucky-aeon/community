@@ -8,8 +8,14 @@ import (
 type MemberInfoService struct {
 }
 
-func (*MemberInfoService) ListMember() []*model.MemberInfos {
-	return memberDao.ListMemberInfo()
+func (*MemberInfoService) ListMembers(page, limit int) (members []*model.MemberInfos, count int64) {
+	db := model.MemberInfo()
+	db.Count(&count)
+	if count == 0 {
+		return
+	}
+	db.Limit(limit).Offset((page - 1) * limit).Find(&members)
+	return
 }
 
 func (*MemberInfoService) SaveMember(member *model.MemberInfos) {

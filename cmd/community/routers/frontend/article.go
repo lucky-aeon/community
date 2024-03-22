@@ -69,7 +69,7 @@ func articleGet(c *gin.Context) {
 func articleDeleted(c *gin.Context) {
 	id := c.Param("id")
 	articleId, _ := strconv.Atoi(id)
-	if err := articleService.Delete(articleId, middleware.GetUserId(c)); err != nil {
+	if err := articleService.DeleteByUserId(articleId, middleware.GetUserId(c)); err != nil {
 		log.Warnf("用户id: %d 删除文章失败,文章id: %d ,err: %s", middleware.GetUserId(c), articleId, err.Error())
 		result.Err(err.Error()).Json(c)
 		return

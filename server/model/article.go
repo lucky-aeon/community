@@ -33,6 +33,7 @@ type ArticleData struct {
 	Desc       string         `json:"content,omitempty"`
 	CreatedAt  time.LocalTime `json:"createdAt"`
 	UpdatedAt  time.LocalTime `json:"updatedAt"`
+	StateName  string         `json:"stateName"`
 }
 
 func Article() *gorm.DB {

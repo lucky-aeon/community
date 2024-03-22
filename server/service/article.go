@@ -242,11 +242,21 @@ func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
 	return id, nil
 }
 
-func (a *ArticleService) Delete(articleId, userId int) (err error) {
+func (a *ArticleService) DeleteByUserId(articleId, userId int) (err error) {
 
 	// 删除文章
 	db := mysql.GetInstance()
 	err = db.Where("id = ? and user_id = ?", articleId, userId).Delete(&model.Articles{}).Error
+	// 删除文章标签表
+	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
+	return
+}
+
+func (a *ArticleService) Delete(articleId int) (err error) {
+
+	// 删除文章
+	db := mysql.GetInstance()
+	err = db.Where("id = ?", articleId).Delete(&model.Articles{}).Error
 	// 删除文章标签表
 	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
 	return
@@ -258,20 +268,42 @@ func (a *ArticleService) GetLikeState(articleId, userId int) bool {
 	return count == 1
 }
 
-func (a *ArticleService) PageArticles(p, limit int) (articles []model.Articles, count int64) {
-	model.Article().Limit(limit).Offset((p - 1) * limit).Find(&articles)
+func (a *ArticleService) PageArticles(p, limit int) (articleList []model.ArticleData, count int64) {
+	var articles []model.Articles
+	model.Article().Limit(limit).Offset((p-1)*limit).Select("id", "created_at", "title", "user_id", "state", "type").Order("created_at desc").Find(&articles)
 	model.Article().Count(&count)
-
+	if count == 0 {
+		return
+	}
 	// 找到文章的userId
 	userIds := mapset.NewSet[int]()
+	typeIds := mapset.NewSet[int]()
+
 	for i := range articles {
-		userIds.Add(articles[i].UserId)
+		articleO := articles[i]
+		aritcle := model.ArticleData{
+			ID:         articleO.ID,
+			Title:      articleO.Title,
+			State:      articleO.State,
+			CreatedAt:  articleO.CreatedAt,
+			UserSimple: model.UserSimple{UId: articleO.UserId},
+			TypeSimple: model.TypeSimple{TypeId: articleO.Type},
+		}
+		typeIds.Add(articleO.Type)
+		userIds.Add(articleO.UserId)
+		articleList = append(articleList, aritcle)
 	}
 
+	// 填充分类,状态名称
+
 	var u UserService
+	var t TypeService
 	userMap := u.ListByIdsToMap(userIds.ToSlice())
+	typeMap := t.ListByIdToMap(typeIds.ToSlice())
 	for i := range articles {
-		articles[i].Users = userMap[articles[i].UserId]
+		articleList[i].StateName = constant.GetArticleName(articleList[i].State)
+		articleList[i].TypeSimple.TypeTitle = typeMap[articleList[i].TypeSimple.TypeId]
+		articleList[i].UserSimple.UName = userMap[articleList[i].UserSimple.UId].Name
 	}
 	return
 }

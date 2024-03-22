@@ -28,6 +28,7 @@ func InitFrontedRouter(r *gin.Engine) {
 	backend.InitMessageRouters(r)
 	backend.InitLogRouters(r)
 	backend.InitArticleRouters(r)
+	backend.InitUserTagRouters(r)
 	InitCommentRouters(r)
 	frontend.InitArticleTagRouter(r)
 }

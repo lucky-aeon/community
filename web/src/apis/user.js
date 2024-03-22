@@ -44,3 +44,14 @@ export function apiAdminListUsers(page,limit) {
 export function apiAdminUpdateUsers(user) {
   return axios.post(`/community/admin/user`,user)
 }
+
+export function apiAdminListUserTags(page,limit) {
+  return axios.get(`/community/admin/user/tag?page=${page}&limit=${limit}`)
+}
+
+export function apiAdminSaveUserTags(userTags) {
+  return axios.post(`/community/admin/user/tag?`,userTags)
+}
+export function apiAdminDeleteUserTags(id) {
+  return axios.delete(`/community/admin/user/tag/${id}`)
+}

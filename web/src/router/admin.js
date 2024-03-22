@@ -7,6 +7,7 @@ import OperLog from "@/views/admin/log/OperLog.vue";
 import LoginLog from "@/views/admin/log/LoginLog.vue";
 import Type from "@/views/admin/type/Type.vue";
 import User from "@/views/admin/user/User.vue";
+import Tag from "@/views/admin/user/Tag.vue";
 import Article from "@/views/admin/article/Article.vue";
 
 const AdminRouters = [
@@ -41,6 +42,10 @@ const AdminRouters = [
     {
         path: "article",
         component: Article
+    },
+    {
+        path: "user/tag",
+        component: Tag
     }
 
 ]

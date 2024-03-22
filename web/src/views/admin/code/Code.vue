@@ -29,7 +29,7 @@
       </a-col>
     </a-row>
     <a-table row-key="name" :columns="columns" :data="codeData" :row-selection="rowSelection"
-             v-model:selectedKeys="selectedKeys" :pagination="pagination" >
+            :pagination="pagination" >
       <template #optional="{ record, rowIndex }">
         <a-space>
           <a-button type="primary" @click="delCode(rowIndex)">删除</a-button>
@@ -71,7 +71,6 @@ const handleCancel = () => {
   clearForm()
 }
 
-const selectedKeys = ref(['Jane Doe', 'Alisa Ross']);
 
 const rowSelection = reactive({
   type: 'checkbox',

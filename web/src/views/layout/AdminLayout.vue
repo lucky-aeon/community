@@ -102,6 +102,9 @@
               <router-link to="/admin/user">
                 <a-menu-item>用户</a-menu-item>
               </router-link>
+              <router-link to="/admin/user/tag">
+                <a-menu-item>标签</a-menu-item>
+              </router-link>
             </a-sub-menu>
             <a-sub-menu key="9">
               <template #icon><icon-apps></icon-apps></template>

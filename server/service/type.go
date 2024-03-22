@@ -74,3 +74,14 @@ func (s *TypeService) ListParentTypes() []model.Types {
 	return types
 
 }
+
+func (s *TypeService) ListByIdToMap(ids []int) (m map[int]string) {
+	m = make(map[int]string)
+	var types []model.Types
+	model.Type().Where("id in ?", ids).Select("id", "title").Find(&types)
+	for i := range types {
+		m[types[i].ID] = types[i].Title
+	}
+
+	return
+}

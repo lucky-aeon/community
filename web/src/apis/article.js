@@ -44,3 +44,11 @@ export function apiArticleLike(id){
 export function apiArticleLikeState(id){
     return axios.get(`/community/articles/like/state/${id}`)
 }
+
+export function apiAdminListArticles(page,limit){
+    return axios.get(`/community/admin/article/page?page=${page}&limit=${limit}`)
+}
+
+export function apiAdminDeleteArticles(id){
+    return axios.delete(`/community/admin/article/${id}`)
+}

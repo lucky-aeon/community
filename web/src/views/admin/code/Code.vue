@@ -32,7 +32,7 @@
              v-model:selectedKeys="selectedKeys" :pagination="pagination" >
       <template #optional="{ record, rowIndex }">
         <a-space>
-          <a-button type="primary" @click="delComment(rowIndex)">删除</a-button>
+          <a-button type="primary" @click="delCode(rowIndex)">删除</a-button>
         </a-space>
 
       </template>
@@ -124,7 +124,7 @@ const getCodeList = (current)=>{
 
 
 getCodeList()
-function delComment(id) {
+function delCode(id) {
   apiDeleteCode(codeData.value[id].code).then(({ok})=>{
     if (ok) {
       codeData.value.splice(id,1)

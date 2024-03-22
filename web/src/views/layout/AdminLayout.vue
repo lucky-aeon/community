@@ -103,6 +103,13 @@
                 <a-menu-item>用户</a-menu-item>
               </router-link>
             </a-sub-menu>
+            <a-sub-menu key="9">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>文章</template>
+              <router-link to="/admin/article">
+                <a-menu-item>文章</a-menu-item>
+              </router-link>
+            </a-sub-menu>
           </a-menu>
 
         </a-layout-sider>

@@ -66,7 +66,7 @@ const props = defineProps({
     },
     callResponse: {
         type: Function,
-        default: ()=>{}
+        default(){}
     }
 })
 const visible = defineModel({require: true})

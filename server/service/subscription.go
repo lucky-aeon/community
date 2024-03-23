@@ -72,11 +72,11 @@ func (*SubscriptionService) ListSubscriptionUserId(event, businessId int) []mode
 }
 
 // 触发订阅事件
-func (s *SubscriptionService) Do(eventId int, b BusinessId) {
+func (s *SubscriptionService) Do(eventId int, b SubscribeData) {
 
-	go func(eventId int, b BusinessId) {
+	go func(eventId int, b SubscribeData) {
 
-		subscriptions := s.ListSubscriptionUserId(eventId, b.CurrentBusinessId)
+		subscriptions := s.ListSubscriptionUserId(eventId, b.SubscribeId)
 		if len(subscriptions) > 0 {
 			var userIds []int
 			for i := range subscriptions {
@@ -92,8 +92,8 @@ func (s *SubscriptionService) Do(eventId int, b BusinessId) {
 }
 
 // 触发 @ 事件
-func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content string, b BusinessId) {
-	go func(eventId, triggerId int, content string, b BusinessId) {
+func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content string, b SubscribeData) {
+	go func(eventId, triggerId int, content string, b SubscribeData) {
 
 		userNames := findAtUser(content)
 		if len(userNames) > 0 {
@@ -103,6 +103,14 @@ func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content str
 		}
 	}(eventId, triggerId, content, b)
 
+}
+
+func (s *SubscriptionService) Send(eventId, eventType, fromId, toId int, b SubscribeData) {
+	go func(eventId, fromId, toId int, b SubscribeData) {
+		var users []model.Users
+		users = append(users, model.Users{ID: toId})
+		send(users, eventId, eventType, fromId, b)
+	}(eventId, fromId, toId, b)
 }
 
 func findAtUser(content string) []string {
@@ -117,7 +125,7 @@ func findAtUser(content string) []string {
 	return names.ToSlice()
 }
 
-func send(users []model.Users, eventId, eventType, sendId int, b BusinessId) {
+func send(users []model.Users, eventId, eventType, sendId int, b SubscribeData) {
 	var m MessageService
 
 	var ids []int
@@ -130,39 +138,6 @@ func send(users []model.Users, eventId, eventType, sendId int, b BusinessId) {
 	}
 	messageTemplate := messageDao.GetMessageTemplate(eventId)
 	msg := m.GetMsg(messageTemplate, b)
-	m.SendMessages(sendId, eventType, b.UserId, ids, msg)
+	m.SendMessages(sendId, eventType, b.CurrentBusinessId, ids, msg)
 	email.Send(emails, msg, "技术鸭社区")
-}
-
-func extractMentionedUsers(s string) []string {
-	var mentionedUsers []string
-
-	// 搜索字符串中的 "@" 符号
-	startIndex := 0
-	for {
-		atIndex := strings.Index(s[startIndex:], "@")
-		if atIndex == -1 {
-			break
-		}
-
-		atIndex += startIndex
-		startIndex = atIndex + 1
-
-		// 寻找下一个空格或句号，作为结束索引
-		endIndex := len(s)
-		spaceIndex := strings.Index(s[startIndex:], " ")
-		dotIndex := strings.Index(s[startIndex:], ".")
-
-		if spaceIndex != -1 && spaceIndex < endIndex {
-			endIndex = startIndex + spaceIndex
-		}
-		if dotIndex != -1 && dotIndex < endIndex {
-			endIndex = startIndex + dotIndex
-		}
-
-		mentionedUser := s[startIndex:endIndex]
-		mentionedUsers = append(mentionedUsers, mentionedUser)
-	}
-
-	return mentionedUsers
 }

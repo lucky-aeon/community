@@ -32,11 +32,12 @@ func init() {
 }
 
 // 发送消息中消息模板需要用到的业务id
-type BusinessId struct {
+type SubscribeData struct {
 	ArticleId         int
 	UserId            int
 	CommentId         int
 	CurrentBusinessId int // 当前主业务id
+	SubscribeId       int // 订阅业务的id
 }
 
 type MessageService struct {
@@ -105,7 +106,7 @@ func (m *MessageService) PageMessage(page, limit, userId, types, state int) (msg
 
 // 人：你订阅的 xxx 用户发布了文章，文章标题：xxx
 // 文章：你订阅的 xxx 文章，被xxx评论了，评论内容：xxx
-func (m *MessageService) GetMsg(template string, b BusinessId) string {
+func (m *MessageService) GetMsg(template string, b SubscribeData) string {
 	BusinessIdMap := businessIdToMap(b)
 	for s, v := range messageTemplateVar {
 		// 拼接 ${ + s + "." 如果存在则找
@@ -126,7 +127,7 @@ func (m *MessageService) GetMsg(template string, b BusinessId) string {
 	return template
 }
 
-func businessIdToMap(b BusinessId) map[string]int {
+func businessIdToMap(b SubscribeData) map[string]int {
 	m := map[string]int{
 		"user":    b.UserId,
 		"article": b.ArticleId,

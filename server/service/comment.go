@@ -4,6 +4,7 @@ import (
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
 )
@@ -35,15 +36,22 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 		comment.RootId = parentComment.RootId
 		comment.BusinessId = parentComment.BusinessId
 		comment.RootId = parentComment.RootId
+		var s SubscriptionService
+		var b SubscribeData
+		b.UserId = comment.FromUserId
+		b.ArticleId = comment.BusinessId
+		b.CurrentBusinessId = comment.BusinessId
+		s.Send(event.ReplyComment, constant.NOTICE, comment.FromUserId, comment.ToUserId, b)
 	}
 
 	commentDao.AddComment(comment)
 	var subscriptionService SubscriptionService
-	var b BusinessId
+	var b SubscribeData
 	b.CommentId = comment.BusinessId
 	b.UserId = comment.FromUserId
 	b.ArticleId = comment.BusinessId
 	b.CurrentBusinessId = comment.BusinessId
+	b.SubscribeId = comment.BusinessId
 	subscriptionService.ConstantAtSend(event.CommentAt, comment.FromUserId, comment.Content, b)
 	subscriptionService.Do(event.CommentUpdateEvent, b)
 	return nil
@@ -138,7 +146,7 @@ func (*CommentsService) GetCommentsByRootID(page, limit, rootId int) (comments [
 		return
 	}
 	comments = commentDao.GetCommentsByCommentID(page, limit, rootId)
-	
+
 	setCommentUserInfoAndArticleTitle(comments)
 	return
 }

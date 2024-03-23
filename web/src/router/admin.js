@@ -1,14 +1,14 @@
 // admin page
 
+import Article from "@/views/admin/article/Article.vue";
 import Code from "@/views/admin/code/Code.vue";
 import File from "@/views/admin/file/File.vue";
-import Member from "@/views/admin/member/Member.vue";
-import OperLog from "@/views/admin/log/OperLog.vue";
 import LoginLog from "@/views/admin/log/LoginLog.vue";
+import OperLog from "@/views/admin/log/OperLog.vue";
+import Member from "@/views/admin/member/Member.vue";
 import Type from "@/views/admin/type/Type.vue";
-import User from "@/views/admin/user/User.vue";
 import Tag from "@/views/admin/user/Tag.vue";
-import Article from "@/views/admin/article/Article.vue";
+import UserList from "@/views/admin/user/UserList.vue";
 
 const AdminRouters = [
     {
@@ -37,7 +37,7 @@ const AdminRouters = [
     },
     {
         path: "user",
-        component: User
+        component: UserList
     },
     {
         path: "article",

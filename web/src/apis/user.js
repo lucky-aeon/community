@@ -4,10 +4,10 @@ export function getUserMenu() {
   return axios.get('/community/user/menu');
 }
 
-export function getUserInfo(id=undefined) {
-  if (id) {
+export function getUserInfo(userId=undefined) {
+  if (userId) {
     return axios.get('/community/user/info', {
-      params: {id}
+      params: {userId}
     });
   }
   return axios.get('/community/user/info');
@@ -54,4 +54,13 @@ export function apiAdminSaveUserTags(userTags) {
 }
 export function apiAdminDeleteUserTags(id) {
   return axios.delete(`/community/admin/user/tag/${id}`)
+}
+
+/**
+ * 获取用户标签
+ * @param {number} id 用户id
+ * @returns 标签集
+ */
+export function apiGetUserTags(id) {
+  return axios.get(`/community/admin/user/tag/${id}`)
 }

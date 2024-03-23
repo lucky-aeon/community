@@ -2,6 +2,7 @@ package backend
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
 	"xhyovo.cn/community/server/model"
@@ -24,16 +25,23 @@ func listUser(ctx *gin.Context) {
 	result.Page(users, count, nil).Json(ctx)
 }
 
+type updateUserInfo struct {
+	model.Users
+	Tags []int `json:"tags"`
+}
+
 func updateUser(ctx *gin.Context) {
 
-	user := model.Users{}
+	user := updateUserInfo{}
 
-	if err := ctx.ShouldBindJSON(&user); err != nil {
+	if err := ctx.ShouldBindBodyWith(&user, binding.JSON); err != nil {
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
 
 	var u services.UserService
-	u.UpdateUser(&user)
-	result.OkWithMsg(nil, "修改成功").Json(ctx)
+	u.UpdateUser(&user.Users)
+	user.Tags = userTagS.AssignUserLabel(user.ID, user.Tags)
+
+	result.OkWithMsg(user, "修改成功").Json(ctx)
 }

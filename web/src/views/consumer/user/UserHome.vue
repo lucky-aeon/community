@@ -6,7 +6,8 @@
             <h3>{{userData.name}}</h3>
             <a-space>
                 <a-tag color="red" >{{ userData.roleUp }}</a-tag>
-                <a-tag color="blue">{{ userData.createdAt }}</a-tag>
+                <a-tag :color="tagItem.color || 'blue'" v-for="tagItem in userTags" :key="tagItem.id">{{ tagItem.name }}</a-tag>
+                <a-tag>{{ userData.createdAt }}</a-tag>
             </a-space>
         </a-card>
         <div style="height: 20px;"></div>
@@ -36,7 +37,7 @@
 
 </template>
 <script setup>
-import { getUserInfo } from '@/apis/user';
+import { apiGetUserTags, getUserInfo } from '@/apis/user';
 import ArticleList from '@/components/article/ArticleList.vue';
 import router from '@/router';
 import { IconFaceFrownFill } from '@arco-design/web-vue/es/icon';
@@ -53,7 +54,12 @@ const currentUserId = computed(() => {
 })
 const queryData = ref(null)
 const userData = ref({})
+const userTags = ref([])
 if (currentUserId.value) {
+    apiGetUserTags(currentUserId.value).then(({data, ok})=>{
+        if(!ok) return
+        userTags.value = data
+    })
     getUserInfo(currentUserId.value).then(({data, ok})=>{
         if (!ok) {
             currentUserId.value = null

@@ -1,5 +1,5 @@
 <template>
-  <a-modal v-model:visible="visible" title="添加等级" @cancel="handleCancel" @before-ok="handleBeforeOk">
+  <a-modal :ok-loading="loading" v-model:visible="visible" title="修改用户" @cancel="handleCancel" @before-ok="handleBeforeOk">
     <a-form :model="form">
       <a-form-item field="name" label="名称">
         <a-input v-model="form.name" />
@@ -10,50 +10,55 @@
       <a-form-item field="desc" label="描述">
         <a-input v-model="form.desc" />
       </a-form-item>
+      <a-form-item field="tags" label="用户标签">
+        <a-select v-model="form.tags" :loading="loading" placeholder="请选择用户标签" multiple @search="handleTagSearch"
+          :filter-option="false" :show-extra-options="false" :field-names="tagsFieldNames" :options="systemTags" />
+      </a-form-item>
     </a-form>
   </a-modal>
   <a-space direction="vertical" size="large" fill>
 
     <a-table row-key="id" :columns="columns" :data="userData" :row-selection="rowSelection"
-             v-model:selectedKeys="selectedKeys" :pagination="pagination" @page-change="getAdminListUsers">
-      <template #avatar="{ record, rowIndex }">
+      v-model:selectedKeys="selectedKeys" :pagination="pagination" @page-change="getAdminListUsers">
+      <template #avatar="{ record }">
         <div style="width: 200px; height: 100px;">
-        <a-image :src="apiGetFile(record.avatar)"  width="100%" height="100%">123</a-image>
+          <a-image :src="apiGetFile(record.avatar)" width="100%" height="100%">123</a-image>
         </div>
 
       </template>
-    <template  #optional="{ record, rowIndex }">
-      <a-space>
-        <a-button type="primary" @click="updateUser(rowIndex)">修改</a-button>
-      </a-space>
-    </template>
+      <template #optional="{ rowIndex }">
+        <a-space>
+          <a-button :loading="loading" type="primary" @click="updateUser(rowIndex)">修改</a-button>
+        </a-space>
+      </template>
     </a-table>
   </a-space>
 </template>
 
 <script setup>
-import {apiAdminListUsers, apiAdminUpdateUsers} from '@/apis/user.js'
-import { saveMember} from '@/apis/member.js'
+import { apiGetFile } from "@/apis/file.js";
+import { apiAdminListUserTags, apiAdminListUsers, apiAdminUpdateUsers, apiGetUserTags } from "@/apis/user.js";
 import { reactive, ref } from 'vue';
-import { IconPlus, IconCheckCircle } from '@arco-design/web-vue/es/icon';
-import {apiGetFile} from "@/apis/file.js";
+
+const loading = ref(false)
 
 const visible = ref(false);
 const form = reactive({
-  id:null,
+  id: null,
   name: '',
   account: '',
-  desc: ''
+  desc: '',
+  tags: [],
 });
 
 
 const handleBeforeOk = async (done) => {
   await apiAdminUpdateUsers(form)
   done()
-  await getAdminListUsers()
+  getAdminListUsers()
 };
 
-function clearForm(){
+function clearForm() {
   form.id = null
   form.name = null
   form.desc = null
@@ -63,14 +68,20 @@ const handleCancel = () => {
   clearForm()
 }
 
-function updateUser(id){
+async function updateUser(id) {
+  loading.value = true
   const user = userData.value[id]
   visible.value = true;
   form.id = user.id
   form.name = user.name
   form.account = user.account
   form.desc = user.desc
-  console.log(userData.value[id])
+  form.tags = []
+  let res = await apiGetUserTags(user.id)
+  if(res.ok && res.data) {
+    form.tags = res.data.map(tagItem=> tagItem.id)
+  }
+  loading.value = false
 }
 
 const selectedKeys = ref(['Jane Doe', 'Alisa Ross']);
@@ -84,7 +95,7 @@ const rowSelection = reactive({
 
 const columns = [
   {
-    title:"id",
+    title: "id",
     dataIndex: "id"
   },
   {
@@ -118,12 +129,26 @@ const pagination = reactive({
   defaultPageSize: 10
 })
 const userData = ref([])
-const getAdminListUsers = (current)=>{
+const getAdminListUsers = (current) => {
   pagination.current = current
-  apiAdminListUsers(current, pagination.defaultPageSize).then(({data})=>{
+  apiAdminListUsers(current, pagination.defaultPageSize).then(({ data }) => {
     userData.value = data.list
     pagination.total = data.total
   })
 }
 getAdminListUsers()
+const systemTags = ref([])
+const tagsFieldNames = ref({
+  label: "name",
+  value: "id"
+})
+function handleTagSearch(value) {
+  apiAdminListUserTags(value, 10).then(({ data, ok }) => {
+    if (!ok) return
+    systemTags.value = data.list
+  }).finally((()=> loading.value = false));
+}
+
+handleTagSearch("")
+
 </script>

@@ -1,8 +1,9 @@
 package backend
 
 import (
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
@@ -19,7 +20,7 @@ func InitUserTagRouters(r *gin.Engine) {
 	group.POST("", saveUserTag)
 	group.DELETE("/:id", deleteUserTag)
 	group.POST("/assignUserLabel", assignUserLabel)
-	group.GET("/:userId/tags", getTagsByUserId)
+	group.GET("/:userId", getTagsByUserId)
 
 }
 

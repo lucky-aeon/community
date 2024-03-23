@@ -131,16 +131,16 @@ func (*CommentsService) GetAllCommentsByArticleID(page, limit, userId, businessI
 }
 
 // 查询根评论下的子评论
-func (*CommentsService) GetCommentsByRootID(page, limit, rootId int) ([]*model.Comments, int64) {
+func (*CommentsService) GetCommentsByRootID(page, limit, rootId int) (comments []*model.Comments, count int64) {
 
-	comments, count := commentDao.GetCommentsByCommentID(page, limit, rootId)
-	// 如果根评论为空,说明是查询指定根评论下的子评论
+	model.Comment().Where("root_id = ? and id <> root_id", rootId).Count(&count)
 	if count == 0 {
-		return comments, count
+		return
 	}
-
+	comments = commentDao.GetCommentsByCommentID(page, limit, rootId)
+	
 	setCommentUserInfoAndArticleTitle(comments)
-	return comments, count
+	return
 }
 
 func (a *CommentsService) PageComment(p, limit int) (comments []*model.Comments, count int64) {

@@ -1,6 +1,8 @@
 package services
 
 import (
+	mapset "github.com/deckarep/golang-set/v2"
+	"regexp"
 	"strings"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/email"
@@ -75,8 +77,6 @@ func (s *SubscriptionService) Do(eventId int, b BusinessId) {
 	go func(eventId int, b BusinessId) {
 
 		subscriptions := s.ListSubscriptionUserId(eventId, b.CurrentBusinessId)
-		var m MessageService
-
 		if len(subscriptions) > 0 {
 			var userIds []int
 			for i := range subscriptions {
@@ -85,16 +85,7 @@ func (s *SubscriptionService) Do(eventId int, b BusinessId) {
 			sendId := subscriptions[0].SendId
 			var users []model.Users
 			model.User().Where("id in ?", userIds).Select("account", "id", "subscribe").Find(&users)
-			var emails []string
-			for i := range users {
-				if users[i].Subscribe {
-					emails = append(emails, users[i].Account)
-				}
-			}
-			messageTemplate := messageDao.GetMessageTemplate(eventId)
-			msg := m.GetMsg(messageTemplate, b)
-			m.SendMessages(sendId, constant.NOTICE, b.ArticleId, userIds, msg) // todo确定内容
-			email.Send(emails, msg, "技术鸭社区")
+			send(users, eventId, constant.NOTICE, sendId, b)
 		}
 
 	}(eventId, b)
@@ -103,31 +94,44 @@ func (s *SubscriptionService) Do(eventId int, b BusinessId) {
 // 触发 @ 事件
 func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content string, b BusinessId) {
 	go func(eventId, triggerId int, content string, b BusinessId) {
-		var m MessageService
-		if strings.Contains(content, "@") {
-			mentionedUsers := extractMentionedUsers(content)
-			if len(mentionedUsers) == 0 {
-				return
-			}
 
+		userNames := findAtUser(content)
+		if len(userNames) > 0 {
 			var users []model.Users
-			model.User().Where("name in ?", mentionedUsers).Select("account", "id", "subscribe").Find(&users)
-
-			var ids []int
-			var emails []string
-			for i := range users {
-				ids = append(ids, users[i].ID)
-				if users[i].Subscribe {
-					emails = append(emails, users[i].Account)
-				}
-			}
-			messageTemplate := messageDao.GetMessageTemplate(eventId)
-			msg := m.GetMsg(messageTemplate, b)
-			m.SendMessages(triggerId, constant.MENTION, b.UserId, ids, msg)
-			email.Send(emails, msg, "技术鸭社区")
+			model.User().Where("name in ?", userNames).Select("account", "id", "subscribe").Find(&users)
+			send(users, eventId, constant.MENTION, triggerId, b)
 		}
 	}(eventId, triggerId, content, b)
 
+}
+
+func findAtUser(content string) []string {
+
+	// 使用正则表达式匹配文本中的 @ 符号
+	re := regexp.MustCompile(`\s@(\w+)\s`)
+	matches := re.FindAllString(content, -1)
+	names := mapset.NewSet[string]()
+	for i := range matches {
+		names.Add(strings.ReplaceAll(strings.TrimSpace(matches[i]), "@", ""))
+	}
+	return names.ToSlice()
+}
+
+func send(users []model.Users, eventId, eventType, sendId int, b BusinessId) {
+	var m MessageService
+
+	var ids []int
+	var emails []string
+	for i := range users {
+		ids = append(ids, users[i].ID)
+		if users[i].Subscribe {
+			emails = append(emails, users[i].Account)
+		}
+	}
+	messageTemplate := messageDao.GetMessageTemplate(eventId)
+	msg := m.GetMsg(messageTemplate, b)
+	m.SendMessages(sendId, eventType, b.UserId, ids, msg)
+	email.Send(emails, msg, "技术鸭社区")
 }
 
 func extractMentionedUsers(s string) []string {

@@ -74,13 +74,12 @@ func (a *CommentDao) GetCommentsByArticleID(page, limit, businessId int) ([]*mod
 }
 
 // 根据根评论查询下的子评论
-func (a *CommentDao) GetCommentsByCommentID(page, limit, rootId int) ([]*model.Comments, int64) {
+func (a *CommentDao) GetCommentsByCommentID(page, limit, rootId int) []*model.Comments {
 	var comments []*model.Comments
 
 	db := model.Comment()
 	db.Limit(limit).Offset((page-1)*limit).Where("root_id = ? and id <> root_id", rootId).Order("created_at desc").Find(&comments)
-	count := a.GetRootCommentsCountByArticleID(rootId)
-	return comments, count
+	return comments
 }
 
 // 查询跟评论下的评论总数

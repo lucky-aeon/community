@@ -4,6 +4,7 @@ import (
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
 )
@@ -35,15 +36,22 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 		comment.RootId = parentComment.RootId
 		comment.BusinessId = parentComment.BusinessId
 		comment.RootId = parentComment.RootId
+		var s SubscriptionService
+		var b SubscribeData
+		b.UserId = comment.FromUserId
+		b.ArticleId = comment.BusinessId
+		b.CurrentBusinessId = comment.BusinessId
+		s.Send(event.ReplyComment, constant.NOTICE, comment.FromUserId, comment.ToUserId, b)
 	}
 
 	commentDao.AddComment(comment)
 	var subscriptionService SubscriptionService
-	var b BusinessId
+	var b SubscribeData
 	b.CommentId = comment.BusinessId
 	b.UserId = comment.FromUserId
 	b.ArticleId = comment.BusinessId
 	b.CurrentBusinessId = comment.BusinessId
+	b.SubscribeId = comment.BusinessId
 	subscriptionService.ConstantAtSend(event.CommentAt, comment.FromUserId, comment.Content, b)
 	subscriptionService.Do(event.CommentUpdateEvent, b)
 	return nil
@@ -131,16 +139,16 @@ func (*CommentsService) GetAllCommentsByArticleID(page, limit, userId, businessI
 }
 
 // 查询根评论下的子评论
-func (*CommentsService) GetCommentsByRootID(page, limit, rootId int) ([]*model.Comments, int64) {
+func (*CommentsService) GetCommentsByRootID(page, limit, rootId int) (comments []*model.Comments, count int64) {
 
-	comments, count := commentDao.GetCommentsByCommentID(page, limit, rootId)
-	// 如果根评论为空,说明是查询指定根评论下的子评论
+	model.Comment().Where("root_id = ? and id <> root_id", rootId).Count(&count)
 	if count == 0 {
-		return comments, count
+		return
 	}
+	comments = commentDao.GetCommentsByCommentID(page, limit, rootId)
 
 	setCommentUserInfoAndArticleTitle(comments)
-	return comments, count
+	return
 }
 
 func (a *CommentsService) PageComment(p, limit int) (comments []*model.Comments, count int64) {

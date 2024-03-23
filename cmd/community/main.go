@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+
 	log.Init()
 	r := gin.Default()
 	r.SetFuncMap(utils.GlobalFunc())

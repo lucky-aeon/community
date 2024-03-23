@@ -232,10 +232,11 @@ func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
 	db().Create(&tags)
 	var subscriptionService SubscriptionService
 	if flag {
-		var b BusinessId
+		var b SubscribeData
 		b.UserId = article.UserId
 		b.ArticleId = article.ID
-		b.CurrentBusinessId = article.UserId
+		b.CurrentBusinessId = article.ID
+		b.SubscribeId = article.UserId
 		subscriptionService.Do(event.UserFollowingEvent, b)
 		subscriptionService.ConstantAtSend(event.ArticleAt, id, article.Content, b)
 	}

@@ -54,7 +54,7 @@
     <div id="markdown-container"></div>
     <comment-edit :callback="getRootComment" :article-id="articleData.id"/>
     <a-card :bordered="false">
-        <comment-item v-for="comment in articleCommentList" :comment="comment" :key="comment.id"/>
+        <comment-item :callback="getRootComment" v-for="comment in articleCommentList" :comment="comment" :key="comment.id"/>
         <a-divider/>
         <a-pagination @change="getRootComment" :total="paginationData.total" v-model:page-size="paginationData.pageSize" v-model:current="paginationData.current" show-page-size/>
     </a-card>
@@ -64,9 +64,9 @@
 <script setup>
 import { apiSubscribe, apiSubscribeState, } from "@/apis/apiSubscribe.js";
 import { apiArticleLike, apiArticleLikeState, apiArticleView } from '@/apis/article';
+import { apiGetArticleComment } from '@/apis/comment';
 import CommentEdit from '@/components/comment/CommentEdit.vue';
 import CommentItem from '@/components/comment/CommentItem.vue';
-import { apiGetArticleComment } from '@/apis/comment';
 import router from "@/router";
 import { IconDown, IconThumbUp, IconThumbUpFill } from '@arco-design/web-vue/es/icon';
 import Cherry from 'cherry-markdown';

@@ -31,7 +31,7 @@
             </a-avatar>
         </template>
         <CommentEdit :callback="getSubCommentPage" :parent-id="comment.id" :article-id="comment.articleId" :root-comment="comment.rootId" v-if="replyEdit.show"/>
-        <CommentItem v-for="item in subCommentData" :key="item.id" :comment="item"/>
+        <CommentItem v-for="item in subCommentData" :key="item.id" :comment="item" :callback="getSubCommentPage"/>
         <template v-if="comment.rootId==comment.id && comment.childCommentNumber>5">
             <a-button type="text" long v-if="!showPage" @click="getSubCommentPage()">展开评论</a-button>
             <APagination v-else-if="comment.childCommentNumber>5" @change="getSubCommentPage" size="small" :current="currentPage" :total="comment.childCommentNumber" />
@@ -41,7 +41,7 @@
 </template>
 
 <script setup>
-import { apiGetArticleComment, deleteComment as apiCommentDelete } from '@/apis/comment';
+import { deleteComment as apiCommentDelete, apiGetArticleComment } from '@/apis/comment';
 import { useUserStore } from '@/stores/UserStore';
 import { IconMessage } from '@arco-design/web-vue/es/icon';
 import 'cherry-markdown/dist/cherry-markdown.css';
@@ -52,6 +52,10 @@ const props = defineProps({
     comment: {
         type: Object,
         default: () => { }
+    },
+    callback: {
+        type: Function,
+        default(){}
     }
 })
 const replyEdit = ref({
@@ -78,7 +82,7 @@ const htmlContent = computed(() => {
 })
 function getSubCommentPage() {
     apiGetArticleComment(props.comment.id, currentPage.value, 10, false).then(({data, ok})=>{
-        if(!ok) return
+        if(!ok || !data) return
         showPage.value = true
         subComment.value = data.data
     })

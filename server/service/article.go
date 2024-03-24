@@ -62,6 +62,9 @@ func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, p
 		Joins("LEFT JOIN types as tp on tp.id = articles.type").
 		Joins("LEFT JOIN users as u on u.id = articles.user_id").
 		Where("articles.state != ?", constant.Draft)
+	if article.State != 0 {
+		query.Where("articles.state = ?", article.State)
+	}
 	if article != nil {
 		if article.Type > 0 {
 			query.Where("articles.type = ?", article.Type)

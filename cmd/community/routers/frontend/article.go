@@ -27,6 +27,7 @@ type SearchArticle struct {
 	Context string `json:"context"` // 模糊查询内容
 	Type    int    `json:"type"`    // 分类id
 	UserId  int    `json:"userId"`  // 用户id
+	State   int    `json:"state"`
 	data.ListSortStrategy
 }
 
@@ -49,11 +50,18 @@ func articlePageBySearch(ctx *gin.Context) {
 		return
 	}
 
+	if searchArticle.State == constant.Draft || searchArticle.State == constant.PrivateQuestion {
+		log.Warnln("用户id: %d 搜索文章状态不可选择草稿以及私密提问", middleware.GetUserId(ctx))
+		result.Err("搜索文章状态不可选择草稿以及私密提问").Json(ctx) //
+		return
+	}
+
 	result.Page(articleService.PageByClassfily(searchArticle.Tags, &model.Articles{
 		Title:   searchArticle.Context,
 		Content: searchArticle.Context,
 		Type:    searchArticle.Type,
 		UserId:  searchArticle.UserId,
+		State:   searchArticle.State,
 	}, ginutils.GetPage(ctx), ginutils.GetOderBy(ctx))).Json(ctx)
 }
 

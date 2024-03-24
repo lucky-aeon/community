@@ -36,6 +36,7 @@ func InitUserRouters(r *gin.Engine) {
 	group.POST("/edit/:tab", updateUser)
 	group.GET("/menu", getUserMenu)
 	group.GET("/statistics", statistics)
+	group.GET("", listUsers)
 }
 
 func getUserMenu(ctx *gin.Context) {
@@ -122,4 +123,10 @@ func statistics(ctx *gin.Context) {
 
 	m := userService.Statistics(userId)
 	result.Ok(m, "").Json(ctx)
+}
+
+func listUsers(ctx *gin.Context) {
+	name := ctx.Query("name")
+	users := userService.ListUsers(name)
+	result.Ok(users, "").Json(ctx)
 }

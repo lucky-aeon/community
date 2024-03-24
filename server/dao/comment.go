@@ -94,7 +94,7 @@ func (a *CommentDao) GetRootCommentsCountByArticleID(rootId int) int64 {
 // 获取文章评论总数
 func (a *CommentDao) GetCommentsCountByArticleID(businessId int) int64 {
 	var count int64
-	model.Comment().Where(&model.Comments{BusinessId: businessId}).Count(&count)
+	model.Comment().Where("parent_id = 0 and business_id = ?", businessId).Count(&count)
 	return count
 }
 
@@ -105,7 +105,7 @@ func (a *CommentDao) ExistById(id int, userId int, businessId int, rootId int) b
 }
 
 func (a *CommentDao) GetByParentId(parentId int) (comment model.Comments) {
-	model.Comment().Where("parent_id = ?", parentId).First(&comment)
+	model.Comment().Where("id = ?", parentId).First(&comment)
 	return
 }
 

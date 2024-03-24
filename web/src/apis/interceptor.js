@@ -1,3 +1,4 @@
+import router from '@/router';
 import { useUserStore } from '@/stores/UserStore';
 import { getToken } from '@/utils/auth';
 import { Message, Modal } from '@arco-design/web-vue';
@@ -31,7 +32,6 @@ axios.interceptors.request.use(
 axios.interceptors.response.use(
   (response) => {
     const res = response.data;
-    console.log(res)
     // if the custom code is not 20000, it is judged as an error.
     if (res.code !== 2000 && res.code !== 200) {
 
@@ -57,7 +57,6 @@ axios.interceptors.response.use(
           },
         });
       }
-      return Promise.reject(new Error(res.msg || 'Error'));
     }
     else if (res.code === 2000){
         Message.success(

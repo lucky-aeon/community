@@ -34,7 +34,7 @@
         <CommentItem v-for="item in subCommentData" :key="item.id" :comment="item" :callback="getSubCommentPage"/>
         <template v-if="comment.rootId==comment.id && comment.childCommentNumber>5">
             <a-button type="text" long v-if="!showPage" @click="getSubCommentPage()">展开评论</a-button>
-            <APagination v-else-if="comment.childCommentNumber>5" @change="getSubCommentPage" size="small" :current="currentPage" :total="comment.childCommentNumber" />
+            <APagination v-else-if="comment.childCommentNumber>pageData.pageSize" :page-size="pageData.pageSize" @change="getSubCommentPage" size="small" v-model:current="pageData.current" :total="pageData.total" />
         </template>
         
     </a-comment>
@@ -46,7 +46,7 @@ import { useUserStore } from '@/stores/UserStore';
 import { IconMessage } from '@arco-design/web-vue/es/icon';
 import 'cherry-markdown/dist/cherry-markdown.css';
 import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
-import { computed, ref } from 'vue';
+import { computed, reactive, ref } from 'vue';
 import CommentEdit from './CommentEdit.vue';
 const props = defineProps({
     comment: {
@@ -62,7 +62,6 @@ const replyEdit = ref({
     show: false,
     comment: {}
 })
-const currentPage = ref(1)
 const showPage = ref(false)
 const userStore = useUserStore()
 const subComment = ref([])
@@ -71,6 +70,11 @@ const subCommentData = computed(()=> {
         return subComment.value
     }
     return props.comment.childComments
+})
+const pageData = reactive({
+    pageSize: 5,
+    current: 1,
+    total: props.comment.childCommentNumber
 })
 const commentMark = new CherryEngine();
 const htmlContent = computed(() => {
@@ -81,10 +85,11 @@ const htmlContent = computed(() => {
     return commentMark.makeHtml(content)
 })
 function getSubCommentPage() {
-    apiGetArticleComment(props.comment.id, currentPage.value, 10, false).then(({data, ok})=>{
+    apiGetArticleComment(props.comment.id, pageData.current, pageData.pageSize, false).then(({data, ok})=>{
         if(!ok || !data) return
         showPage.value = true
         subComment.value = data.data
+        pageData.total = data.count
     })
 }
 function deleteComment() {

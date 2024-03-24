@@ -85,3 +85,9 @@ func (s *TypeService) ListByIdToMap(ids []int) (m map[int]string) {
 
 	return
 }
+
+func (s *TypeService) GetByParentId(id int) (types model.Types) {
+
+	model.Type().Where("parent_id = ?", id).Find(&types)
+	return
+}

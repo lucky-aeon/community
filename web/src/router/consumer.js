@@ -7,6 +7,24 @@ import ArticleMainVue from '@/views/consumer/article/ArticleMain.vue';
 
 const ConsumerRouters = [
     {
+        path: "/qa",
+        component: () => import('@/views/consumer/qa/QaLayout.vue'),
+        meta: {
+            requiresAuth: true
+        },
+        children: [
+            {
+                path: ":classfily",
+                component: ()=> import('@/views/consumer/qa/QaList.vue')
+            },
+            {
+                path: "view/:id",
+                name: "qaView",
+                component: () => import('@/views/consumer/qa/QaView.vue')
+            }
+        ]
+    },
+    {
         path: "/article",
         component: ArticleMainVue,
         meta: {
@@ -50,12 +68,17 @@ const ConsumerRouters = [
                 component: () => import('@/views/consumer/article/ArticleManager.vue')
             },
             {
+                path: "qa",
+                name: "qAManager",
+                component: () => import('@/views/consumer/qa/QaManager.vue')
+            },
+            {
                 path: "comment",
                 component: () => import('@/views/consumer/user/CommentManager.vue'),
             },
             {
                 path: "message",
-                component: ()=> import('@/views/consumer/user/UserMessage.vue')
+                component: () => import('@/views/consumer/user/UserMessage.vue')
             },
             {
                 path: "subscribe",

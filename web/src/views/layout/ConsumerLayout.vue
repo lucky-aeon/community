@@ -72,6 +72,9 @@
               <router-link to="/user/article">
                 <a-menu-item>文章管理</a-menu-item>
               </router-link>
+              <router-link to="/user/qa">
+                <a-menu-item>问答管理</a-menu-item>
+              </router-link>
               <router-link to="/user/comment">
                 <a-menu-item>评论</a-menu-item>
               </router-link>

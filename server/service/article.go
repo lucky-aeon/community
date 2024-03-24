@@ -270,7 +270,10 @@ func (a *ArticleService) DeleteByUserId(articleId, userId int) (err error) {
 
 	// 删除文章
 	db := mysql.GetInstance()
-	err = db.Where("id = ? and user_id = ?", articleId, userId).Delete(&model.Articles{}).Error
+	tx := db.Where("id = ? and user_id = ?", articleId, userId).Delete(&model.Articles{})
+	if tx.RowsAffected == 0 {
+		return errors.New("删除文章不存在")
+	}
 	// 删除文章标签表
 	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
 	return

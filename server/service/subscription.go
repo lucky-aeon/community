@@ -3,9 +3,10 @@ package services
 import (
 	mapset "github.com/deckarep/golang-set/v2"
 	"regexp"
-	"strings"
+	"strconv"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/email"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
 )
@@ -83,9 +84,7 @@ func (s *SubscriptionService) Do(eventId int, b SubscribeData) {
 				userIds = append(userIds, subscriptions[i].SubscriberId)
 			}
 			sendId := subscriptions[0].SendId
-			var users []model.Users
-			model.User().Where("id in ?", userIds).Select("account", "id", "subscribe").Find(&users)
-			send(users, eventId, constant.NOTICE, sendId, b)
+			send(userIds, eventId, constant.NOTICE, sendId, b)
 		}
 
 	}(eventId, b)
@@ -95,38 +94,43 @@ func (s *SubscriptionService) Do(eventId int, b SubscribeData) {
 func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content string, b SubscribeData) {
 	go func(eventId, triggerId int, content string, b SubscribeData) {
 
-		userNames := findAtUser(content)
-		if len(userNames) > 0 {
-			var users []model.Users
-			model.User().Where("name in ?", userNames).Select("account", "id", "subscribe").Find(&users)
-			send(users, eventId, constant.MENTION, triggerId, b)
-		}
+		ids := findAtUser(content)
+		send(ids, eventId, constant.MENTION, triggerId, b)
 	}(eventId, triggerId, content, b)
 
 }
 
 func (s *SubscriptionService) Send(eventId, eventType, fromId, toId int, b SubscribeData) {
 	go func(eventId, fromId, toId int, b SubscribeData) {
-		var users []model.Users
-		users = append(users, model.Users{ID: toId})
-		send(users, eventId, eventType, fromId, b)
+		send([]int{toId}, eventId, eventType, fromId, b)
 	}(eventId, fromId, toId, b)
 }
 
-func findAtUser(content string) []string {
+func findAtUser(content string) []int {
 
 	// 使用正则表达式匹配文本中的 @ 符号
-	re := regexp.MustCompile(`\s@(\w+)\s`)
-	matches := re.FindAllString(content, -1)
-	names := mapset.NewSet[string]()
-	for i := range matches {
-		names.Add(strings.ReplaceAll(strings.TrimSpace(matches[i]), "@", ""))
+	re := regexp.MustCompile(`@\((.*?)\)\[(.*?)\]`)
+	matches := re.FindAllStringSubmatch(content, -1)
+	ids := mapset.NewSet[int]()
+	for _, match := range matches {
+		id, err := strconv.Atoi(match[2])
+		if err != nil {
+			log.Warnf("解析 @ 失败,err: %s", err.Error())
+			continue
+		}
+		ids.Add(id)
 	}
-	return names.ToSlice()
+	return ids.ToSlice()
 }
 
-func send(users []model.Users, eventId, eventType, sendId int, b SubscribeData) {
+func send(userIds []int, eventId, eventType, sendId int, b SubscribeData) {
+	if len(userIds) == 0 {
+		return
+	}
 	var m MessageService
+
+	var users []model.Users
+	model.User().Where("id in ?", userIds).Select("account", "id", "subscribe").Find(&users)
 
 	var ids []int
 	var emails []string

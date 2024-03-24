@@ -12,7 +12,7 @@ type UserService struct {
 }
 
 func (s UserService) ListUsers(name string) (users []model.Users) {
-	model.User().Where("name like ?", "%"+name+"%").Select("name", "id").Find(&users)
+	model.User().Where("name like ?", "%"+name+"%").Select("name", "id").Limit(10).Find(&users)
 	return
 }
 

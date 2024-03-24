@@ -1,6 +1,6 @@
 <template>
     <a-list v-if="dataSource.length" class="list-demo-action-layout" :bordered="false">
-        <a-list-item  v-for="(item, index) in dataSource" :key="item.id" @click="router.push(`/article/view/${item.id}`)"
+        <a-list-item v-for="(item, index) in dataSource" :key="item.id" @click="router.push(`/qa/view/${item.id}`)"
             class="list-demo-item" action-layout="horizontal">
             <template #actions>
                 <a-button-group @click.stop="() => { }" v-if="userStore.userInfo.id == item.user.id">
@@ -14,7 +14,7 @@
 
                         <template #content>
                             <a-popconfirm popup-hover-stay @ok="deleteArticle(index)" content="你确定要删除该文章?">
-                                <a-doption>删除文章</a-doption>
+                                <a-doption>删除提问</a-doption>
                             </a-popconfirm>
                         </template>
                     </a-dropdown>
@@ -23,10 +23,17 @@
             <a-list-item-meta :title="item.title">
 
                 <template #description>
-
-                    <a-tag size="small">
-                        分类: {{ item.type.title || "未知" }}
-                    </a-tag>
+                    <a-space>
+                        <a-tag color="red" v-if="item.state == 3 || item.state == 5">
+                            待解决
+                        </a-tag>
+                        <a-tag color="green" v-else-if="item.state == 4">
+                            已解决
+                        </a-tag>
+                        <a-tag size="small">
+                            分类: {{ item.type.title || "未知" }}
+                        </a-tag>
+                    </a-space>
                     <a-divider direction="vertical" />
                     <a-tag v-if="!item.tags" color="blue" size="small">
                         无标签
@@ -40,7 +47,7 @@
                     <br />
                     <span><icon-user />{{ item.user.name || "未知" }}</span>
                     <a-divider direction="vertical" />
-                    <span><icon-heart />{{item.like}}</span>
+                    <span><icon-heart />{{ item.like }}</span>
                     <a-divider direction="vertical" />
                     <span><icon-calendar />{{ item.updatedAt }}</span>
                 </template>
@@ -52,19 +59,19 @@
             </a-list-item-meta>
         </a-list-item>
     </a-list>
-    <AResult v-else title="no articles">
+    <AResult v-else title="no  questions">
 
         <template #icon>
             <IconEmpty />
         </template>
     </AResult>
-    <ArtilceEdit v-model="editArticle.show" :article-id="editArticle.id" :call-response="refreshList" />
+    <QaEdit v-model="editArticle.show" :article-id="editArticle.id" :call-response="refreshList" />
 
 </template>
 
 <script setup>
 import { apiArticleDelete, apiArticleList } from '@/apis/article';
-import ArtilceEdit from '@/components/article/ArticleEdit.vue';
+import QaEdit from '@/components/qa/QaEdit.vue';
 import router from '@/router';
 import { useUserStore } from '@/stores/UserStore';
 import { IconCalendar, IconDown, IconEmpty, IconHeart, IconUser } from '@arco-design/web-vue/es/icon';
@@ -114,15 +121,15 @@ function getArticleList() {
 
     apiArticleList(Object.assign(props.queryData, { context: route.query.context, tags: (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || [] }), paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
         paginationProps.total = data.total
-        if(data.list == null) {
+        if (data.list == null) {
             return
         }
         dataSource.value.push(...data.list)
     })
 }
 function deleteArticle(index) {
-    apiArticleDelete(dataSource.value[index].id).then(({ok})=>{
-        if(!ok) return
+    apiArticleDelete(dataSource.value[index].id).then(({ ok }) => {
+        if (!ok) return
         dataSource.value.splice(index, 1)
     })
 }
@@ -154,7 +161,7 @@ watch(() => route.fullPath, () => {
     paginationProps.page = 1
     getArticleList()
 })
-watch(()=> props.queryData.state, ()=>{
+watch(() => props.queryData.state, () => {
     dataSource.value = []
     getArticleList()
 })

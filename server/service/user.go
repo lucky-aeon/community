@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/utils"
@@ -95,8 +96,12 @@ func (t *UserService) GetUserMenu() []*UserMenu {
 	userMenu := make(map[int]*UserMenu)
 	for i, item := range rootMenu {
 		parentIds[i] = item.ID
+		path := "/article/"
+		if item.ID == 1 {
+			path = "/qa/"
+		}
 		userMenu[int(item.ID)] = &UserMenu{
-			Path:     "/article/" + item.FlagName,
+			Path:     path,
 			Name:     item.FlagName,
 			Children: []UserMenu{},
 			Meta: map[string]interface{}{
@@ -112,7 +117,7 @@ func (t *UserService) GetUserMenu() []*UserMenu {
 	for _, item := range children {
 		um := userMenu[int(item.ParentId)]
 		um.Children = append(um.Children, UserMenu{
-			Path: "/article/" + item.FlagName,
+			Path: um.Path + item.FlagName,
 			Name: item.FlagName,
 			Meta: map[string]interface{}{
 				"locale":       item.Title,

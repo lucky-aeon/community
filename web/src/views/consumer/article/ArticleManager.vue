@@ -1,13 +1,30 @@
 <template>
     <ARow style="margin-top: 10px;" :gutter="10">
         <ACol :span="19">
-            <a-space size="small">
-                <ACard hoverable><a-statistic title="喜欢人数" :value="userStatistics.likeCount" show-group-separator />
-                </ACard>
-                <ACard hoverable><a-statistic title="文章数量" :value="userStatistics.articleCount" show-group-separator />
-                </ACard>
-            </a-space>
-            <ArticleListCom v-if="showList" style="margin-top: 10px;" :queryData="queryData" />
+            <a-row>
+                <a-col :span="24">
+                    <a-space size="small">
+                        <ACard hoverable><a-statistic title="喜欢人数" :value="userStatistics.likeCount"
+                                show-group-separator />
+                        </ACard>
+                        <ACard hoverable><a-statistic title="文章数量" :value="userStatistics.articleCount"
+                                show-group-separator />
+                        </ACard>
+                    </a-space>
+                </a-col>
+                <a-col :span="24">
+                    <div style="float: right;padding: 5px;">
+                    <a-radio-group v-model="queryData.state" type="button">
+                        <a-radio :value="2">已发布</a-radio>
+                        <a-radio :value="1">草稿</a-radio>
+                    </a-radio-group>
+                </div>
+                </a-col>
+                <a-col :span="24">
+                    <ArticleListCom v-if="showList" style="margin-top: 10px;" :queryData="queryData" />
+                </a-col>
+            </a-row>
+
         </ACol>
         <ACol :span="5">
             <ASpace direction="vertical" style="width: 100%;">
@@ -39,6 +56,7 @@ const queryData = ref({
     context: "",
     orderBy: "created_at",
     descOrder: true,
+    state: 2,
     userID: userStore.userInfo.id
 })
 const userStatistics = ref({

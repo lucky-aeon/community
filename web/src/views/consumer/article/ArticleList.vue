@@ -7,6 +7,7 @@ import { ref } from "vue";
 const queryData = ref({
   tags: [],
   context: "",
+  state: 2,
   orderBy: "created_at",
   descOrder: true
 })

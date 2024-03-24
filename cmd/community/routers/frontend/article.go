@@ -50,7 +50,10 @@ func articlePageBySearch(ctx *gin.Context) {
 		return
 	}
 
-	if searchArticle.State == constant.Draft || searchArticle.State == constant.PrivateQuestion {
+	searchUserId := searchArticle.UserId
+	currentUserId := middleware.GetUserId(ctx)
+
+	if (searchArticle.State == constant.Draft || searchArticle.State == constant.PrivateQuestion) && searchUserId != 0 && searchUserId != currentUserId {
 		log.Warnln("用户id: %d 搜索文章状态不可选择草稿以及私密提问", middleware.GetUserId(ctx))
 		result.Err("搜索文章状态不可选择草稿以及私密提问").Json(ctx) //
 		return
@@ -60,9 +63,9 @@ func articlePageBySearch(ctx *gin.Context) {
 		Title:   searchArticle.Context,
 		Content: searchArticle.Context,
 		Type:    searchArticle.Type,
-		UserId:  searchArticle.UserId,
+		UserId:  searchUserId,
 		State:   searchArticle.State,
-	}, ginutils.GetPage(ctx), ginutils.GetOderBy(ctx))).Json(ctx)
+	}, ginutils.GetPage(ctx), ginutils.GetOderBy(ctx), currentUserId)).Json(ctx)
 }
 
 func articleGet(c *gin.Context) {

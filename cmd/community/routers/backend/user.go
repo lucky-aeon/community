@@ -3,6 +3,7 @@ package backend
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
 	"xhyovo.cn/community/server/model"
@@ -13,7 +14,7 @@ func InitUserRouters(r *gin.Engine) {
 
 	group := r.Group("/community/admin/user")
 	group.GET("", listUser)
-	group.POST("", updateUser)
+	group.POST("", updateUser, middleware.OperLogger())
 }
 
 func listUser(ctx *gin.Context) {

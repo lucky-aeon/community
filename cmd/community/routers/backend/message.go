@@ -15,8 +15,8 @@ func InitMessageRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/message")
 	group.GET("/template/var", listMsgVar)
 	group.GET("/template", listMsgTemp)
-	group.POST("/template", saveMsgTemp)
-	group.DELETE("/template", deleteMsgTemp)
+	group.POST("/template", saveMsgTemp, middleware.OperLogger())
+	group.DELETE("/template", deleteMsgTemp, middleware.OperLogger())
 }
 
 // 获取消息模板中的变量

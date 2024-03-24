@@ -14,8 +14,8 @@ import (
 func InitMemberRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/member")
 	group.GET("", listMembers)
-	group.POST("", saveMember)
-	group.DELETE("/:id", deleteMember)
+	group.POST("", saveMember, middleware.OperLogger())
+	group.DELETE("/:id", deleteMember, middleware.OperLogger())
 }
 
 func listMembers(ctx *gin.Context) {

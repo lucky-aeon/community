@@ -3,6 +3,7 @@ package backend
 import (
 	"github.com/gin-gonic/gin"
 	"strconv"
+	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
@@ -12,7 +13,7 @@ import (
 func InitArticleRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/article")
 	group.GET("/page", listArticles)
-	group.DELETE("/:id", deleteArticle)
+	group.DELETE("/:id", deleteArticle, middleware.OperLogger())
 }
 
 func listArticles(ctx *gin.Context) {

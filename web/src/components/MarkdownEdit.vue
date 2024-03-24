@@ -1,18 +1,48 @@
 <template>
     <a-spin :loading="loading" tip="This may take a while..." style="width: 100%;height: 100%;">
-        <div :id="`markdownedit-container${markId}`"></div>
+        <div :id="`${markId}`"></div>
+        <a-modal v-model:visible="searchAt.show" :ok-loading="loading"  v-on:ok="handlerAtOk">
+    <template #title>
+      请搜索要提起的人
+    </template>
+    <div>
+        <a-auto-complete v-model:model-value="searchAt.select" :data="searchAt.data" :loading="loading" v-on:search="searchAt.search"/>
+    </div>
+  </a-modal>
     </a-spin>
 </template>
 <script setup>
 import { apiGetFile, apiUploadFile } from '@/apis/file';
 import { useUserStore } from '@/stores/UserStore';
+import {apiSearchUserByName} from '@/apis/user'
 import { Message } from '@arco-design/web-vue';
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
+import { nextTick } from 'vue';
+import { reactive } from 'vue';
 import { onMounted, ref, watch } from 'vue';
-const markId = ref(Math.random().toString())
+const markId = ref("markdownedit-container" + (Math.random().toString()))
 const userStore = useUserStore()
 const loading = ref(false)
+const searchAt = reactive({
+    show: false,
+    data: [],
+    select: "",
+    search(v){
+        apiSearchUserByName(v).then(({data, ok})=> {
+            if(!ok) return
+            searchAt.data = data.map(item=> ({
+                value: `@(${item.name})[${item.id}]`,
+                label: item.name
+            }))
+        })
+    }
+})
+const handlerAtOk = ()=> {
+    searchAt.data = []
+    model.value = model.value.substring(0, model.value.length-1).concat(searchAt.select)
+    searchAt.select = ""
+}
 const props = defineProps({
     previewOnly: {
         type: Boolean,
@@ -23,24 +53,33 @@ const props = defineProps({
         default: true
     }
 })
-var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
+/**
+ * 自定义一个语法，识别形如 ***ABC*** 的内容，并将其替换成 <span style="color: red"><strong>ABC</strong></span>
+ */
+var CustomHookA = Cherry.createSyntaxHook('important', Cherry.constants.HOOKS_TYPE_LIST.SEN, {
     makeHtml(str) {
-        console.warn('custom hook', 'hello');
-        return str;
+        return str.replace(this.RULE.reg, function (whole, m1, m2) {
+
+            return `<a class="chip" href="/user/${m2}" target="_blank">@${m1}</a>`
+            // h(
+            //     "a-tag",
+            //     {
+            //         color: "blue",
+            //         icon: "icon-user"
+            //     },
+            //     {
+            //         m1
+            //     }
+            // );
+        });
     },
-    rule() {
-        const regex = {
-            begin: '',
-            content: '',
-            end: '',
-        };
-        regex.reg = new RegExp(regex.begin + regex.content + regex.end, 'g');
-        return regex;
+    rule(str) {
+        return { reg: /@\((.*?)\)\[(.*?)\]/g };
     },
 });
 var cherryInstance = undefined
 var cherryConfig = {
-    id: 'markdownedit-container' + markId.value,
+    id: markId.value,
     value: '# welcome to cherry editor! \n awdwadad',
     externals: {
         echarts: window.echarts,
@@ -50,7 +89,6 @@ var cherryConfig = {
     engine: {
         global: {
             urlProcessor(url, srcType) {
-                console.log(`url-processor`, url, srcType);
                 return url;
             },
         },
@@ -81,8 +119,7 @@ var cherryConfig = {
             // SyntaxHookClass
             CustomHook: {
                 syntaxClass: CustomHookA,
-                force: false,
-                after: 'br',
+                force: true,
             },
         },
     },
@@ -101,7 +138,6 @@ var cherryConfig = {
         onClickPreview: function (e) {
             const { target } = e;
             if (target.tagName === 'IMG') {
-                console.log('click img', target);
                 // eslint-disable-next-line no-undef
                 const tmp = new Viewer(target, {
                     button: false,
@@ -114,8 +150,15 @@ var cherryConfig = {
                 tmp.show();
             }
         },
-        afterChange(e) {
+        afterChange(e, b, c) {
             model.value = e
+            if (e[e.length - 1] == '@') {
+                nextTick(() => { 
+                    searchAt.show = true
+                })
+            } else {
+                searchAt.show = false
+            }
         }
     },
     previewer: {
@@ -164,6 +207,8 @@ watch(() => props.showNav, () => {
 watch(model, () => {
     refreshMarkdown()
 })
+
+
 </script>
 
 <style>
@@ -184,5 +229,18 @@ watch(model, () => {
 
 .cherry video {
     width: 50%;
+}
+
+.chip {
+    display: inline-block;
+    background-color: #a4c3f9bd;
+    color: #4f1afc;
+    border-radius: 5px;
+    margin-right: 4px;
+}
+
+.chip:hover {
+    background-color: #86aff5bd;
+    cursor: pointer;
 }
 </style>

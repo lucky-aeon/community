@@ -51,20 +51,25 @@ func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, 
 	}, err
 }
 
-func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, page data.QueryPage, sort data.ListSortStrategy) (result []*model.ArticleData, total int64, err error) {
+func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, page data.QueryPage, sort data.ListSortStrategy, currentUserId int) (result []*model.ArticleData, total int64, err error) {
 	query := mysql.GetInstance().Table("articles").
-		Select("articles.id, articles.title, articles.state, articles.`like`, "+
-			"tp.id as type_id, tp.title as type_title, tp.flag_name as type_flag, "+
-			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, "+
+		Select("articles.id, articles.title, articles.state, articles.`like`, " +
+			"tp.id as type_id, tp.title as type_title, tp.flag_name as type_flag, " +
+			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, " +
 			"articles.created_at, articles.updated_at, GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
 		Joins("LEFT JOIN article_tag_relations as atr on atr.article_id = articles.id").
 		Joins("LEFT JOIN article_tags as atg on atg.id = atr.tag_id").
 		Joins("LEFT JOIN types as tp on tp.id = articles.type").
-		Joins("LEFT JOIN users as u on u.id = articles.user_id").
-		Where("articles.state != ?", constant.Draft)
+		Joins("LEFT JOIN users as u on u.id = articles.user_id")
+
 	if article.State != 0 {
 		query.Where("articles.state = ?", article.State)
 	}
+	searchUserId := article.UserId
+	if (searchUserId != 0 && currentUserId != searchUserId) || searchUserId == 0 {
+		query.Where("articles.state != ? and articles.state != ?", constant.Draft, constant.PrivateQuestion)
+	}
+
 	if article != nil {
 		if article.Type > 0 {
 			query.Where("articles.type = ?", article.Type)
@@ -109,6 +114,9 @@ func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, p
 		item.UserSimple = itemUser
 		item.TypeSimple = itemType
 		item.Tags = tags
+		if item.State != constant.Published {
+			item.StateName = constant.GetArticleName(item.State)
+		}
 		result = append(result, &item)
 	}
 	return

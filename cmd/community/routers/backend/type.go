@@ -17,8 +17,8 @@ func InitTypeRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/type")
 	group.GET("/parent", listParentTypes)
 	group.GET("", listType)
-	group.POST("", saveType)
-	group.DELETE(":id", deleteType)
+	group.POST("", saveType, middleware.OperLogger())
+	group.DELETE(":id", deleteType, middleware.OperLogger())
 }
 
 func listParentTypes(ctx *gin.Context) {

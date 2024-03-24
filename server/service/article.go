@@ -182,23 +182,28 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 	typeO := article.Type
 	flag := true
 	var typeS TypeService
-	// 分类是否存在
-	if !typeS.Exist(typeO) {
+	types := typeS.GetById(typeO)
+	if types.ID == 0 {
 		return 0, errors.New("分类不存在")
 	}
+	if types.ParentId == 0 {
+		return 0, errors.New("不能选择一级分类")
+	}
+
+	types = typeS.GetById(types.ParentId)
 	// 状态是否存在
-	oldState := article.State
-	if oldState < 0 || oldState > 5 {
+	state := article.State
+	if state < 0 || state > 5 {
 		return 0, errors.New("状态不存在")
 	}
 
 	// 根据分类选择状态：QA分类没有发布,普通分类只有草稿和发布
-	if typeO == 1 && oldState == constant.Published {
+	if types.Title == "QA" && state == constant.Published {
 		return 0, errors.New("QA分类状态不能选择已发布")
-	} else {
+	} else if types.Title != "QA" {
 		// 普通分类校验状态
-		if oldState == constant.Pending || oldState == constant.Resolved || oldState == constant.PrivateQuestion {
-			msg := constant.GetArticleName(oldState)
+		if state == constant.Pending || state == constant.Resolved || state == constant.PrivateQuestion {
+			msg := constant.GetArticleName(state)
 			return 0, errors.New("普通分类不支持该状态:" + msg)
 		}
 	}
@@ -209,12 +214,12 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 		oldArticle := a.GetById(id)
 		oldTypeParentId := typeS.GetById(oldArticle.Type).ParentId
 		// 修改 一级分类不能修改,如果parent不同则修改了一级分类
-		newTypeParentId := typeS.GetById(typeO).ParentId
+		newTypeParentId := types.ID
 		if oldTypeParentId != newTypeParentId {
 			return 0, errors.New("修改的分类只能属于同一级分类下")
 		}
 		// 老文章状态如果为非草稿状态，则新文章不可修改为草稿状态
-		if oldState != constant.Draft && article.State == constant.Draft {
+		if oldArticle.State != constant.Draft && article.State == constant.Draft {
 			return 0, errors.New("旧文章状态不可从非草稿转为草稿")
 		}
 	}

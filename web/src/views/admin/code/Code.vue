@@ -85,13 +85,14 @@ const columns = [
     dataIndex: "id"
   },
   {
-    title: '等级',
-    dataIndex: 'memberName',
-  },
-  {
     title: '邀请码',
     dataIndex: 'code',
   },
+  {
+    title: '等级',
+    dataIndex: 'memberName',
+  },
+
   {
     title: '状态',
     dataIndex: 'state',

@@ -228,7 +228,7 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 		Type:    article.Type,
 	}
 	mysql.GetInstance().Save(&articleObject)
-	id = article.ID
+	id = articleObject.ID
 	// 关联关系
 	db := model.ArticleTagRelation
 	db().Where("article_id = ?", id).Delete(nil)

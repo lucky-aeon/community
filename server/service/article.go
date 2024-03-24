@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
+	"xhyovo.cn/community/server/request"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -176,7 +177,7 @@ func (a *ArticleService) ArticlesLikeCount(ids []int) (count int64) {
 	return
 }
 
-func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
+func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 
 	id := article.ID
 	typeO := article.Type
@@ -218,9 +219,17 @@ func (a *ArticleService) SaveArticle(article model.Articles) (int, error) {
 			return 0, errors.New("旧文章状态不可从非草稿转为草稿")
 		}
 	}
-	article.UpdatedAt = time.Now()
-	article.Like = 0
-	mysql.GetInstance().Save(&article)
+
+	articleObject := &model.Articles{
+		ID:        article.ID,
+		Title:     article.Title,
+		Content:   article.Content,
+		UserId:    article.UserId,
+		State:     article.State,
+		Type:      article.Type,
+		UpdatedAt: time.Now(),
+	}
+	mysql.GetInstance().Save(&articleObject)
 	id = article.ID
 	// 关联关系
 	db := model.ArticleTagRelation

@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/log"
+	"xhyovo.cn/community/server/request"
 
 	"xhyovo.cn/community/pkg/utils"
 
@@ -78,7 +79,7 @@ func articleDeleted(c *gin.Context) {
 }
 
 func articleSave(c *gin.Context) {
-	var o model.Articles
+	var o request.ReqArticle
 	if err := c.ShouldBindJSON(&o); err != nil {
 		log.Warnf("用户id: %d 保存文章解析文章失败 ,err: %s", middleware.GetUserId(c), err.Error())
 		result.Err(err.Error()).Json(c)

@@ -20,7 +20,6 @@ func (s UserService) ListUsers(name string) (users []model.Users) {
 func (*UserService) GetUserById(id int) *model.Users {
 
 	user := userDao.QueryUser(&model.Users{ID: id})
-	user.Password = ""
 	user.InviteCode = 0
 	return user
 }

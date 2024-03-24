@@ -55,7 +55,7 @@ func (*UserDao) CreateUser(account, name, pswd string, ininviteCode int) int {
 }
 
 func (d *UserDao) UpdateUser(user *model.Users) {
-	model.User().Where("id = ?", user.ID).Select("subscribe").Updates(&user)
+	model.User().Where("id = ?", user.ID).Updates(&user)
 }
 
 func (d *UserDao) ListByIds(id ...int) []string {

@@ -17,7 +17,7 @@ type Users struct {
 	InviteCode int    `json:"inviteCode,omitempty"`
 	Desc       string `json:"desc"`
 	Avatar     string `json:"avatar"`
-	Subscribe  bool   `json:"subscribe" gorm:"force"`
+	Subscribe  int    `json:"subscribe"` // 1: 未订阅站内消息 2:订阅站内消息 (发送邮箱)
 }
 
 type UserSimple struct {
@@ -28,6 +28,7 @@ type UserSimple struct {
 	Role      string         `json:"role" gorm:"column:u_role"`
 	Account   string         `json:"account" gorm:"account"`
 	CreatedAt time.LocalTime `json:"createdAt"`
+	Subscribe int            `json:"subscribe"` // 1: 未订阅站内消息 2:订阅站内消息 (发送邮箱)
 }
 
 type LoginForm struct {

@@ -139,9 +139,9 @@ function clearForm(){
 
 listMember()
 function listMember(){
-  listAllMember().then(({data})=>{
-    memberData.value = data.data
-    generateCode.memberId = data.data[0].id
+  listAllMember(1,10).then(({data})=>{
+    memberData.value = data.list
+    generateCode.memberId = data.list[0].id
   })
 }
 </script>

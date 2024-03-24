@@ -10,7 +10,6 @@ import (
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/data"
 	"xhyovo.cn/community/pkg/mysql"
-	"xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
 )
@@ -221,13 +220,12 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 	}
 
 	articleObject := &model.Articles{
-		ID:        article.ID,
-		Title:     article.Title,
-		Content:   article.Content,
-		UserId:    article.UserId,
-		State:     article.State,
-		Type:      article.Type,
-		UpdatedAt: time.Now(),
+		ID:      article.ID,
+		Title:   article.Title,
+		Content: article.Content,
+		UserId:  article.UserId,
+		State:   article.State,
+		Type:    article.Type,
 	}
 	mysql.GetInstance().Save(&articleObject)
 	id = article.ID
@@ -242,12 +240,12 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 	var subscriptionService SubscriptionService
 	if flag {
 		var b SubscribeData
-		b.UserId = article.UserId
-		b.ArticleId = article.ID
-		b.CurrentBusinessId = article.ID
-		b.SubscribeId = article.UserId
+		b.UserId = articleObject.UserId
+		b.ArticleId = articleObject.ID
+		b.CurrentBusinessId = articleObject.ID
+		b.SubscribeId = articleObject.UserId
 		subscriptionService.Do(event.UserFollowingEvent, b)
-		subscriptionService.ConstantAtSend(event.ArticleAt, id, article.Content, b)
+		subscriptionService.ConstantAtSend(event.ArticleAt, id, articleObject.Content, b)
 	}
 	return id, nil
 }

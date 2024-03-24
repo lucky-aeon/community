@@ -129,7 +129,7 @@ const pagination = reactive({
 const memberData = ref([])
 const getMemberList = (current)=>{
   pagination.current = current
-
+  console.log(current)
   listAllMember(current,pagination.defaultPageSize).then(({data})=>{
     memberData.value = data.list
     pagination.total = data.total

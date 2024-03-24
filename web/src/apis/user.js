@@ -64,3 +64,11 @@ export function apiAdminDeleteUserTags(id) {
 export function apiGetUserTags(id) {
   return axios.get(`/community/admin/user/tag/${id}`)
 }
+
+export function apiSearchUserByName(name="") {
+  return axios.get(`/community/user`, {
+    params: {
+      name
+    }
+  })
+}

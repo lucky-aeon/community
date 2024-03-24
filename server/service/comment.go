@@ -29,9 +29,6 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 	// 父评论是否存在
 	if parentId != 0 {
 		parentComment := commentDao.GetByParentId(parentId)
-		if parentComment.ID == 0 {
-			parentComment = commentDao.GetByRootId(parentId)
-		}
 		comment.ToUserId = parentComment.FromUserId
 		comment.RootId = parentComment.RootId
 		comment.BusinessId = parentComment.BusinessId

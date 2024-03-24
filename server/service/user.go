@@ -11,6 +11,11 @@ import (
 type UserService struct {
 }
 
+func (s UserService) ListUsers(name string) (users []model.Users) {
+	model.User().Where("name like ?", "%"+name+"%").Select("name", "id").Find(&users)
+	return
+}
+
 // get user information
 func (*UserService) GetUserById(id int) *model.Users {
 

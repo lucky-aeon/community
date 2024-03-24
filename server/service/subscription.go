@@ -136,7 +136,7 @@ func send(userIds []int, eventId, eventType, sendId int, b SubscribeData) {
 	var emails []string
 	for i := range users {
 		ids = append(ids, users[i].ID)
-		if users[i].Subscribe {
+		if users[i].Subscribe == 2 {
 			emails = append(emails, users[i].Account)
 		}
 	}

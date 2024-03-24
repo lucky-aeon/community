@@ -14,7 +14,7 @@
                         show-word-limit />
           </a-form-item>
           <a-form-item field="desc" label="订阅站点消息" >
-              <a-switch v-model="form.subscribe" :checked-value="true" :unchecked-value="false" type="round">
+              <a-switch v-model="form.subscribe" :checked-value="2" :unchecked-value="1" type="round">
                 <template #checked>
                   订阅
                 </template>

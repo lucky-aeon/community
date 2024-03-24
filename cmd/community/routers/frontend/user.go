@@ -21,7 +21,7 @@ var (
 type editUserForm struct {
 	Name      string `binding:"required" form:"name" msg:"用户名不可为空"`
 	Desc      string `form:"desc"`
-	Subscribe bool   `form:"subscribe"`
+	Subscribe int    `form:"subscribe"`
 }
 
 type editPasswordForm struct {

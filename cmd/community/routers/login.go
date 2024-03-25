@@ -76,7 +76,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	err = services.Register(form.Account, form.Password, form.Name, form.Code)
+	id, err := services.Register(form.Account, form.Password, form.Name, form.Code)
 	if err != nil {
 		loginLog.State = err.Error()
 		logS.InsertLoginLog(loginLog)
@@ -85,5 +85,13 @@ func Register(c *gin.Context) {
 	}
 	loginLog.State = "注册成功"
 	logS.InsertLoginLog(loginLog)
-	result.OkWithMsg(form, "注册成功").Json(c)
+	token, err := middleware.GenerateToken(id, form.Name)
+	if err != nil {
+		loginLog.State = err.Error()
+		logS.InsertLoginLog(loginLog)
+		result.Err(err.Error()).Json(c)
+		return
+	}
+	c.SetCookie(middleware.AUTHORIZATION, token, 3600, "/", c.Request.Host, true, true)
+	result.OkWithMsg(map[string]string{"token": token}, "注册成功").Json(c)
 }

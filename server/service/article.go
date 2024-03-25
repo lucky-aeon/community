@@ -54,10 +54,10 @@ func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, 
 
 func (a *ArticleService) PageByClassfily(tagId []string, article *model.Articles, page data.QueryPage, sort data.ListSortStrategy, currentUserId int) (result []*model.ArticleData, total int64, err error) {
 	query := mysql.GetInstance().Table("articles").
-		Select("articles.id, articles.title, articles.state, articles.`like`, " +
+		Select("articles.id, articles.title, articles.state, articles.`like`, articles.created_at,articles.updated_at," +
 			"tp.id as type_id, tp.title as type_title, tp.flag_name as type_flag, " +
 			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, " +
-			"articles.created_at, articles.updated_at, GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
+			"  GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
 		Joins("LEFT JOIN article_tag_relations as atr on atr.article_id = articles.id").
 		Joins("LEFT JOIN article_tags as atg on atg.id = atr.tag_id").
 		Joins("LEFT JOIN types as tp on tp.id = articles.type").
@@ -110,10 +110,10 @@ func (a *ArticleService) PageByClassfily(tagId []string, article *model.Articles
 		itemUser := model.UserSimple{}
 		tags := ""
 		rows.Scan(
-			&item.ID, &item.Title, &item.State, &item.Like,
+			&item.ID, &item.Title, &item.State, &item.Like, &item.CreatedAt, &item.UpdatedAt,
 			&itemType.TypeId, &itemType.TypeTitle, &itemType.TypeFlag,
 			&itemUser.UName, &itemUser.UId, &itemUser.UAvatar,
-			&item.CreatedAt, &item.UpdatedAt, &tags,
+			&tags,
 		)
 		item.UserSimple = itemUser
 		item.TypeSimple = itemType
@@ -247,7 +247,13 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 		State:   article.State,
 		Type:    article.Type,
 	}
-	mysql.GetInstance().Save(&articleObject)
+	// 分开写，避免更新 0 值
+	if article.ID == 0 {
+		mysql.GetInstance().Save(&articleObject)
+	} else {
+		model.Article().Where("user_id = ? and id = ?", articleObject.UserId, articleObject.ID).Updates(&articleObject)
+	}
+
 	id = articleObject.ID
 	// 关联关系
 	db := model.ArticleTagRelation

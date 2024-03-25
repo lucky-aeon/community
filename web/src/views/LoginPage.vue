@@ -114,8 +114,8 @@ import { useUserStore } from '@/stores/UserStore';
 import {reactive, ref} from 'vue';
 
 const authForm = reactive({
-    account: "liuscraft@qq.com",
-    password: "123123",
+    account: "",
+    password: "",
     code: "",
     name: "",
     isRead: false

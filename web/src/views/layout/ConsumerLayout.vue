@@ -23,7 +23,7 @@
 
             </a-tooltip>
 
-            <a-popover trigger="click" :arrow-style="{ display: 'none' }"
+            <a-popover trigger="click" :arrow-style="{ display: 'none' }" position="bottom"
               :content-style="{ padding: 0, minWidth: '400px' }" content-class="message-popover">
               <div ref="refBtn" class="ref-btn"></div>
               <template #content>

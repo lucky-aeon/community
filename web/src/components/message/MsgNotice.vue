@@ -1,6 +1,6 @@
 <template>
   <a-list class="list-demo-action-layout" :bordered="false" :data="dataSource" :pagination-props="paginationProps"
-    v-if="dataSource.length">
+    v-if="dataSource.length" @page-change="getMsg">
     <template #item="{ item, index }">
       <a-list-item class="list-demo-item" :style="{ padding: '5px' }" action-layout="vertical" @click="handlerMsg(item, index)">
 
@@ -40,12 +40,14 @@ const count = ref()
 
 const paginationProps = reactive({
   defaultPageSize: 15,
-  total: count
+  total: count,
+  current:1
 })
 const messageStore = useMessage()
-const getMsg = () => {
+const getMsg = (current) => {
   messageStore.getUnReadCount()
-  apiListMsg(props.msgType, props.msgState).then(({ data }) => {
+  paginationProps.current = current
+  apiListMsg(current,10,props.msgType, props.msgState).then(({ data }) => {
     dataSource.value = data.data
     count.value = data.count
   })

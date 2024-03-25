@@ -4,10 +4,9 @@
     <a-table row-key="id" :columns="columns" :data="articleData"
              :pagination="pagination" >
       <template #optional="{ record, rowIndex }">
-        <a-space>
-          <a-button type="primary" @click="delArticle(rowIndex)">删除</a-button>
-        </a-space>
-
+        <a-popconfirm popup-hover-stay @ok="delArticle(rowIndex)" content="你确定要删除该文章?">
+          <a-button type="primary">删除</a-button>
+        </a-popconfirm>
       </template>
     </a-table>
   </a-space>

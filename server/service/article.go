@@ -65,6 +65,10 @@ func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, p
 	if article.State != 0 {
 		query.Where("articles.state = ?", article.State)
 	}
+	// 未空则是 QA
+	if article.State == 0 {
+		query.Where("articles.state != ? and articles.state != ?", constant.Draft, constant.Published)
+	}
 	searchUserId := article.UserId
 	if (searchUserId != 0 && currentUserId != searchUserId) || searchUserId == 0 {
 		query.Where("articles.state != ? and articles.state != ?", constant.Draft, constant.PrivateQuestion)

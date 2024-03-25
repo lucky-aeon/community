@@ -17,7 +17,7 @@ func (*FileService) Delete(userId, fileId, tenantId int) {
 	fileDao.Delete(userId, fileId, tenantId)
 }
 
-func (*FileService) Deletes(userId, businessId, tenantId int) {
+func (*FileService) Deletes(userId, businessId, tenantcdId int) {
 
 }
 

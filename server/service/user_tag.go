@@ -27,6 +27,7 @@ func (*UserTag) Save(userTag model.UserTags) {
 
 func (*UserTag) DeleteById(id int) {
 	model.UserTag().Where("id = ?", id).Delete(&model.UserTags{})
+	model.UserTagRelation().Where("user_tag_id = ?", id).Delete(&model.UserTagRelations{})
 }
 
 func (*UserTag) AssignUserLabel(userId int, tags []int) (okIds []int) {

@@ -17,12 +17,13 @@ var (
 )
 
 func InitArticleTagRouter(r *gin.Engine) {
-	rg := r.Group("/community/tags")
-	rg.GET("", getArticleTags)
-	rg.GET("/hot", getHotTags)
-	rg.POST("", saveArticleTags, middleware.OperLogger())
-	rg.DELETE("/:tagId", deleteArticleTags, middleware.OperLogger())
-	rg.GET("/getTagArticleCount", getTagArticleCount)
+	group := r.Group("/community/tags")
+	group.GET("", getArticleTags)
+	group.GET("/hot", getHotTags)
+	group.GET("/getTagArticleCount", getTagArticleCount)
+	group.Use(middleware.OperLogger())
+	group.POST("", saveArticleTags)
+	group.DELETE("/:tagId", deleteArticleTags)
 }
 
 func getArticleTags(r *gin.Context) {

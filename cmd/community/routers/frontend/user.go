@@ -33,10 +33,11 @@ type editPasswordForm struct {
 func InitUserRouters(r *gin.Engine) {
 	group := r.Group("/community/user")
 	group.GET("/info", getUserInfo)
-	group.POST("/edit/:tab", updateUser)
 	group.GET("/menu", getUserMenu)
 	group.GET("/statistics", statistics)
 	group.GET("", listUsers)
+	group.Use(middleware.OperLogger())
+	group.POST("/edit/:tab", updateUser)
 }
 
 func getUserMenu(ctx *gin.Context) {

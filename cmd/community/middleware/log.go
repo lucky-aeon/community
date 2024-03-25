@@ -5,7 +5,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"time"
-	xt "xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
@@ -30,17 +29,21 @@ func (w responseWriter) Write(b []byte) (int, error) {
 func OperLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		t := time.Now()
+		//请求体 body
+		requestBody := ""
+		b, err := c.GetRawData()
+		if err != nil {
+			requestBody = "failed to get request body"
+		} else {
+			requestBody = string(b)
+		}
+		c.Request.Body = io.NopCloser(bytes.NewBuffer(b))
+
 		writer := responseWriter{
 			c.Writer,
 			bytes.NewBuffer([]byte{}),
 		}
 		c.Writer = writer
-		reqBytes, _ := c.GetRawData()
-
-		// 请求包体写回。
-		if len(reqBytes) > 0 {
-			c.Request.Body = io.NopCloser(bytes.NewBuffer(reqBytes))
-		}
 		c.Next()
 
 		// 请求后
@@ -55,11 +58,10 @@ func OperLogger() gin.HandlerFunc {
 			ExecAt:        execTime.String(),
 			RequestMethod: c.Request.Method,
 			RequestInfo:   c.Request.URL.Path,
-			RequestBody:   string(reqBytes),
+			RequestBody:   requestBody,
 			UserId:        GetUserId(c),
 			Ip:            utils.GetClientIP(c.Request),
 			ResponseData:  body,
-			CreatedAt:     xt.Now(),
 		}
 
 		log.InsertOperLog(logs)

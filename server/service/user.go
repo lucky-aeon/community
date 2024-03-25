@@ -72,6 +72,11 @@ func Register(account, pswd, name string, inviteCode int) error {
 		return errors.New("账户已存在,换一个吧")
 	}
 
+	user = userDao.QueryUser(&model.Users{Name: name})
+	if user.ID > 0 {
+		return errors.New("用户昵称已存在,换一个吧")
+	}
+
 	// 保存用户
 	userDao.CreateUser(account, name, pswd, inviteCode)
 	// 修改code状态

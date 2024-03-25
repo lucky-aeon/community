@@ -17,7 +17,8 @@ func InitSubscriptionRouters(r *gin.Engine) {
 	group.GET("/subscription", listSubscription)
 	group.GET("/event", eventList)
 	group.POST("/subscription/state", subscriptionState)
-	group.POST("/subscribe", subscribe, middleware.OperLogger())
+	group.Use(middleware.OperLogger())
+	group.POST("/subscribe", subscribe)
 }
 
 // 查看订阅列表

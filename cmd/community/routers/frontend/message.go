@@ -15,8 +15,9 @@ func InitMessageRouters(r *gin.Engine) {
 	group := r.Group("/community/message")
 	group.GET("/unReader/count", getUnReadMsgCount)
 	group.GET("", listMsg)
-	group.POST("/read", readMsg, middleware.OperLogger())
-	group.DELETE("/UnReadMsg/:type", clearUnReadMsg, middleware.OperLogger())
+	group.Use(middleware.OperLogger())
+	group.POST("/read", readMsg)
+	group.DELETE("/UnReadMsg/:type", clearUnReadMsg)
 
 }
 

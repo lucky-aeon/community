@@ -15,11 +15,13 @@ import (
 
 func InitCommentRouters(g *gin.Engine) {
 	group := g.Group("/community/comments")
-	group.POST("/comment", comment, middleware.OperLogger())
-	group.DELETE("/:id", deleteComment, middleware.OperLogger())
 	group.GET("/byArticleId/:articleId", listCommentsByArticleId)
 	group.GET("/byRootId/:rootId", listCommentsByRootId)
 	group.GET("/allCommentsByArticleId/:articleId", listAllCommentsByArticleId)
+	group.Use(middleware.OperLogger())
+	group.POST("/comment", comment)
+	group.DELETE("/:id", deleteComment)
+
 }
 
 // 发布评论

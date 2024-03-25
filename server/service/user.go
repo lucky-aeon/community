@@ -55,35 +55,35 @@ func (s *UserService) ListByIdsToMap(ids []int) map[int]model.Users {
 	return m
 }
 
-func Register(account, pswd, name string, inviteCode int) error {
+func Register(account, pswd, name string, inviteCode int) (int, error) {
 
 	if err := utils.NotBlank(account, pswd, name, inviteCode); err != nil {
-		return err
+		return 0, err
 	}
 
 	// query codeDao
 	if !codeDao.Exist(inviteCode) {
-		return errors.New("验证码不存在")
+		return 0, errors.New("验证码不存在")
 	}
 
 	// 查询账户
 	user := userDao.QueryUser(&model.Users{Account: account})
 	if user.ID > 0 {
-		return errors.New("账户已存在,换一个吧")
+		return 0, errors.New("账户已存在,换一个吧")
 	}
 
 	user = userDao.QueryUser(&model.Users{Name: name})
 	if user.ID > 0 {
-		return errors.New("用户昵称已存在,换一个吧")
+		return 0, errors.New("用户昵称已存在,换一个吧")
 	}
 
 	// 保存用户
-	userDao.CreateUser(account, name, pswd, inviteCode)
+	id := userDao.CreateUser(account, name, pswd, inviteCode)
 	// 修改code状态
 	var c CodeService
 	c.SetState(inviteCode)
 
-	return nil
+	return id, nil
 }
 
 type UserMenu struct {

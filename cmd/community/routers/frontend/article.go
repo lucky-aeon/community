@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/request"
@@ -23,11 +24,11 @@ var (
 )
 
 type SearchArticle struct {
-	Tags    []int  `json:"tags"`    // 文章标签
-	Context string `json:"context"` // 模糊查询内容
-	Type    int    `json:"type"`    // 分类id
-	UserId  int    `json:"userId"`  // 用户id
-	State   int    `json:"state"`
+	Tags    []string `json:"tags"`    // 文章标签
+	Context string   `json:"context"` // 模糊查询内容
+	Type    int      `json:"type"`    // 分类id
+	UserId  int      `json:"userId"`  // 用户id
+	State   int      `json:"state"`
 	data.ListSortStrategy
 }
 

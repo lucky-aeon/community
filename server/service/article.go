@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+
 	mapset "github.com/deckarep/golang-set/v2"
 	"xhyovo.cn/community/server/request"
 
@@ -51,7 +52,7 @@ func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, 
 	}, err
 }
 
-func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, page data.QueryPage, sort data.ListSortStrategy, currentUserId int) (result []*model.ArticleData, total int64, err error) {
+func (a *ArticleService) PageByClassfily(tagId []string, article *model.Articles, page data.QueryPage, sort data.ListSortStrategy, currentUserId int) (result []*model.ArticleData, total int64, err error) {
 	query := mysql.GetInstance().Table("articles").
 		Select("articles.id, articles.title, articles.state, articles.`like`, " +
 			"tp.id as type_id, tp.title as type_title, tp.flag_name as type_flag, " +
@@ -62,19 +63,18 @@ func (a *ArticleService) PageByClassfily(tagId []int, article *model.Articles, p
 		Joins("LEFT JOIN types as tp on tp.id = articles.type").
 		Joins("LEFT JOIN users as u on u.id = articles.user_id")
 
-	if article.State != 0 {
-		query.Where("articles.state = ?", article.State)
-	}
-	// 未空则是 QA
-	if article.State == 0 {
-		query.Where("articles.state != ? and articles.state != ?", constant.Draft, constant.Published)
-	}
-	searchUserId := article.UserId
-	if (searchUserId != 0 && currentUserId != searchUserId) || searchUserId == 0 {
-		query.Where("articles.state != ? and articles.state != ?", constant.Draft, constant.PrivateQuestion)
-	}
-
 	if article != nil {
+		if article.State != 0 {
+			query.Where("articles.state = ?", article.State)
+		}
+		// 未空则是 QA
+		if article.State == 0 {
+			query.Where("articles.state != ? and articles.state != ?", constant.Draft, constant.Published)
+		}
+		searchUserId := article.UserId
+		if (searchUserId != 0 && currentUserId != searchUserId) || searchUserId == 0 {
+			query.Where("articles.state != ? and articles.state != ?", constant.Draft, constant.PrivateQuestion)
+		}
 		if article.Type > 0 {
 			query.Where("articles.type = ?", article.Type)
 		}
@@ -288,6 +288,9 @@ func (a *ArticleService) Delete(articleId int) (err error) {
 	// 删除文章
 	db := mysql.GetInstance()
 	err = db.Where("id = ?", articleId).Delete(&model.Articles{}).Error
+	if err != nil {
+		return err
+	}
 	// 删除文章标签表
 	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
 	return

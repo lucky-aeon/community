@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-export function apiListMsg(type, state) {
-    return axios.get(`/community/message?type=${type}&state=${state}`);
+export function apiListMsg(page,limit,type, state) {
+    return axios.get(`/community/message?type=${type}&state=${state}&page=${page}&limit=${limit}`);
 }
 
 export function apiClearUnReadMsg(type){

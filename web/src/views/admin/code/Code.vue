@@ -29,7 +29,7 @@
       </a-col>
     </a-row>
     <a-table row-key="name" :columns="columns" :data="codeData" :row-selection="rowSelection"
-            :pagination="pagination" >
+            :pagination="pagination" @page-change="getCodeList">
       <template #optional="{ record, rowIndex }">
         <a-space>
           <a-popconfirm popup-hover-stay @ok="delCode(rowIndex)" content="你确定要删除该邀请码?">

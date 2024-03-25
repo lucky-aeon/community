@@ -119,6 +119,10 @@ const columns = [
     slotName: 'avatar',
   },
   {
+    title: '创建时间',
+    dataIndex: 'createdAt',
+  },
+  {
     title: '操作',
     slotName: 'optional'
   }

@@ -32,7 +32,9 @@
             :pagination="pagination" >
       <template #optional="{ record, rowIndex }">
         <a-space>
-          <a-button type="primary" @click="delCode(rowIndex)">删除</a-button>
+          <a-popconfirm popup-hover-stay @ok="delCode(rowIndex)" content="你确定要删除该邀请码?">
+            <a-button type="primary">删除</a-button>
+          </a-popconfirm>
         </a-space>
 
       </template>

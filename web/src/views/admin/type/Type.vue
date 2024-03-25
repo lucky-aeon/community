@@ -46,7 +46,9 @@
       <template #optional="{ record, rowIndex }">
         <a-space>
           <a-button type="primary" @click="updateType(record)">修改</a-button>
-          <a-button type="primary" @click="delType(record.id)">删除</a-button>
+          <a-popconfirm popup-hover-stay @ok="delType(record.id)" content="你确定要删除该分类?">
+            <a-button type="primary">删除</a-button>
+          </a-popconfirm>
         </a-space>
 
       </template>

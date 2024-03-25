@@ -29,7 +29,9 @@
     <template  #optional="{ record, rowIndex }">
       <a-space>
         <a-button type="primary" @click="updateTag(rowIndex)">修改</a-button>
-        <a-button type="primary" @click="delTag(rowIndex)">删除</a-button>
+        <a-popconfirm popup-hover-stay @ok="delTag(rowIndex)" content="你确定要删除该标签?">
+          <a-button type="primary">删除</a-button>
+        </a-popconfirm>
       </a-space>
     </template>
     </a-table>

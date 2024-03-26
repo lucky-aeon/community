@@ -53,13 +53,38 @@ func articlePageBySearch(ctx *gin.Context) {
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
+	state := searchArticle.State
+	if state < 1 || state > 5 {
+		log.Warnln("用户id: %d 搜索文章状态参数错误,当前状态: %d", middleware.GetUserId(ctx), state)
+		result.Err("文章状态非法").Json(ctx)
+		return
+	}
 
 	searchUserId := searchArticle.UserId
 	currentUserId := middleware.GetUserId(ctx)
 
-	if (searchArticle.State == constant.Draft || searchArticle.State == constant.PrivateQuestion) && searchUserId != 0 && searchUserId != currentUserId {
+	if (state == constant.Draft || state == constant.PrivateQuestion) && searchUserId != 0 && searchUserId != currentUserId {
 		log.Warnln("用户id: %d 搜索文章状态不可选择草稿以及私密提问", middleware.GetUserId(ctx))
 		result.Err("搜索文章状态不可选择草稿以及私密提问").Json(ctx) //
+		return
+	}
+	if state == 0 {
+		log.Warnln("用户id: %d 查询文章必须带上文章状态", middleware.GetUserId(ctx))
+		result.Err("查询文章必须带上文章状态").Json(ctx)
+		return
+	}
+	var userS services.UserService
+	flag, err := userS.IsAdmin(currentUserId)
+	if err != nil {
+		log.Warnln("用户id: %d 校验身份出现错误: %s", middleware.GetUserId(ctx), err)
+		result.Err("校验身份出现错误").Json(ctx)
+		return
+	}
+
+	// TA 用户并且 不是管理员
+	if searchUserId != currentUserId && !flag && (state == constant.Draft || state == constant.PrivateQuestion) {
+		log.Warnln("用户id: %d 非法查询文章,查询文章状态: %s", middleware.GetUserId(ctx), state)
+		result.Err("你没有权限查询该状态文章").Json(ctx)
 		return
 	}
 
@@ -68,7 +93,7 @@ func articlePageBySearch(ctx *gin.Context) {
 		Content: searchArticle.Context,
 		Type:    searchArticle.Type,
 		UserId:  searchUserId,
-		State:   searchArticle.State,
+		State:   state,
 	}, ginutils.GetPage(ctx), ginutils.GetOderBy(ctx), currentUserId)).Json(ctx)
 }
 

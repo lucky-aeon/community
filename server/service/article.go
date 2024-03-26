@@ -21,7 +21,7 @@ type ArticleService struct {
 func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, err error) {
 	var a model.Articles
 	model.Article().Where("id = ?", id).First(&a)
-	if a.ID == 0 && a.UserId != userId && a.State == constant.Draft {
+	if (a.ID == 0 && a.UserId != userId && a.State == constant.Draft) || (userId != a.UserId && a.State == constant.PrivateQuestion) {
 		return nil, errors.New("文章不存在")
 	}
 	var tags []*model.ArticleTagSimple
@@ -64,17 +64,7 @@ func (a *ArticleService) PageByClassfily(tagId []string, article *model.Articles
 		Joins("LEFT JOIN users as u on u.id = articles.user_id")
 
 	if article != nil {
-		if article.State != 0 {
-			query.Where("articles.state = ?", article.State)
-		}
-		// 未空则是 QA
-		if article.State == 0 {
-			query.Where("articles.state != ? and articles.state != ?", constant.Draft, constant.Published)
-		}
-		searchUserId := article.UserId
-		if (searchUserId != 0 && currentUserId != searchUserId) || searchUserId == 0 {
-			query.Where("articles.state != ? and articles.state != ?", constant.Draft, constant.PrivateQuestion)
-		}
+		query.Where("articles.state = ?", article.State)
 		if article.Type > 0 {
 			query.Where("articles.type = ?", article.Type)
 		}

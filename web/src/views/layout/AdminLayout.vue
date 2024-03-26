@@ -2,16 +2,7 @@
   <div class="layout-demo">
     <a-layout style="height: 100%;">
       <a-layout-header>
-        <a-menu class="line" mode="horizontal" :default-selected-keys="['1']">
-          <a-menu-item key="0" :style="{ padding: 0, marginRight: '38px' }" disabled>
-            <div :style="{
-          width: '80px',
-          height: '30px',
-          borderRadius: '2px',
-          background: 'var(--color-fill-3)',
-          cursor: 'text',
-        }" />
-          </a-menu-item>
+        <a-menu class="line" mode="horizontal" :default-selected-keys="[]">
           <RouterLink to="/"><a-menu-item key="1">切换前台</a-menu-item></RouterLink> 
           <AButtonGroup style="float: right;">
 

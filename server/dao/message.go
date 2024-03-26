@@ -21,12 +21,17 @@ func (*MessageDao) GetMessageTemplate(id int) string {
 	return messageTemplate
 }
 
-func (*MessageDao) SaveMessageTemplate(template model.MessageTemplates) {
-	mysql.GetInstance().Save(&template)
+func (*MessageDao) SaveMessageTemplate(template model.MessageTemplates) error {
+
+	if template.ID == 0 {
+		return mysql.GetInstance().Save(&template).Error
+	}
+
+	return model.MessageTemplate().Where("id = ?", template.ID).Updates(&model.MessageTemplates{Content: template.Content, EventId: template.EventId}).Error
 }
 
 func (*MessageDao) DeleteMessageTemplate(id int) {
-	model.MessageState().Where("id = ?", id).Delete(nil)
+	model.MessageTemplate().Where("id = ?", id).Delete(model.MessageTemplates{})
 }
 
 // 消息日志crud

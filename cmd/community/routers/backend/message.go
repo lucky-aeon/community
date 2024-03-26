@@ -9,14 +9,21 @@ import (
 	"xhyovo.cn/community/pkg/utils/page"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
+	"xhyovo.cn/community/server/service/event"
 )
 
 func InitMessageRouters(r *gin.Engine) {
-	group := r.Group("/community/admin/message")
-	group.GET("/template/var", listMsgVar)
-	group.GET("/template", listMsgTemp)
-	group.POST("/template", saveMsgTemp, middleware.OperLogger())
-	group.DELETE("/template", deleteMsgTemp, middleware.OperLogger())
+	group := r.Group("/community/admin/message/template")
+	group.GET("/var", listMsgVar)
+	group.GET("/event", listEvent)
+	group.GET("", listMsgTemp)
+	group.Use(middleware.OperLogger())
+	group.POST("", saveMsgTemp)
+	group.DELETE("/:id", deleteMsgTemp)
+}
+
+func listEvent(ctx *gin.Context) {
+	result.Ok(event.List(), "").Json(ctx)
 }
 
 // 获取消息模板中的变量
@@ -41,7 +48,11 @@ func saveMsgTemp(ctx *gin.Context) {
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
-	mS.SaveMessageTemplate(template)
+	if err := mS.SaveMessageTemplate(template); err != nil {
+		result.Err(err.Error()).Json(ctx)
+		log.Warnf("用户id: %d 保存消息模板失败,err: %s", middleware.GetUserId(ctx), err.Error())
+		return
+	}
 	result.OkWithMsg(nil, "保存成功").Json(ctx)
 }
 

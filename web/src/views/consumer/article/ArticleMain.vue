@@ -25,12 +25,9 @@
                     </ACol>
                     <ACol>
                         <a-space>
-                            <a-tooltip mini :content="tagItem.description" position="bottom"
-                                v-for="tagItem in searchData.hotTags" :key="tagItem.tag">
-                                <a-tag color="red">
+                            <a-tag color="red" v-for="tagItem in searchData.hotTags" :key="tagItem.tag">
                                     {{ tagItem.tag }}
                                 </a-tag>
-                            </a-tooltip>
                             <!-- <a-tag color="blue">
                                 <template #icon>
                                     <icon-tags />

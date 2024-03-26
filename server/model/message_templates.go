@@ -12,7 +12,8 @@ type MessageTemplates struct {
 	Content   string         `json:"content" binding:"required" msg:"内容不能未空"`
 	EventId   int            `json:"eventId"` // 事件id
 	CreatedAt time.LocalTime `json:"createdAt"`
-	UpdateAt  time.LocalTime `json:"updateAt"`
+	UpdatedAt time.LocalTime `json:"updateAt"`
+	EventName string         `json:"eventName" gorm:"-"`
 }
 
 func MessageTemplate() *gorm.DB {

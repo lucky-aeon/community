@@ -1,10 +1,12 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/server/model"
+	"xhyovo.cn/community/server/service/event"
 )
 
 var messageTemplateVar = make(map[string]map[string]string)
@@ -46,11 +48,20 @@ type MessageService struct {
 func (*MessageService) ListMessageTemplate(page, limit int) ([]*model.MessageTemplates, int64) {
 	var count int64
 	model.MessageTemplate().Count(&count)
-	return messageDao.ListMessageTemplate(page, limit), count
+	templates := messageDao.ListMessageTemplate(page, limit)
+	eventMap := event.Map()
+	for i := range templates {
+		templates[i].EventName = eventMap[templates[i].EventId]
+	}
+
+	return templates, count
 }
 
-func (*MessageService) SaveMessageTemplate(template model.MessageTemplates) {
-	messageDao.SaveMessageTemplate(template)
+func (*MessageService) SaveMessageTemplate(template model.MessageTemplates) error {
+	if err := messageDao.SaveMessageTemplate(template); err != nil {
+		return errors.New("创建消息模板对应的事件已经存在")
+	}
+	return nil
 }
 
 func (*MessageService) DeleteMessageTemplate(id int) {

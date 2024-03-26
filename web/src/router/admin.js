@@ -9,6 +9,7 @@ import Member from "@/views/admin/member/Member.vue";
 import Type from "@/views/admin/type/Type.vue";
 import Tag from "@/views/admin/user/Tag.vue";
 import UserList from "@/views/admin/user/UserList.vue";
+import MessageTemplate from "@/views/admin/message/MessageTemplate.vue";
 
 const AdminRouters = [
     {
@@ -46,6 +47,10 @@ const AdminRouters = [
     {
         path: "user/tag",
         component: Tag
+    },
+    {
+        path: "message/template",
+        component: MessageTemplate
     }
 
 ]

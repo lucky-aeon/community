@@ -14,3 +14,23 @@ export function apiGetUnReadCount() {
 export function apiPostRead(ids) {
     return axios.post(`/community/message/read`, ids)
 }
+
+export function apiMessageTemplateList(page,limit) {
+    return axios.get(`/community/admin/message/template?page=${page}&limit=${limit}`)
+}
+
+export function apiMessageTemplateEventList() {
+    return axios.get(`/community/admin/message/template/event`)
+}
+
+export function apiMessageTemplateVarList(page,limit) {
+    return axios.get(`/community/admin/message/template/var`)
+}
+
+export function apiMessageTemplateSave(template) {
+    return axios.post(`/community/admin/message/template`,template)
+}
+
+export function apiMessageTemplateListDelete(id) {
+    return axios.delete(`/community/admin/message/template/${id}`)
+}

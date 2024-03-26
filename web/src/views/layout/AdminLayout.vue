@@ -113,6 +113,13 @@
                 <a-menu-item>文章</a-menu-item>
               </router-link>
             </a-sub-menu>
+            <a-sub-menu key="10">
+              <template #icon><icon-apps></icon-apps></template>
+              <template #title>消息</template>
+              <router-link to="/admin/message/template">
+                <a-menu-item>消息模板</a-menu-item>
+              </router-link>
+            </a-sub-menu>
           </a-menu>
 
         </a-layout-sider>

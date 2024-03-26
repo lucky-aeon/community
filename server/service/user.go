@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"xhyovo.cn/community/pkg/mysql"
 
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/constant"
@@ -10,6 +11,25 @@ import (
 )
 
 type UserService struct {
+}
+
+func (s UserService) IsAdmin(userId int) (bool, error) {
+	query := mysql.GetInstance().Table("users as u").Select("m.name").
+		Joins("join invite_codes as inv on u.invite_code = inv.code").
+		Joins("join member_infos as m on m.id = inv.member_id").
+		Where("u.id = ?", userId)
+	rows, err := query.Rows()
+	if err != nil {
+		return false, err
+	}
+	var name string
+	if rows.Next() {
+		rows.Scan(&name)
+		if name == "admin" {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func (s UserService) ListUsers(name string) (users []model.Users) {

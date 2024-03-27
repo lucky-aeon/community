@@ -46,7 +46,7 @@ func deleteCode(ctx *gin.Context) {
 	code := ctx.Param("code")
 
 	if code == "" {
-		log.Warnln("用户id: %d 删除邀请码不存在: %s", middleware.GetUserId(ctx), code)
+		log.Warnf("用户id: %d 删除邀请码不存在: %s", middleware.GetUserId(ctx), code)
 		result.Err("删除的code不存在").Json(ctx)
 		return
 	}

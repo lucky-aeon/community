@@ -1,4 +1,4 @@
-package routers
+package frontend
 
 import (
 	"crypto/hmac"

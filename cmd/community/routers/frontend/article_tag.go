@@ -40,14 +40,14 @@ func getHotTags(r *gin.Context) {
 func saveArticleTags(c *gin.Context) {
 	var articleTag model.ArticleTags
 	if err := c.ShouldBindJSON(&articleTag); err != nil {
-		log.Warnln("用户id: %d 添加文章标签参数解析解析失败 ,err: %s", middleware.GetUserId(c), err.Error())
+		log.Warnf("用户id: %d 添加文章标签参数解析解析失败 ,err: %s", middleware.GetUserId(c), err.Error())
 		result.Err(utils.GetValidateErr(articleTag, err)).Json(c)
 		return
 	}
 	articleTag.UserId = middleware.GetUserId(c)
 	tag, err := articleTagService.CreateTag(articleTag)
 	if err != nil {
-		log.Warn("用户id: %d 添加文章标签失败,err: %s", middleware.GetUserId(c), err.Error())
+		log.Warnf("用户id: %d 添加文章标签失败,err: %s", middleware.GetUserId(c), err.Error())
 		result.Err(err.Error()).Json(c)
 		return
 	}

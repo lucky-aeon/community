@@ -5,8 +5,7 @@
         <a-list-item-meta :title="`${item.fromUserName}  ${item.toUserName == '' ? '' : '回复【@' + item.toUserName+'】'} 时间:${ item.createdAt }`"
           :description="item.content">
           <template #avatar>
-            <a-avatar shape="square">
-              <img alt="avatar" :src="item.fromUserAvatar" />
+            <a-avatar shape="square" :image-url="item.fromUserAvatar" @click="router.push({path: `/user/${item.FromUserId}`})">
             </a-avatar>
           </template>
         </a-list-item-meta>

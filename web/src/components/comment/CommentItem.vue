@@ -27,7 +27,7 @@
         </template>
 
         <template #avatar>
-            <a-avatar :image-url="comment.fromUserAvatar">
+            <a-avatar :image-url="comment.fromUserAvatar" @click="router.push({path: `/user/${comment.FromUserId}`})"
             </a-avatar>
         </template>
         <CommentEdit :callback="getSubCommentPage" :parent-id="comment.id" :article-id="comment.articleId" :root-comment="comment.rootId" v-if="replyEdit.show"/>
@@ -48,6 +48,7 @@ import 'cherry-markdown/dist/cherry-markdown.css';
 import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
 import { computed, reactive, ref } from 'vue';
 import CommentEdit from './CommentEdit.vue';
+import router from '@/router';
 const props = defineProps({
     comment: {
         type: Object,

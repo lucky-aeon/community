@@ -14,7 +14,7 @@
           
           <span><a-avatar :image-url="articleData.user.avatar" :style="{ marginRight: '8px', backgroundColor: '#165DFF' }" :size="28">
                 load
-              </a-avatar>{{ articleData.user.name }}</span>
+              </a-avatar><RouterLink :to="`/user/${articleData.user.id}`">{{ articleData.user.name }}</RouterLink></span>
           <span>时间: {{ articleData.updatedAt }}</span>
         </a-space>
       </template>

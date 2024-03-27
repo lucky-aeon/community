@@ -159,3 +159,14 @@ func (a *CommentsService) PageComment(p, limit int) (comments []*model.Comments,
 	setCommentUserInfoAndArticleTitle(comments)
 	return comments, count
 }
+
+func (a *CommentsService) Exist(commentId int) bool {
+	var count int64
+	model.Comment().Where("id = ?", commentId).Count(&count)
+	return count == 1
+}
+
+func (a *CommentsService) GetById(id int) (comment model.Comments) {
+	model.Comment().Where("id = ?", id).Find(&comment)
+	return
+}

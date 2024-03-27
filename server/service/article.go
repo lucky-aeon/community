@@ -337,3 +337,13 @@ func (a *ArticleService) PageArticles(p, limit int) (articleList []model.Article
 	}
 	return
 }
+
+func (a *ArticleService) Auth(userId, articleId int) bool {
+	var count int64
+	model.Article().Where("user_id = ? and id = ?", userId, articleId).Count(&count)
+	return count == 1
+}
+
+func (a *ArticleService) UpdateState(articleId, state int) {
+	model.Article().Where("id = ?", articleId).Select("state").Updates(model.Articles{State: state})
+}

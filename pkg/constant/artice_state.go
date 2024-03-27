@@ -6,6 +6,7 @@ const (
 	Pending
 	Resolved
 	PrivateQuestion
+	QADraft
 )
 
 var name map[int]string

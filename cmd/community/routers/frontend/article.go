@@ -63,7 +63,7 @@ func articlePageBySearch(ctx *gin.Context) {
 	searchUserId := searchArticle.UserId
 	currentUserId := middleware.GetUserId(ctx)
 
-	if (state == constant.Draft || state == constant.PrivateQuestion) && searchUserId != 0 && searchUserId != currentUserId {
+	if (state == constant.Draft || state == constant.QADraft || state == constant.PrivateQuestion) && searchUserId != 0 && searchUserId != currentUserId {
 		log.Warnln("用户id: %d 搜索文章状态不可选择草稿以及私密提问", middleware.GetUserId(ctx))
 		result.Err("搜索文章状态不可选择草稿以及私密提问").Json(ctx) //
 		return
@@ -82,7 +82,7 @@ func articlePageBySearch(ctx *gin.Context) {
 	}
 
 	// TA 用户并且 不是管理员
-	if searchUserId != currentUserId && !flag && (state == constant.Draft || state == constant.PrivateQuestion) {
+	if searchUserId != currentUserId && !flag && (state == constant.Draft || state == constant.QADraft || state == constant.PrivateQuestion) {
 		log.Warnln("用户id: %d 非法查询文章,查询文章状态: %s", middleware.GetUserId(ctx), state)
 		result.Err("你没有权限查询该状态文章").Json(ctx)
 		return

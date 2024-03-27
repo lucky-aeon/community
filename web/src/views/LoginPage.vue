@@ -1,13 +1,16 @@
 <template>
-    <a-menu style="font-size: 16px;" class="line" mode="horizontal" :default-selected-keys="['1']">
-        <a-menu-item key="0" :style="{ padding: 0, marginRight: '38px' }" disabled>
+  <a-menu style="font-size: 16px;" class="line" mode="horizontal" :default-selected-keys="['1']">
+    <a-menu-item key="0" :style="{ padding: 0, marginRight: '38px' }" disabled>
 
-        </a-menu-item>
-        <a-menu-item key="1">首页</a-menu-item>
-      <a-menu-item key="2"><a href="https://xhyqaq.github.io/">付费</a></a-menu-item>
-    </a-menu>
-    <a-divider />
-  <a-modal v-model:visible="visible" @ok="handleOk" @cancel="handleCancel" width="auto">
+    </a-menu-item>
+    <a-menu-item key="1">首页</a-menu-item>
+    <a-menu-item key="2" @click="showBuy = true">付费</a-menu-item>
+  </a-menu>
+  <a-divider style="margin-top: 0px;"/>
+  <a-modal title="为什么选择我?只有学生才最懂学生" :closable="false" ok-text="我已了解" hide-cancel v-model:visible="showBuy" fullscreen :body-style="{padding:0, height: '100%'}">
+    <iframe src="https://xhyqaq.github.io/" height="100%" width="100%"></iframe>
+  </a-modal>
+  <a-modal v-model:visible="visible" :body-style="{ height: '400px' }" @ok="handleOk" @cancel="handleCancel" width="auto">
     <template #title>
       用户协议
     </template>
@@ -72,57 +75,77 @@
       <p>以上为用户协议的基本内容，如有任何疑问，请联系我们。</p>
     </div>
   </a-modal>
-    <div style="height: 100%; width: 100%;margin-top: 100px;">
-        <a-card hoverable style="margin: auto; width: 550px;" title="身份验证">
-            <template #extra>
-                <a-link @click="handleClick">用户协议</a-link>
-            </template>
-            <a-form :model="authForm" :style="{ width: '100%' }" @submit="handleSubmit">
-                <a-form-item feedback field="account" tooltip="联系站长获取邀请码" label="邮箱"
-                    :rules="[{ required: true, message: 'account is required' }, { minLength: 6, message: 'must be greater than 6 characters' }]"
-                    :validate-trigger="['change', 'input']">
-                    <a-input v-model="authForm.account" placeholder="please enter your emial..." />
-                </a-form-item>
-                <a-form-item feedback field="password" label="密码"
-                    :rules="[{ required: true, message: 'password is required' }, { minLength: 6, message: 'must be greater than 6 characters' }]"
-                    :validate-trigger="['change', 'input']">
-                    <a-input v-model="authForm.password" type="password" placeholder="please enter your password..." />
-                </a-form-item>
-                <a-form-item field="code" tooltip="第一次登录需填写" label="邀请码">
-                    <a-verification-code :formatter="(inputValue) => /^\d*$/.test(inputValue) ? inputValue : false"
-                        :length="8" v-model="authForm.code" style="width: 200px" />
-                </a-form-item>
-                <a-form-item feedback v-if="authForm.code.length == 8" field="name" label="昵称"
-                    :rules="[{ required: true, message: 'name is required' }, { minLength: 2, message: 'must be greater than 2 characters' }]"
-                    :validate-trigger="['change', 'input']">
-                    <a-input v-model="authForm.name" placeholder="please enter your name..." />
-                </a-form-item>
-                <a-form-item feedback field="isRead" :rules="[{ type:'boolean', true:true, message: '请阅读用户协议并同意' }]"
-                    :validate-trigger="['change', 'input']">
-                    <a-checkbox v-model="authForm.isRead"> I have read the manual </a-checkbox>
-                </a-form-item>
+  <div style="height: 100%; width: 100%;margin-top: 100px;">
+    <a-card hoverable style="margin: auto; width: 550px;" title="身份验证">
+      <template #extra>
+        <a-link @click="handleClick">用户协议</a-link>
+      </template>
+      <a-form :model="authForm" :style="{ width: '100%' }" @submit="handleSubmit">
+        <a-form-item feedback field="account" tooltip="联系站长获取邀请码" label="邮箱"
+          :rules="[{ required: true, message: 'account is required' }, { minLength: 6, message: 'must be greater than 6 characters' }]"
+          :validate-trigger="['change', 'input']">
+          <a-input v-model="authForm.account" placeholder="please enter your emial..." />
+        </a-form-item>
+        <a-form-item feedback field="password" label="密码"
+          :rules="[{ required: true, message: 'password is required' }, { minLength: 6, message: 'must be greater than 6 characters' }]"
+          :validate-trigger="['change', 'input']">
+          <a-input v-model="authForm.password" type="password" placeholder="please enter your password..." />
+        </a-form-item>
+        <a-form-item field="code" tooltip="第一次登录需填写" label="邀请码">
+          <a-verification-code :formatter="(inputValue) => /^\d*$/.test(inputValue) ? inputValue : false" :length="8"
+            v-model="authForm.code" style="width: 200px" />
+        </a-form-item>
+        <a-form-item feedback v-if="authForm.code.length == 8" field="name" label="昵称"
+          :rules="[{ required: true, message: 'name is required' }, { minLength: 2, message: 'must be greater than 2 characters' }]"
+          :validate-trigger="['change', 'input']">
+          <a-input v-model="authForm.name" placeholder="please enter your name..." />
+        </a-form-item>
+        <a-form-item feedback field="isRead" :rules="[{ type: 'boolean', true: true, message: '请阅读用户协议并同意' }]"
+          :validate-trigger="['change', 'input']">
+          <a-checkbox v-model="authForm.isRead"> I have read the manual </a-checkbox>
+        </a-form-item>
 
-                <a-form-item>
-                    <a-button type="primary" html-type="submit">login / register</a-button>
-                </a-form-item>
-            </a-form>
-        </a-card>
+        <a-form-item>
+          <a-button type="primary" html-type="submit">login / register</a-button>
+        </a-form-item>
+      </a-form>
+    </a-card>
+  </div>
+  <a-card hoverable style="position:sticky;bottom: 0;width: 100%;">
+    <div :style="{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }">
+      <span :style="{ display: 'flex', alignItems: 'center', color: '#1D2129' }">
+        <a-avatar :style="{ marginRight: '8px', backgroundColor: '#165DFF' }" :size="28" image-url="/icp.png">
+          A
+        </a-avatar>
+        <a-typography-text> <a-link href="https://beian.mps.gov.cn/#/query/webSearch?code=42088102000211"
+            rel="noreferrer" target="_blank">鄂公网安备42088102000211</a-link>
+        </a-typography-text>
+      </span>
+      <a-link>Power by Xhy, 2024-至今</a-link>
     </div>
+  </a-card>
 </template>
 <script setup>
 import { useUserStore } from '@/stores/UserStore';
-import {reactive, ref} from 'vue';
+import { nextTick } from 'vue';
+import { watch } from 'vue';
+import { reactive, ref } from 'vue';
 
 const authForm = reactive({
-    account: "",
-    password: "",
-    code: "",
-    name: "",
-    isRead: false
+  account: "",
+  password: "",
+  code: "",
+  name: "",
+  isRead: false
 })
 const userStore = useUserStore()
+const showBuy = ref(false)
 const handleSubmit = () => {
-    userStore.login(authForm)
+  userStore.login(authForm)
 }
 
 const visible = ref(false);

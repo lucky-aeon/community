@@ -83,6 +83,7 @@ const props = defineProps({
         type: Object,
         default: () => ({
             tags: [],
+            state: 0,
             context: "",
             orderBy: "created_at",
             descOrder: true
@@ -117,13 +118,14 @@ function refreshList(data, ok) {
     currentItem.type = data.type
     currentItem.tags = data.tags.map(item => item.name).join(',')
 }
-function getArticleList() {
-
+function getArticleList(clean) {
     apiArticleList(Object.assign(props.queryData, { context: route.query.context, tags: (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || [] }), paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
+        if(clean) dataSource.value = []
         paginationProps.total = data.total
         if (data.list == null) {
             return
         }
+        console.trace("func")
         dataSource.value.push(...data.list)
     })
 }
@@ -152,19 +154,14 @@ const scroll = () => {
 }
 onMounted(() => {
     window.addEventListener('scroll', scroll)
-    getArticleList()
 })
 // 页面销毁移除scroll事件
 onUnmounted(() => window.removeEventListener('scroll', scroll))
 watch(() => route.fullPath, () => {
     dataSource.value = []
     paginationProps.page = 1
-    getArticleList()
-})
-watch(() => props.queryData.state, () => {
-    dataSource.value = []
-    getArticleList()
-})
+    getArticleList(true)
+}, {immediate: true})
 </script>
 
 <style scoped>

@@ -198,9 +198,6 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 	types = typeS.GetById(types.ParentId)
 	// 状态是否存在
 	state := article.State
-	if state < 0 || state > 5 {
-		return 0, errors.New("状态不存在")
-	}
 
 	// QA 状态校验
 	if (state == constant.Resolved || state == constant.Pending || state == constant.QADraft) && state == constant.Published {

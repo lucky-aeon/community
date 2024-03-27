@@ -18,7 +18,7 @@
                         <a-radio :value="3">待解决</a-radio>
                         <a-radio :value="5">私密提问</a-radio>
                         <a-radio :value="4">已解决</a-radio>
-                        <a-radio :value="1">草稿</a-radio>
+                        <a-radio :value="6">草稿</a-radio>
                     </a-radio-group>
                 </div>
                 </a-col>
@@ -49,6 +49,7 @@ import { apiGetUserStatistics } from "@/apis/user";
 import QaEditCom from "@/components/qa/QaEdit.vue";
 import QaListCom from "@/components/qa/QaList.vue";
 import { useUserStore } from "@/stores/UserStore";
+import { watch } from "vue";
 import { nextTick, reactive, ref } from "vue";
 // const IconFont = Icon.addFromIconFontCn({ src: 'https://at.alicdn.com/t/c/font_4443211_9ji0rjy60kw.js' });
 const userStore = useUserStore()
@@ -77,4 +78,5 @@ function refreshPage() {
     nextTick(() => showList.value = true)
 }
 refreshPage()
+watch(()=> queryData.value.state, ()=> refreshPage())
 </script>

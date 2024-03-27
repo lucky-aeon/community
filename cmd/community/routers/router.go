@@ -13,12 +13,16 @@ func InitFrontedRouter(r *gin.Engine) {
 
 	InitLoginRegisterRouters(r)
 	r.Use(middleware.Auth)
-	InitFileRouters(r)
+	frontend.InitFileRouters(r)
 	frontend.InitUserRouters(r)
 	frontend.InitArticleRouter(r)
 	frontend.InitTypeRouters(r)
 	frontend.InitSubscriptionRouters(r)
 	frontend.InitMessageRouters(r)
+	frontend.InitCommentRouters(r)
+	frontend.InitArticleTagRouter(r)
+
+	r.Use(middleware.AdminAuth)
 	backend.InitTypeRouters(r)
 	backend.InitCodeRouters(r)
 	backend.InitFileRouters(r)
@@ -29,6 +33,5 @@ func InitFrontedRouter(r *gin.Engine) {
 	backend.InitLogRouters(r)
 	backend.InitArticleRouters(r)
 	backend.InitUserTagRouters(r)
-	InitCommentRouters(r)
-	frontend.InitArticleTagRouter(r)
+
 }

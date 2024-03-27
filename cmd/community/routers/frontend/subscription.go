@@ -36,7 +36,7 @@ func subscriptionState(ctx *gin.Context) {
 	var su services.SubscriptionService
 	var subscription model.SubscriptionState
 	if err := ctx.ShouldBindJSON(&subscription); err != nil {
-		log.Warnln("用户id: %d 查看事件订阅状态参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
+		log.Warnf("用户id: %d 查看事件订阅状态参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(utils.GetValidateErr(subscription, err)).Json(ctx)
 		return
 	}

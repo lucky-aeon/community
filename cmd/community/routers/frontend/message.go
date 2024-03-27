@@ -58,7 +58,7 @@ func readMsg(ctx *gin.Context) {
 func clearUnReadMsg(ctx *gin.Context) {
 	msgType, err := strconv.Atoi(ctx.Param("type"))
 	if err != nil {
-		log.Warnln("用户id: %d 清除未读消息参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
+		log.Warnf("用户id: %d 清除未读消息参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}

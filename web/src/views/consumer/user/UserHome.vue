@@ -12,6 +12,11 @@
         </a-card>
         <div style="height: 20px;"></div>
         <a-card title="Latest Article">
+            <a-radio-group v-model="queryData.state" type="button">
+                        <a-radio :value="2">文章</a-radio>
+                        <a-radio :value="3">待解决</a-radio>
+                        <a-radio :value="4">已解决</a-radio>
+                    </a-radio-group>
             <ArticleList :query-data="queryData" />
         </a-card>
 
@@ -37,7 +42,7 @@
 
 </template>
 <script setup>
-import { apiGetUserTags, getUserInfo } from '@/apis/user';
+import { apiGetUserTags2, getUserInfo } from '@/apis/user';
 import ArticleList from '@/components/article/ArticleList.vue';
 import router from '@/router';
 import { IconFaceFrownFill } from '@arco-design/web-vue/es/icon';
@@ -56,7 +61,7 @@ const queryData = ref(null)
 const userData = ref({})
 const userTags = ref([])
 if (currentUserId.value) {
-    apiGetUserTags(currentUserId.value).then(({data, ok})=>{
+    apiGetUserTags2(currentUserId.value).then(({data, ok})=>{
         if(!ok) return
         userTags.value = data
     })
@@ -71,6 +76,7 @@ if (currentUserId.value) {
     queryData.value = {
         tags: [],
         context: "",
+        state: 2,
         orderBy: "created_at",
         descOrder: true,
         userID: currentUserId.value

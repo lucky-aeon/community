@@ -65,6 +65,10 @@ export function apiGetUserTags(id) {
   return axios.get(`/community/admin/user/tag/${id}`)
 }
 
+export function apiGetUserTags2(id) {
+  return axios.get(`/community/user/tags/${id}`)
+}
+
 export function apiSearchUserByName(name="") {
   return axios.get(`/community/user`, {
     params: {

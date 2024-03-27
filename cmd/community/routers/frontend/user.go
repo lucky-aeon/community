@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+
 	"xhyovo.cn/community/pkg/log"
 
 	"xhyovo.cn/community/cmd/community/middleware"
@@ -38,6 +39,7 @@ func InitUserRouters(r *gin.Engine) {
 	group.GET("", listUsers)
 	group.Use(middleware.OperLogger())
 	group.POST("/edit/:tab", updateUser)
+	group.GET("/tags/:userId", getTagsByUserId)
 }
 
 func getUserMenu(ctx *gin.Context) {
@@ -130,4 +132,17 @@ func listUsers(ctx *gin.Context) {
 	name := ctx.Query("name")
 	users := userService.ListUsers(name)
 	result.Ok(users, "").Json(ctx)
+}
+
+var userTagS services.UserTag
+
+func getTagsByUserId(ctx *gin.Context) {
+	userId, err := strconv.Atoi(ctx.Param("userId"))
+	if err != nil {
+		log.Warnf("获取用户标签参数解析失败,err: %s", err.Error())
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	tagNames := userTagS.GetTagsByUserId(userId)
+	result.Ok(tagNames, "").Json(ctx)
 }

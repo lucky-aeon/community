@@ -23,6 +23,14 @@
                     {{ replyEdit.show?"取消回复":"回复" }}
                 </span>
             </a-button>
+            <template v-if="article.user.id == userStore.userInfo.id">
+                <a-button v-if="comment.adoptionState" type="secondary" @click="adoption(comment.id)">
+                取消采纳
+            </a-button>
+            <a-button v-else type="primary" @click="adoption(comment.id)">
+                采纳
+            </a-button>
+            </template>
             
         </template>
 
@@ -31,7 +39,7 @@
             </a-avatar>
         </template>
         <CommentEdit :callback="getSubCommentPage" :parent-id="comment.id" :article-id="comment.articleId" :root-comment="comment.rootId" v-if="replyEdit.show"/>
-        <CommentItem v-for="item in subCommentData" :key="item.id" :comment="item" :callback="getSubCommentPage"/>
+        <CommentItem :article="article" v-for="item in subCommentData" :key="item.id" :comment="item" :callback="getSubCommentPage"/>
         <template v-if="comment.rootId==comment.id && comment.childCommentNumber>5">
             <a-button type="text" long v-if="!showPage" @click="getSubCommentPage()">展开评论</a-button>
             <APagination v-else-if="comment.childCommentNumber>pageData.pageSize" :page-size="pageData.pageSize" @change="getSubCommentPage" size="small" v-model:current="pageData.current" :total="pageData.total" />
@@ -41,7 +49,7 @@
 </template>
 
 <script setup>
-import { deleteComment as apiCommentDelete, apiGetArticleComment } from '@/apis/comment';
+import { deleteComment as apiCommentDelete, apiGetArticleComment, apiAdoptionComment } from '@/apis/comment';
 import { useUserStore } from '@/stores/UserStore';
 import { IconMessage } from '@arco-design/web-vue/es/icon';
 import 'cherry-markdown/dist/cherry-markdown.css';
@@ -57,6 +65,10 @@ const props = defineProps({
     callback: {
         type: Function,
         default(){}
+    },
+    article: {
+        type: Object,
+        default: ()=>{}
     }
 })
 const replyEdit = ref({
@@ -95,6 +107,12 @@ function getSubCommentPage() {
 }
 function deleteComment() {
     apiCommentDelete(props.comment.id).then(({ok})=>{
+        if(!ok) return
+        props.callback()
+    })
+}
+function adoption(id) {
+    apiAdoptionComment(id).then(({ok})=>{
         if(!ok) return
         props.callback()
     })

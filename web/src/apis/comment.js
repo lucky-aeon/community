@@ -47,3 +47,9 @@ export function apiPublishArticleComment(articleId, parentId, content, root=0) {
   }
   return axios.post(`/community/comments/comment`, data)
 }
+
+export function apiAdoptionComment(CommentId) {
+  return axios.post(`/community/comments/adoption`, {
+    CommentId
+  })
+}

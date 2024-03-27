@@ -202,14 +202,14 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 		return 0, errors.New("状态不存在")
 	}
 
-	// 根据分类选择状态：QA分类没有发布,普通分类只有草稿和发布
-	if types.Title == "QA" && state == constant.Published {
-		return 0, errors.New("QA分类状态不能选择已发布")
-	} else if types.Title != "QA" {
-		// 普通分类校验状态
+	// QA 状态校验
+	if (state == constant.Resolved || state == constant.Pending || state == constant.QADraft) && state == constant.Published {
+		return 0, errors.New("QA不能选择已发布")
+	} else if state == constant.Published || state == constant.Draft {
+		// 文章 状态校验
 		if state == constant.Pending || state == constant.Resolved || state == constant.PrivateQuestion {
 			msg := constant.GetArticleName(state)
-			return 0, errors.New("普通分类不支持该状态:" + msg)
+			return 0, errors.New("文章不支持该状态:" + msg)
 		}
 	}
 	// 修改
@@ -224,7 +224,7 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 			return 0, errors.New("修改的分类只能属于同一级分类下")
 		}
 		// 老文章状态如果为非草稿状态，则新文章不可修改为草稿状态
-		if oldArticle.State != constant.Draft && article.State == constant.Draft {
+		if (oldArticle.State != constant.Draft && state == constant.Draft) || (oldArticle.State != constant.QADraft && state == constant.QADraft) {
 			return 0, errors.New("旧文章状态不可从非草稿转为草稿")
 		}
 	}
@@ -234,7 +234,7 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 		Title:   article.Title,
 		Content: article.Content,
 		UserId:  article.UserId,
-		State:   article.State,
+		State:   state,
 		Type:    article.Type,
 	}
 	// 分开写，避免更新 0 值

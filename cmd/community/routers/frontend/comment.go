@@ -127,9 +127,11 @@ func adoption(ctx *gin.Context) {
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
-	articleId := adoption.ArticleId
+	var cS services.CommentsService
 	commentId := adoption.CommentId
-
+	comment := cS.GetById(commentId)
+	articleId := comment.ID
+	adoption.ArticleId = articleId
 	var msg string
 	// 采纳权限，文章得是本人,评论得存在
 	var aS services.ArticleService
@@ -153,8 +155,6 @@ func adoption(ctx *gin.Context) {
 		return
 	}
 
-	var cS services.CommentsService
-	comment := cS.GetById(commentId)
 	if comment.ID == 0 {
 		msg = fmt.Sprintf("用户id: %d 采纳评论对应的评论不存在,评论id: %d", userId, commentId)
 		log.Warnln(msg)

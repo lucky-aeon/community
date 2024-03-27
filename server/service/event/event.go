@@ -6,6 +6,7 @@ const (
 	ArticleAt                     // 文章中@
 	CommentAt                     // 评论中@
 	ReplyComment                  // 评论回复
+	Adoption                      // 评论回复
 )
 
 var events []*event
@@ -19,12 +20,14 @@ func init() {
 	events = append(events, &event{Id: ArticleAt, Msg: "文章 @"})
 	events = append(events, &event{Id: CommentAt, Msg: "评论 @"})
 	events = append(events, &event{Id: ReplyComment, Msg: "评论回复"})
+	events = append(events, &event{Id: Adoption, Msg: "采纳"})
 
 	eventMap[CommentUpdateEvent] = "文章评论"
 	eventMap[UserFollowingEvent] = "用户文章更新"
 	eventMap[ArticleAt] = "文章 @"
 	eventMap[CommentAt] = "评论 @"
 	eventMap[ReplyComment] = "评论回复"
+	eventMap[Adoption] = "采纳"
 }
 
 // 事件

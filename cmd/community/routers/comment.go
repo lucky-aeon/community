@@ -1,8 +1,12 @@
 package routers
 
 import (
+	"fmt"
 	"strconv"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/log"
+	"xhyovo.cn/community/server/constants"
+	"xhyovo.cn/community/server/service/event"
 
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
@@ -21,6 +25,7 @@ func InitCommentRouters(g *gin.Engine) {
 	group.Use(middleware.OperLogger())
 	group.POST("/comment", comment)
 	group.DELETE("/:id", deleteComment)
+	group.POST("/adoption", adoption)
 
 }
 
@@ -78,6 +83,8 @@ func listCommentsByArticleId(ctx *gin.Context) {
 	}
 	var commentsService services.CommentsService
 	comments, count := commentsService.GetCommentsByArticleID(p, limit, articleId)
+	var adS services.QAAdoption
+	adS.SetAdoptionComment(comments)
 	result.Ok(page.New(comments, count), "").Json(ctx)
 }
 
@@ -87,7 +94,8 @@ func listCommentsByRootId(ctx *gin.Context) {
 	p, limit := page.GetPage(ctx)
 	var commentsService services.CommentsService
 	comments, count := commentsService.GetCommentsByRootID(p, limit, rootId)
-
+	var adS services.QAAdoption
+	adS.SetAdoptionComment(comments)
 	result.Ok(page.New(comments, count), "").Json(ctx)
 
 }
@@ -105,6 +113,68 @@ func listAllCommentsByArticleId(ctx *gin.Context) {
 	userId := middleware.GetUserId(ctx)
 	var commentsService services.CommentsService
 	comments, count := commentsService.GetAllCommentsByArticleID(p, userId, limit, articleId)
-
+	var adS services.QAAdoption
+	adS.SetAdoptionComment(comments)
 	result.Ok(page.New(comments, count), "").Json(ctx)
+}
+
+// 采纳评论
+func adoption(ctx *gin.Context) {
+	var adoption model.QaAdoptions
+	userId := middleware.GetUserId(ctx)
+	if err := ctx.ShouldBindJSON(&adoption); err != nil {
+		log.Warnf("用户id: %d 采纳评论参数解析失败,err :%s", userId, err.Error())
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	articleId := adoption.ArticleId
+	commentId := adoption.CommentId
+
+	var msg string
+	// 采纳权限，文章得是本人,评论得存在
+	var aS services.ArticleService
+	article := aS.GetById(articleId)
+	state := article.State
+	if article.UserId != userId {
+		msg = fmt.Sprintf("用户id: %d 采纳评论无权限,文章id: %d", userId, articleId)
+		log.Warnln(msg)
+		result.Err(msg).Json(ctx)
+		return
+	}
+	if !(state == constants.Pending || state == constants.Resolved) {
+		result.Err("该文章不是 QA 分类,无法进行采纳").Json(ctx)
+		return
+	}
+
+	if !aS.Auth(userId, articleId) {
+		msg = fmt.Sprintf("用户id: %d 采纳评论无权限,文章id: %d", userId, articleId)
+		log.Warnln(msg)
+		result.Err(msg).Json(ctx)
+		return
+	}
+
+	var cS services.CommentsService
+	comment := cS.GetById(commentId)
+	if comment.ID == 0 {
+		msg = fmt.Sprintf("用户id: %d 采纳评论对应的评论不存在,评论id: %d", userId, commentId)
+		log.Warnln(msg)
+		result.Err(msg).Json(ctx)
+		return
+	}
+	var adptionS services.QAAdoption
+	msg = "取消采纳"
+	if adptionS.Adopt(articleId, commentId) {
+		var suS services.SubscriptionService
+
+		suS.Send(event.Adoption, constant.NOTICE, userId, comment.FromUserId, services.SubscribeData{CommentId: commentId, ArticleId: articleId, UserId: userId, CurrentBusinessId: articleId})
+		msg = "已采纳"
+	}
+	// 采纳了,但是状态为未解决,则改为已解决
+	if adptionS.QAAdoptState(articleId) && state == constants.Pending {
+		aS.UpdateState(articleId, constants.Resolved)
+	} else if !adptionS.QAAdoptState(articleId) && state == constants.Resolved {
+		aS.UpdateState(articleId, constants.Pending)
+	}
+
+	result.OkWithMsg(nil, msg).Json(ctx)
 }

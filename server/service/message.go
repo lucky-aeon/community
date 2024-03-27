@@ -39,7 +39,7 @@ type SubscribeData struct {
 	UserId            int
 	CommentId         int
 	CurrentBusinessId int // 当前主业务id
-	SubscribeId       int // 订阅业务的id
+	SubscribeId       int // 订阅业务的id(在消息中可以点击跳转的)
 }
 
 type MessageService struct {

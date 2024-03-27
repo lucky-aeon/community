@@ -54,7 +54,7 @@ func articlePageBySearch(ctx *gin.Context) {
 		return
 	}
 	state := searchArticle.State
-	if state < 1 || state > 5 {
+	if state < 1 || state > 6 {
 		log.Warnln("用户id: %d 搜索文章状态参数错误,当前状态: %d", middleware.GetUserId(ctx), state)
 		result.Err("文章状态非法").Json(ctx)
 		return

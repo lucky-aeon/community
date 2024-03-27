@@ -110,9 +110,11 @@ function refreshList(data, ok) {
     currentItem.type = data.type
     currentItem.tags = data.tags.map(item => item.name).join(',')
 }
-function getArticleList() {
+function getArticleList(clean=false) {
 
+    console.trace("1")
     apiArticleList(Object.assign(props.queryData, { context: route.query.context, tags: (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || [] }), paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
+        if(clean) dataSource.value = []
         paginationProps.total = data.total
         if(data.list == null) {
             return
@@ -145,15 +147,14 @@ const scroll = () => {
 }
 onMounted(() => {
     window.addEventListener('scroll', scroll)
-    getArticleList()
 })
 // 页面销毁移除scroll事件
 onUnmounted(() => window.removeEventListener('scroll', scroll))
 watch(() => route.fullPath, () => {
     dataSource.value = []
     paginationProps.page = 1
-    getArticleList()
-})
+    getArticleList(true)
+}, {immediate: true})
 watch(()=> props.queryData.state, ()=>{
     dataSource.value = []
     getArticleList()

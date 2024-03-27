@@ -1,16 +1,15 @@
 <template>
-    <QaListCom :queryData="queryData"/>
+    <QaListCom :queryData="model"/>
   </template>
   <script setup>
   import QaListCom from "@/components/qa/QaList.vue";
-  import { ref } from "vue";
-  const queryData = ref({
+  const model = defineModel({required: true, default: {
     tags: [],
     context: "",
     state: 3,
     orderBy: "created_at",
     descOrder: true
-  })
+  }})
   </script>
   
   <style scoped>

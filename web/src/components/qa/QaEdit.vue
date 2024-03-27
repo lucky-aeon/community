@@ -25,7 +25,7 @@
                             </a-button>
 
                             <template #content>
-                                <a-doption @click="updateArticle(1)">保存草稿</a-doption>
+                                <a-doption @click="updateArticle(6)">保存草稿</a-doption>
                                 <a-doption @click="updateArticle(5)">私密提问</a-doption>
                             </template>
                         </a-dropdown>

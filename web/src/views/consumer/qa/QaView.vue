@@ -41,9 +41,13 @@
         </a-space>
       </template>
       <div>
+        <a-space>
+          <a-tag color="green" size="large" v-if="articleData.state == 4">已解决</a-tag>
+          <a-tag color="red" size="large" v-else>未解决</a-tag>
          <a-tag color=blue size="large">
                 {{ articleData.type.title || "未知" }}
               </a-tag>
+        </a-space>
               <a-divider direction="vertical"/>
         <a-space>
           <a-tooltip v-for="tagItem in articleData.tags" :key="tagItem.name" :content="tagItem.description"><a-tag
@@ -54,7 +58,7 @@
     <div id="markdown-container"></div>
     <comment-edit :callback="getRootComment" :article-id="articleData.id"/>
     <a-card :bordered="false">
-        <comment-item :callback="getRootComment" v-for="comment in articleCommentList" :comment="comment" :key="comment.id"/>
+        <comment-item :article="articleData" :callback="getRootComment" v-for="comment in articleCommentList" :comment="comment" :key="comment.id"/>
         <a-divider/>
         <a-pagination @change="getRootComment" :total="paginationData.total" v-model:page-size="paginationData.pageSize" v-model:current="paginationData.current" show-page-size/>
     </a-card>

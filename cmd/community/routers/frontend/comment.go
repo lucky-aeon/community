@@ -3,6 +3,7 @@ package frontend
 import (
 	"fmt"
 	"strconv"
+
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/constants"
@@ -130,7 +131,7 @@ func adoption(ctx *gin.Context) {
 	var cS services.CommentsService
 	commentId := adoption.CommentId
 	comment := cS.GetById(commentId)
-	articleId := comment.ID
+	articleId := comment.BusinessId
 	adoption.ArticleId = articleId
 	var msg string
 	// 采纳权限，文章得是本人,评论得存在

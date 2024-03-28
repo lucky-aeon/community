@@ -19,7 +19,7 @@ export function apiGetFile(fileKey) {
 export async function apiGetUploadPolicy() {
   return axios.get(`/community/file/policy`)
 }
-export async function apiUploadFile(userId, file, callback) {
+export async function apiUploadFile(userId, file, callback, progress=()=>{}) {
   let policy = await apiGetUploadPolicy()
   console.log(policy)
   if (!policy.ok) return Promise.reject("无法获取授权")
@@ -32,8 +32,12 @@ export async function apiUploadFile(userId, file, callback) {
     callback: policy.data.callback,
     file: file
   }, {
+    onUploadProgress(progressEvent) {
+      const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+      if(progress)
+      progress(percentCompleted, progressEvent)
+    },
     timeout: 999999
   })
-  console.log(result )
   callback(result, key)
 }

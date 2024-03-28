@@ -4,6 +4,11 @@
       <a-form-item field="name" label="标签名">
         <a-input v-model="form.name" />
       </a-form-item>
+
+      <a-form-item field="color" label="颜色">
+        <a-color-picker  v-model="form.color" />
+      </a-form-item>
+
     </a-form>
   </a-modal>
   <a-space direction="vertical" size="large" fill>
@@ -74,6 +79,7 @@ function updateTag(id){
   visible.value = true;
   form.id = tag.id
   form.name = tag.name
+  form.color = tag.color
 }
 
 
@@ -85,6 +91,10 @@ const columns = [
   {
     title: '昵称',
     dataIndex: 'name',
+  },
+  {
+    title: '颜色',
+    dataIndex: 'color',
   },
   {
     title: '创建时间',

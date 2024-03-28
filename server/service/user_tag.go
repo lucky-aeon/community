@@ -19,7 +19,7 @@ func (*UserTag) Page(page, limit int) (userTags []model.UserTags, count int64) {
 
 func (*UserTag) Save(userTag model.UserTags) {
 	if userTag.ID != 0 {
-		model.UserTag().Updates(&userTag)
+		model.UserTag().Where("id = ?", userTag.ID).Updates(&userTag)
 	} else {
 		model.UserTag().Create(&userTag)
 	}

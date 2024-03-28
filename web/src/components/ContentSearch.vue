@@ -63,11 +63,7 @@ import { apiArticleList } from '@/apis/article';
 import { apiTagHots, apiTags } from '@/apis/tags';
 import router from '@/router';
 import { IconEmpty, IconSearch, IconTags } from '@arco-design/web-vue/es/icon';
-import { nextTick } from 'vue';
-import { reactive } from 'vue';
-import { computed } from 'vue';
-import { watch } from 'vue';
-import { onMounted } from 'vue';
+import { watch, onMounted,computed,reactive,nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute()

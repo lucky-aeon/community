@@ -76,3 +76,9 @@ export function apiSearchUserByName(name="") {
     }
   })
 }
+
+export function apiUserEditUserAvatar(avatar) {
+  return axios.post(`/community/user/edit/avatar`, {
+    avatar
+  })
+}

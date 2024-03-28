@@ -9,6 +9,7 @@ import (
 type UserTags struct {
 	ID        int             `json:"id"`
 	Name      string          `json:"name"`
+	Color     string          `json:"color"`
 	CreatedAt *time.LocalTime `json:"createdAt"`
 }
 

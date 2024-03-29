@@ -100,6 +100,9 @@ const userInfo = computed(() => {
     {
         label: '注册时间',
         value: userStore.userInfo.createdAt,
+    },{
+        label: "描述",
+        value: userStore.userInfo.desc
     }]
 })
 userStore.refreshTags()

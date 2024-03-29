@@ -2,24 +2,67 @@
     <a-layout v-if="currentUserId">
         <a-card
             style="padding: 15px; text-align: center;background: url('https://p1-arco.byteimg.com/tos-cn-i-uwbnlip3yd/6480dbc69be1b5de95010289787d64f1.png~tplv-uwbnlip3yd-webp.webp') center/cover no-repeat;">
-            <a-avatar :size="60" :src="userData.avatar">{{ userData.name }}</a-avatar>
-            <h3>{{userData.name}}</h3>
+            <a-avatar v-if="userData.name" :size="60" :image-url="getFileUrl(userData.avatar)">{{ userData.name
+                }}</a-avatar>
+            <h3>{{ userData.name }}</h3>
+            <span style="display: block;">{{ userData.desc }}</span>
             <a-space>
-                <a-tag color="red" >{{ userData.roleUp }}</a-tag>
-                <a-tag :color="tagItem.color || 'blue'" v-for="tagItem in userTags" :key="tagItem.id">{{ tagItem.name }}</a-tag>
+                <a-tag color="red">{{ userData.roleUp }}</a-tag>
+                <a-tag :color="tagItem.color || 'blue'" v-for="tagItem in userTags" :key="tagItem.id">{{ tagItem.name
+                    }}</a-tag>
                 <a-tag>{{ userData.createdAt }}</a-tag>
             </a-space>
         </a-card>
         <div style="height: 20px;"></div>
-        <a-card title="Latest Article">
-            <a-radio-group v-model="queryData.state" type="button">
-                        <a-radio :value="2">文章</a-radio>
-                        <a-radio :value="3">待解决</a-radio>
-                        <a-radio :value="4">已解决</a-radio>
-                    </a-radio-group>
-            <ArticleList :query-data="queryData" />
-        </a-card>
+        <a-row v-if="false" gutter="20" :style="{ marginBottom: '20px' }">
+            <a-col :span="8">
+                <a-card title="Arco Card" :bordered="false" :style="{ width: '100%' }">
+                    <template #extra>
+                        <a-link>More</a-link>
+                    </template>
+                    Card content
+                </a-card>
+            </a-col>
+            <a-col :span="8">
+                <a-card title="Arco Card" :bordered="false" :style="{ width: '100%' }">
+                    <template #extra>
+                        <a-link>More</a-link>
+                    </template>
+                    Card content
+                </a-card>
+            </a-col>
+            <a-col :span="8">
+                <a-card title="Arco Card" :bordered="false" :style="{ width: '100%' }">
+                    <template #extra>
+                        <a-link>More</a-link>
+                    </template>
+                    Card content
+                </a-card>
+            </a-col>
+        </a-row>
+        <a-row :gutter="20">
+            <a-col :span="16">
+                <a-card title="Latest Article" :bordered="false" :style="{ width: '100%' }">
+                    <template #extra>
+                        <a-radio-group v-model="queryData.state" type="button">
+                            <a-radio :value="2">文章</a-radio>
+                            <a-radio :value="3">待解决</a-radio>
+                            <a-radio :value="4">已解决</a-radio>
+                        </a-radio-group>
+                    </template>
 
+                    <ArticleList :query-data="queryData" />
+                </a-card>
+            </a-col>
+            <a-col :span="8">
+                <a-card title="个人描述" :bordered="false" :style="{ width: '100%' }">
+                    <template #extra>
+                        <!-- <a-link>订阅</a-link> -->
+                    </template>
+                    {{ userData.desc }}
+                </a-card>
+            </a-col>
+        </a-row>
     </a-layout>
     <a-result status="error" title="未找到该用户信息 " v-else>
         <template #icon>
@@ -42,6 +85,7 @@
 
 </template>
 <script setup>
+import { apiGetFile } from '@/apis/file';
 import { apiGetUserTags2, getUserInfo } from '@/apis/user';
 import ArticleList from '@/components/article/ArticleList.vue';
 import router from '@/router';
@@ -60,12 +104,16 @@ const currentUserId = computed(() => {
 const queryData = ref(null)
 const userData = ref({})
 const userTags = ref([])
+const getFileUrl = (fileKey) => {
+    return apiGetFile(fileKey)
+
+}
 if (currentUserId.value) {
-    apiGetUserTags2(currentUserId.value).then(({data, ok})=>{
-        if(!ok) return
+    apiGetUserTags2(currentUserId.value).then(({ data, ok }) => {
+        if (!ok) return
         userTags.value = data
     })
-    getUserInfo(currentUserId.value).then(({data, ok})=>{
+    getUserInfo(currentUserId.value).then(({ data, ok }) => {
         if (!ok) {
             currentUserId.value = null
             return

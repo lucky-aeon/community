@@ -122,9 +122,12 @@ func updateUser(ctx *gin.Context) {
 
 // 数据统计
 func statistics(ctx *gin.Context) {
+	types, err := strconv.Atoi(ctx.Query("type"))
+	if err != nil {
+		types = 1
+	}
 	userId := middleware.GetUserId(ctx)
-
-	m := userService.Statistics(userId)
+	m := userService.Statistics(userId, types)
 	result.Ok(m, "").Json(ctx)
 }
 

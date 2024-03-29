@@ -190,16 +190,22 @@ func (s *UserService) ListBySelect(user model.Users) (users []model.Users) {
 	return
 }
 
-func (s *UserService) Statistics(userId int) (m map[string]interface{}) {
+func (s *UserService) Statistics(userId, types int) (m map[string]interface{}) {
 	m = make(map[string]interface{})
 	var articleS ArticleService
 	// 获取被点赞次数,获取用户发布的所有文章
+	var articleCount int64
+	if types == 1 {
+		articleCount = articleS.PublishArticleCount(userId)
+	} else {
+		articleCount = articleS.QAArticleCount(userId)
+	}
 	ids := articleS.PublishArticlesSelectId(userId)
 	likeCount := articleS.ArticlesLikeCount(ids)
 	// 获取发布文章
 	count := len(ids)
 
-	m["articleCount"] = count
+	m["articleCount"] = articleCount
 	m["likeCount"] = likeCount
 	return
 }

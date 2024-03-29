@@ -166,7 +166,7 @@ func (a *ArticleService) Like(articleId, userId int) bool {
 }
 
 func (a *ArticleService) PublishArticleCount(userId int) (count int64) {
-	model.Article().Where("user_id = ?", userId).Count(&count)
+	model.Article().Where("user_id = ? and state = ? and state = ?", userId, constant.Published, constant.Draft).Count(&count)
 	return
 }
 
@@ -343,4 +343,9 @@ func (a *ArticleService) Auth(userId, articleId int) bool {
 
 func (a *ArticleService) UpdateState(articleId, state int) {
 	model.Article().Where("id = ?", articleId).Select("state").Updates(model.Articles{State: state})
+}
+
+func (a *ArticleService) QAArticleCount(userId int) (count int64) {
+	model.Article().Where("user_id = ? and state = ? and state = ? and state = ? and state = ?", userId, constant.Pending, constant.Resolved, constant.PrivateQuestion, constant.QADraft).Count(&count)
+	return
 }

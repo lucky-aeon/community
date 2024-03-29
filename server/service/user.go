@@ -14,10 +14,11 @@ type UserService struct {
 }
 
 func (s UserService) IsAdmin(userId int) (bool, error) {
+
 	query := mysql.GetInstance().Table("users as u").Select("m.name").
 		Joins("join invite_codes as inv on u.invite_code = inv.code").
 		Joins("join member_infos as m on m.id = inv.member_id").
-		Where("u.id = ?", userId)
+		Where("u.id = ? and u.deleted_at is NULL", userId)
 	rows, err := query.Rows()
 	if err != nil {
 		return false, err

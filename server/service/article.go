@@ -61,8 +61,8 @@ func (a *ArticleService) PageByClassfily(tagId []string, article *model.Articles
 		Joins("LEFT JOIN article_tag_relations as atr on atr.article_id = articles.id").
 		Joins("LEFT JOIN article_tags as atg on atg.id = atr.tag_id").
 		Joins("LEFT JOIN types as tp on tp.id = articles.type").
-		Joins("LEFT JOIN users as u on u.id = articles.user_id")
-
+		Joins("LEFT JOIN users as u on u.id = articles.user_id").
+		Where("articles.deleted_at is null")
 	if article != nil {
 		query.Where("articles.state = ?", article.State)
 		if article.Type > 0 {

@@ -12,7 +12,7 @@
       <template #subtitle>
         <a-space>
           
-          <span><a-avatar :image-url="articleData.user.avatar" :style="{ marginRight: '8px', backgroundColor: '#165DFF' }" :size="28">
+          <span><a-avatar :image-url="getFileUrl(articleData.user.avatar)" :style="{ marginRight: '8px', backgroundColor: '#165DFF' }" :size="28">
                 load
               </a-avatar><RouterLink :to="`/user/${articleData.user.id}`">{{ articleData.user.name }}</RouterLink></span>
           <span>时间: {{ articleData.updatedAt }}</span>
@@ -27,13 +27,12 @@
             </AButton>
 
           </AButtonGroup>
-          <a-dropdown-button>
-            订阅
+          <a-dropdown-button @click="subscribe(1,articleData.id)">
+            {{articleSubscribe}}
             <template #icon>
               <icon-down />
             </template>
             <template #content>
-              <a-doption @click="subscribe(1,articleData.id)">{{articleSubscribe}}</a-doption>
               <a-doption @click="subscribe(2,articleData.user.id)">{{userSubscribe}}</a-doption>
             </template>
           </a-dropdown-button>
@@ -65,6 +64,7 @@
 import { apiSubscribe, apiSubscribeState, } from "@/apis/apiSubscribe.js";
 import { apiArticleLike, apiArticleLikeState, apiArticleView } from '@/apis/article';
 import { apiGetArticleComment } from '@/apis/comment';
+import { apiGetFile } from "@/apis/file";
 import CommentEdit from '@/components/comment/CommentEdit.vue';
 import CommentItem from '@/components/comment/CommentItem.vue';
 import router from "@/router";
@@ -88,6 +88,7 @@ var CustomHookA = Cherry.createSyntaxHook('codeBlock', Cherry.constants.HOOKS_TY
     return regex;
   },
 });
+const getFileUrl = (fileKey)=> apiGetFile(fileKey)
 
 var cherryConfig = {
   id: 'markdown-container',

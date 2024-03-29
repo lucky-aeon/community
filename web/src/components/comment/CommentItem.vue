@@ -35,7 +35,7 @@
         </template>
 
         <template #avatar>
-            <a-avatar :image-url="comment.fromUserAvatar" @click="router.push({path: `/user/${comment.FromUserId}`})"
+            <a-avatar :image-url="getFileUrl(comment.fromUserAvatar)" @click="router.push({path: `/user/${comment.FromUserId}`})">
             </a-avatar>
         </template>
         <CommentEdit :callback="getSubCommentPage" :parent-id="comment.id" :article-id="comment.articleId" :root-comment="comment.rootId" v-if="replyEdit.show"/>
@@ -57,6 +57,7 @@ import CherryEngine from 'cherry-markdown/dist/cherry-markdown.engine.core';
 import { computed, reactive, ref } from 'vue';
 import CommentEdit from './CommentEdit.vue';
 import router from '@/router';
+import { apiGetFile } from '@/apis/file';
 const props = defineProps({
     comment: {
         type: Object,
@@ -75,6 +76,8 @@ const replyEdit = ref({
     show: false,
     comment: {}
 })
+const getFileUrl = (fileKey)=> apiGetFile(fileKey)
+
 const showPage = ref(false)
 const userStore = useUserStore()
 const subComment = ref([])

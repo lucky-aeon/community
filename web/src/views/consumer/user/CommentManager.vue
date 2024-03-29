@@ -5,7 +5,7 @@
         <a-list-item-meta :title="`${item.fromUserName}  ${item.toUserName == '' ? '' : '回复【@' + item.toUserName+'】'} 时间:${ item.createdAt }`"
           :description="item.content">
           <template #avatar>
-            <a-avatar shape="square" :image-url="item.fromUserAvatar" @click="router.push({path: `/user/${item.FromUserId}`})">
+            <a-avatar shape="square" :image-url="getFileUrl(item.fromUserAvatar)" @click="router.push({path: `/user/${item.FromUserId}`})">
             </a-avatar>
           </template>
         </a-list-item-meta>
@@ -34,6 +34,7 @@
 
 <script setup>
 import { apiReply, deleteComment, listAllCommentsByArticleId } from '@/apis/comment.js';
+import { apiGetFile } from '@/apis/file';
 import MarkdownEdit from "@/components/MarkdownEdit.vue";
 import router from '@/router';
 import { IconDelete, IconDown } from '@arco-design/web-vue/es/icon';
@@ -46,7 +47,10 @@ const replyEdit = reactive({
   item: {}
 })
 
+const getFileUrl = (fileKey) => {
+    return apiGetFile(fileKey)
 
+}
 function replyRq() {
   const data1 = replyEdit.item
   const replyComment = {

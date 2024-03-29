@@ -46,7 +46,7 @@
                 </template>
 
                 <template #avatar>
-                    <a-avatar shape="square" :image-url="item.user.avatar">
+                    <a-avatar shape="square" :image-url="getFileUrl(item.user.avatar)">
                     </a-avatar>
                 </template>
             </a-list-item-meta>
@@ -64,6 +64,7 @@
 
 <script setup>
 import { apiArticleDelete, apiArticleList } from '@/apis/article';
+import { apiGetFile } from '@/apis/file';
 import ArtilceEdit from '@/components/article/ArticleEdit.vue';
 import router from '@/router';
 import { useUserStore } from '@/stores/UserStore';
@@ -98,6 +99,7 @@ const paginationProps = reactive({
     total: 9999
 })
 const route = useRoute()
+const getFileUrl = (fileKey)=> apiGetFile(fileKey)
 function refreshList(data, ok) {
     if (!ok) {
         return

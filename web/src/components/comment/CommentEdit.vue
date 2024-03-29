@@ -6,7 +6,7 @@
         </template>
 
         <template #avatar>
-            <a-avatar :image-url="userStore.userInfo.avatar">
+            <a-avatar :image-url="getFileUrl(userStore.userInfo.avatar)">
             </a-avatar>
         </template>
     </a-comment>
@@ -17,6 +17,7 @@ import { apiPublishArticleComment } from '@/apis/comment';
 import { useUserStore } from '@/stores/UserStore';
 import { ref } from 'vue';
 import MarkdownEdit from '../MarkdownEdit.vue';
+import { apiGetFile } from '@/apis/file';
 const props = defineProps({
     articleId: {
         type: Number,
@@ -35,6 +36,8 @@ const props = defineProps({
         default(){}
     }
 })
+const getFileUrl = (fileKey)=> apiGetFile(fileKey)
+
 const userStore = useUserStore()
 const commentData = ref("")
 function pushComment() {

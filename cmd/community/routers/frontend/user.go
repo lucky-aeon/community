@@ -37,9 +37,9 @@ func InitUserRouters(r *gin.Engine) {
 	group.GET("/menu", getUserMenu)
 	group.GET("/statistics", statistics)
 	group.GET("", listUsers)
+	group.GET("/tags/:userId", getTagsByUserId)
 	group.Use(middleware.OperLogger())
 	group.POST("/edit/:tab", updateUser)
-	group.GET("/tags/:userId", getTagsByUserId)
 }
 
 func getUserMenu(ctx *gin.Context) {

@@ -51,8 +51,9 @@ type CallbackParam struct {
 
 func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
-	group.Use(middleware.OperLogger())
 	group.POST("/upload", uploadCallback)
+	group.Use(middleware.Auth)
+	group.Use(middleware.OperLogger())
 	group.GET("/policy", getPolicy)
 	group.GET("/singUrl", getUrl)
 }

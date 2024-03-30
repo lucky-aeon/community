@@ -91,6 +91,7 @@ func (a *ArticleService) PageByClassfily(typeFlag string, tagId []string, articl
 	rows, err := query.Offset((page.Page - 1) * page.Limit).
 		Limit(page.Limit).
 		Rows()
+	defer rows.Close()
 	if err != nil {
 		return
 	}
@@ -368,6 +369,7 @@ func (a *ArticleService) PageTopArticle(types, page, limit int) (articles []mode
 	query.Where("articles.state = ? and type = ?", constant.Top, types)
 	query.Group("articles.id").Count(&count)
 	rows, err := query.Order("top_number desc").Limit(limit).Offset((page - 1) * limit).Rows()
+	defer rows.Close()
 	if err != nil {
 		return
 	}

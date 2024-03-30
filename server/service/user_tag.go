@@ -11,7 +11,7 @@ func (*UserTag) Page(page, limit int) (userTags []model.UserTags, count int64) {
 	db := model.UserTag()
 	db.Count(&count)
 	if count == 0 {
-		return
+		return make([]model.UserTags, 0), 0
 	}
 	db.Limit(limit).Offset((page - 1) * limit).Find(&userTags)
 	return
@@ -50,7 +50,7 @@ func (*UserTag) GetTagsByUserId(userId int) (tagNames []model.UserTags) {
 	var tagsIds []int
 	model.UserTagRelation().Where("user_id = ?", userId).Select("user_tag_id").Find(&tagsIds)
 	if len(tagsIds) == 0 {
-		return
+		return make([]model.UserTags, 0)
 	}
 	model.UserTag().Where("id in ?", tagsIds).Find(&tagNames)
 	return tagNames

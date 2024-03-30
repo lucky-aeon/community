@@ -156,8 +156,12 @@ func (a *ArticleService) Like(articleId, userId int) bool {
 }
 
 func (a *ArticleService) PublishArticleCount(userId int) (count int64) {
-	model.Article().Where("user_id = ? and state = ? and state = ?", userId, constant.Published, constant.Draft).Count(&count)
-	return
+	var c1 int64
+	var c2 int64
+	model.Article().Where("user_id = ? and state = ?", userId, constant.Published).Count(&c1)
+	model.Article().Where("user_id = ? and state = ?", userId, constant.Draft).Count(&c2)
+
+	return c1 + c2
 }
 
 func (a *ArticleService) PublishArticlesSelectId(userId int) (id []int) {
@@ -337,8 +341,51 @@ func (a *ArticleService) UpdateState(articleId, state int) {
 }
 
 func (a *ArticleService) QAArticleCount(userId int) (count int64) {
-	model.Article().Where("user_id = ? and state = ? and state = ? and state = ? and state = ?", userId, constant.Pending, constant.Resolved, constant.PrivateQuestion, constant.QADraft).Count(&count)
+	var c1 int64
+	var c2 int64
+	var c3 int64
+	var c4 int64
+	model.Article().Where("user_id = ? and state = ?", userId, constant.Pending).Count(&c1)
+	model.Article().Where("user_id = ? and state = ?", userId, constant.Resolved).Count(&c2)
+	model.Article().Where("user_id = ? and state = ?", userId, constant.PrivateQuestion).Count(&c3)
+	model.Article().Where("user_id = ? and state = ?", userId, constant.QADraft).Count(&c4)
+	return c1 + c2 + c3 + c4
+}
+
+func (a *ArticleService) PageTopArticle(types, page, limit int) (articles []model.ArticleData, count int64) {
+
+	query := articleDao.GetArticleSql()
+	query.Where("articles.state = ? and type = ?", constant.Top, types)
+	query.Group("articles.id").Count(&count)
+	rows, err := query.Order("top_number desc").Limit(limit).Offset((page - 1) * limit).Rows()
+	if err != nil {
+		return
+	}
+	for rows.Next() {
+		item := model.ArticleData{}
+		itemType := model.TypeSimple{}
+		itemUser := model.UserSimple{}
+		tags := ""
+		rows.Scan(
+			&item.ID, &item.Title, &item.State, &item.Like, &item.CreatedAt, &item.UpdatedAt,
+			&itemType.TypeId, &itemType.TypeTitle, &itemType.TypeFlag,
+			&itemUser.UName, &itemUser.UId, &itemUser.UAvatar,
+			&tags,
+		)
+		item.UserSimple = itemUser
+		item.TypeSimple = itemType
+		item.Tags = tags
+		if item.State != constant.Published {
+			item.StateName = constant.GetArticleName(item.State)
+		}
+		articles = append(articles, item)
+	}
 	return
+}
+
+func (a *ArticleService) UpdateArticleState(article request.TopArticle) error {
+
+	return model.Article().Where("id = ?", article.Id).Updates(&article).Error
 }
 
 func (a *ArticleService) PageTopArticle(types, page, limit int) (articles []model.ArticleData, count int64) {

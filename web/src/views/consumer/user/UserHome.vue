@@ -7,7 +7,7 @@
             <h3>{{ userData.name }}</h3>
             <span style="display: block;">{{ userData.desc }}</span>
             <a-space>
-                <a-tag color="red">{{ userData.roleUp }}</a-tag>
+                <!-- <a-tag color="red">{{ userData.roleUp }}</a-tag> -->
                 <a-tag :color="tagItem.color || 'blue'" v-for="tagItem in userTags" :key="tagItem.id">{{ tagItem.name
                     }}</a-tag>
                 <a-tag>{{ userData.createdAt }}</a-tag>

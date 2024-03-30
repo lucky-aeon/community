@@ -24,7 +24,7 @@
                                 :key="tagItem.id">{{ tagItem.name
                                 }}</a-tag>
                         </a-space>
-                        <a-tag>没标签的哈~</a-tag>
+                        <a-tag v-else>没标签的哈~</a-tag>
                     </template>
                 </a-comment>
             </template>

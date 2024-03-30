@@ -21,7 +21,7 @@ func (s *TypeService) List(parentId int) []model.Types {
 func (s *TypeService) PageTypes(page, limit int) (types []model.Types, count int64) {
 	model.Type().Limit(limit).Offset((page - 1) * limit).Find(&types)
 	if len(types) == 0 {
-		return types, count
+		return make([]model.Types, 0), 0
 	}
 	parentIds := make([]model.Types, 0, len(types))
 	for i := range types {

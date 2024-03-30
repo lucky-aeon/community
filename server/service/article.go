@@ -296,7 +296,7 @@ func (a *ArticleService) PageArticles(p, limit int) (articleList []model.Article
 	model.Article().Limit(limit).Offset((p-1)*limit).Select("id", "created_at", "title", "user_id", "state", "type", "top_number").Order("created_at desc").Find(&articles)
 	model.Article().Count(&count)
 	if count == 0 {
-		return
+		return make([]model.ArticleData, 0), 0
 	}
 	// 找到文章的userId
 	userIds := mapset.NewSet[int]()

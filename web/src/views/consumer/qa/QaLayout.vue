@@ -10,6 +10,7 @@
                 <a-radio-group v-model="searchData.state" type="button" :default-value="3">
                         <a-radio :value="3">待解决</a-radio>
                         <a-radio :value="4">已解决</a-radio>
+                        <a-radio :value="5" v-if="userStore.userInfo.role == 'admin'">私密提问</a-radio>
                     </a-radio-group> 
                 </div>
             </ACol>
@@ -20,6 +21,7 @@
 </template>
 <script setup>
 import ContentSearchCom from '@/components/ContentSearch.vue'
+import { useUserStore } from '@/stores/UserStore';
 import { reactive, ref } from 'vue';
 import { useRoute } from 'vue-router';
 const route = useRoute()
@@ -30,7 +32,7 @@ const searchData = reactive({
         orderBy: "created_at",
         descOrder: true
     })
-
+const userStore = useUserStore()
 const currentArticleData = ref({})
 const handlerSearchArticle = (value) => {
 }

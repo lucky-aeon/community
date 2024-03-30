@@ -76,7 +76,7 @@ import QaEdit from '@/components/qa/QaEdit.vue';
 import router from '@/router';
 import { useUserStore } from '@/stores/UserStore';
 import { IconCalendar, IconDown, IconEmpty, IconHeart, IconUser } from '@arco-design/web-vue/es/icon';
-import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const props = defineProps({
@@ -120,8 +120,9 @@ function refreshList(data, ok) {
     currentItem.type = data.type
     currentItem.tags = data.tags.map(item => item.name).join(',')
 }
+const currentType = computed(()=> route.params.classfily || "")
 function getArticleList(clean) {
-    apiArticleList(Object.assign(props.queryData, { context: route.query.context, tags: (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || [] }), paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
+    apiArticleList(Object.assign(props.queryData, { type: currentType, context: route.query.context, tags: (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || [] }), paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
         if(clean) dataSource.value = []
         paginationProps.total = data.total
         if (data.list == null) {

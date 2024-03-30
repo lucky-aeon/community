@@ -27,7 +27,7 @@ var (
 type SearchArticle struct {
 	Tags    []string `json:"tags"`    // 文章标签
 	Context string   `json:"context"` // 模糊查询内容
-	Type    int      `json:"type"`    // 分类id
+	Type    string   `json:"type"`    // 分类id
 	UserId  int      `json:"userId"`  // 用户id
 	State   int      `json:"state"`
 	data.ListSortStrategy
@@ -90,10 +90,9 @@ func articlePageBySearch(ctx *gin.Context) {
 		return
 	}
 
-	result.Page(articleService.PageByClassfily(searchArticle.Tags, &model.Articles{
+	result.Page(articleService.PageByClassfily(searchArticle.Type, searchArticle.Tags, &model.Articles{
 		Title:   searchArticle.Context,
 		Content: searchArticle.Context,
-		Type:    searchArticle.Type,
 		UserId:  searchUserId,
 		State:   state,
 	}, ginutils.GetPage(ctx), ginutils.GetOderBy(ctx), currentUserId)).Json(ctx)

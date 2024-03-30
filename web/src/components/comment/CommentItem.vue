@@ -23,7 +23,7 @@
                     {{ replyEdit.show?"取消回复":"回复" }}
                 </span>
             </a-button>
-            <template v-if="article.user.id == userStore.userInfo.id">
+            <template v-if="article.user.id == userStore.userInfo.id && article.state != 2">
                 <a-button v-if="comment.adoptionState" type="secondary" @click="adoption(comment.id)">
                 取消采纳
             </a-button>

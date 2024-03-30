@@ -71,7 +71,7 @@ const editArticle = reactive({
 })
 const showList = ref(false)
 function refreshPage() {
-    apiGetUserStatistics().then(({ data }) => {
+    apiGetUserStatistics(false).then(({ data }) => {
         userStatistics.value = data
     })
     showList.value = false

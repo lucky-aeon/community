@@ -33,8 +33,12 @@ export function apiAuthAccount(authForm) {
  * 用户数据统计
  * @returns {"code":200,"data":{"articleCount":2,"likeCount":1},"msg":"","ok":true}
  */
-export function apiGetUserStatistics() {
-  return axios.get(`/community/user/statistics`)
+export function apiGetUserStatistics(article=false) {
+  return axios.get(`/community/user/statistics`, {
+    params: {
+      type: article? 1 : 2
+    }
+  })
 }
 
 export function apiAdminListUsers(page,limit) {

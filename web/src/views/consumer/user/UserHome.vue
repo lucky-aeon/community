@@ -48,6 +48,7 @@
                             <a-radio :value="2">文章</a-radio>
                             <a-radio :value="3">待解决</a-radio>
                             <a-radio :value="4">已解决</a-radio>
+                            <a-radio :value="5" v-if="userStore.userInfo.role == 'admin'">私密提问</a-radio>
                         </a-radio-group>
                     </template>
 
@@ -89,6 +90,7 @@ import { apiGetFile } from '@/apis/file';
 import { apiGetUserTags2, getUserInfo } from '@/apis/user';
 import ArticleList from '@/components/article/ArticleList.vue';
 import router from '@/router';
+import { useUserStore } from '@/stores/UserStore';
 import { IconFaceFrownFill } from '@arco-design/web-vue/es/icon';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
@@ -101,6 +103,7 @@ const currentUserId = computed(() => {
         return null
     }
 })
+const userStore = useUserStore()
 const queryData = ref(null)
 const userData = ref({})
 const userTags = ref([])

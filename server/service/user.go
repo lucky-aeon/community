@@ -30,6 +30,7 @@ func (s UserService) IsAdmin(userId int) (bool, error) {
 			return true, nil
 		}
 	}
+	defer rows.Close()
 	return false, nil
 }
 

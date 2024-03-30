@@ -52,3 +52,10 @@ export function apiAdminListArticles(page,limit){
 export function apiAdminDeleteArticles(id){
     return axios.delete(`/community/admin/article/${id}`)
 }
+
+export function apiAdminUpdateArticleState(article){
+    return axios.post(`/community/admin/article/state`,article)
+}
+export function apiAdminListArticleStates(){
+    return axios.get(`/community/admin/article/states`)
+}

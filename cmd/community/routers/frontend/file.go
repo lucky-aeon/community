@@ -97,7 +97,7 @@ func getPolicy(ctx *gin.Context) {
 	signedStr := base64.StdEncoding.EncodeToString(h.Sum(nil))
 
 	uId := uuid.NewString()
-	cache.GetInstance().Set(uId, 1, 5*time.Second)
+	cache.GetInstance().Set(uId, 1, 60*time.Second)
 	body := fmt.Sprintf("{\"fileKey\":${object},\"size\":${size},\"mimeType\":${mimeType},\"x:userId\":%d,\"x:uuid\":\"%s\"}", userId, uId)
 
 	var callbackParam CallbackParam

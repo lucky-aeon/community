@@ -51,7 +51,7 @@ func Login(c *gin.Context) {
 		result.Err(err.Error()).Json(c)
 		return
 	}
-	c.SetCookie(middleware.AUTHORIZATION, token, 3600, "/", c.Request.Host, true, true)
+	c.SetCookie(middleware.AUTHORIZATION, token, 3600, "/", c.Request.Host, false, true)
 	loginLog.State = "登录成功"
 	logS.InsertLoginLog(loginLog)
 	result.OkWithMsg(map[string]string{"token": token}, "登录成功").Json(c)

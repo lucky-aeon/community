@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+	"xhyovo.cn/community/pkg/utils/page"
 
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/log"
@@ -36,6 +37,7 @@ func InitArticleRouter(r *gin.Engine) {
 	group := r.Group("/community/articles")
 
 	group.GET("/:id", articleGet)
+	group.GET("/top", articleTop)
 	group.POST("", articlePageBySearch)
 	group.GET("/like/state/:articleId", articleLikeState)
 	group.Use(middleware.OperLogger())
@@ -170,4 +172,16 @@ func articleLikeState(c *gin.Context) {
 	userId := middleware.GetUserId(c)
 	state := articleService.GetLikeState(articleId, userId)
 	result.Ok(state, "").Json(c)
+}
+
+func articleTop(ctx *gin.Context) {
+	types, err := strconv.Atoi(ctx.Query("type"))
+	p, limit := page.GetPage(ctx)
+	if err != nil {
+		log.Warnf("用户id: %d 获取置顶文章失败,分类id: %d ,err: %s", middleware.GetUserId(ctx), types, err.Error())
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	articles, count := articleService.PageTopArticle(types, p, limit)
+	result.Page(articles, count, nil).Json(ctx)
 }

@@ -2,6 +2,7 @@ package dao
 
 import (
 	"gorm.io/gorm"
+	"xhyovo.cn/community/pkg/mysql"
 
 	"xhyovo.cn/community/pkg/time"
 
@@ -96,4 +97,18 @@ func (a *Article) DeleteLike(articleId, userId int) {
 
 func (a *Article) UpdateCount(articleId, number int) {
 	model.Article().Where("id = ?", articleId).Update("like", gorm.Expr("'like' + ?", number))
+}
+
+func (a *Article) GetArticleSql() *gorm.DB {
+	query := mysql.GetInstance().Table("articles").
+		Select("articles.id, articles.title, articles.state, articles.`like`, articles.created_at,articles.updated_at," +
+			"tp.id as type_id, tp.title as type_title, tp.flag_name as type_flag, " +
+			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, " +
+			"  GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
+		Joins("LEFT JOIN article_tag_relations as atr on atr.article_id = articles.id").
+		Joins("LEFT JOIN article_tags as atg on atg.id = atr.tag_id").
+		Joins("LEFT JOIN types as tp on tp.id = articles.type").
+		Joins("LEFT JOIN users as u on u.id = articles.user_id").
+		Where("articles.deleted_at is null")
+	return query
 }

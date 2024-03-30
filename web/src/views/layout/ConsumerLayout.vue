@@ -80,7 +80,7 @@
             </a-sub-menu>
           </a-menu>
         </a-layout-sider>
-        <a-layout-content id="consumerlayout" style="padding: 15px; background-color: #f2f3f5;">
+        <a-layout-content style="padding: 15px;background-color: #f2f3f5;">
           <RouterView />
         </a-layout-content>
       </a-layout>

@@ -122,13 +122,12 @@ function refreshList(data, ok) {
 }
 const currentType = computed(()=> route.params.classfily || "")
 function getArticleList(clean) {
-    apiArticleList(Object.assign(props.queryData, { type: currentType, context: route.query.context, tags: (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || [] }), paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
+    apiArticleList(Object.assign(props.queryData, { type: currentType.value , context: route.query.context, tags: (typeof route.query.tags == "string" ? [route.query.tags] : route.query.tags) || [] }), paginationProps.page, paginationProps.defaultPageSize).then(({ data }) => {
         if(clean) dataSource.value = []
         paginationProps.total = data.total
         if (data.list == null) {
             return
         }
-        console.trace("func")
         dataSource.value.push(...data.list)
     })
 }

@@ -1,4 +1,5 @@
 <template>
+  <a-card style="margin-top: 5px;" :bordered="false">
   <a-tabs default-active-key="1">
     <a-tab-pane key="1" title="个人信息">
       <a-space direction="horizontal" size="large" :style="{width: '600px'}" >
@@ -61,6 +62,8 @@
     </a-tab-pane>
 
   </a-tabs>
+  </a-card>
+
 
 </template>
 

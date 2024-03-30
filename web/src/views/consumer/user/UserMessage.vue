@@ -1,6 +1,7 @@
 
 
 <template>
+   <a-card :bordered="false" style="margin-top: 10px;">
   <a-tabs v-model:active-key="msgType">
     <a-tab-pane :key="1" title="通知">
     </a-tab-pane>
@@ -13,7 +14,7 @@
     </template>
   </a-tabs>
   <msg-notice :msg-type="msgType" :reload="msgReload"/>
-
+</a-card>
 </template>
 <script setup>
 import { apiClearUnReadMsg } from '@/apis/message.js';

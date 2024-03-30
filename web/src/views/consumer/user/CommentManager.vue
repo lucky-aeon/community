@@ -1,4 +1,5 @@
 <template>
+  <a-card :bordered="false" style="margin-top: 10px;">
   <a-list :bordered="false" :data="commentData" :pagination-props="page" @page-change="getListData">
     <template #item="{ item, index }">
       <a-list-item>
@@ -30,6 +31,7 @@
       <markdown-edit v-model="replyEdit.data" />
     </div>
   </a-modal>
+</a-card>
 </template>
 
 <script setup>

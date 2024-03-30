@@ -1,15 +1,30 @@
 <template>
-  <ArticleListCom :queryData="queryData"/>
+  <a-row gutter="10">
+    <a-col :span="17">
+      <a-card title="文章列表" :bordered="false" :style="{ width: '100%' }">
+        <template #extra>
+          <a-link>排序</a-link>
+        </template>
+        <ArticleListCom :queryData="queryData" />
+      </a-card>
+    </a-col>
+    <a-col :span="7">
+      <TopList />
+    </a-col>
+  </a-row>
 </template>
 <script setup>
+import TopList from '@/components/TopList.vue';
 import ArticleListCom from "@/components/article/ArticleList.vue";
-import { ref } from "vue";
-const queryData = ref({
-  tags: [],
-  context: "",
-  state: 2,
-  orderBy: "created_at",
-  descOrder: true
+const queryData = defineModel({
+  required: true,
+  default: {
+    tags: [],
+    context: "",
+    state: 2,
+    orderBy: "created_at",
+    descOrder: true
+  }
 })
 </script>
 

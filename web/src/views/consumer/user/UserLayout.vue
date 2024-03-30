@@ -1,7 +1,7 @@
 <template>
     <ALayout>
         <ALayoutHeader v-if="!route.meta.hideSelf">
-            <a-card direction="vertical" size="large" :body-style="{ paddingBottom: '0', paddingTop: '0' }">
+            <a-card :bordered="false" direction="vertical" size="large" :body-style="{ paddingBottom: '0', paddingTop: '0' }">
                 <a-space>
                     <a-upload :custom-request="userAvatar.uploadAvatar" :fileList="userAvatar.file ? [userAvatar.file] : []" :show-file-list="false"
                         @change="userAvatar.onChange" @progress="userAvatar.onProgress">

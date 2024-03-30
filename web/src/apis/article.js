@@ -59,3 +59,13 @@ export function apiAdminUpdateArticleState(article){
 export function apiAdminListArticleStates(){
     return axios.get(`/community/admin/article/states`)
 }
+
+export function apiGetTopArticle(type, page=1, limit=10) {
+    return axios.get(`/community/articles/top`, {
+        params:{
+            type,
+            page,
+            limit
+        }
+    })
+}

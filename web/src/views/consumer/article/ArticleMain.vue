@@ -1,18 +1,20 @@
 <template>
     <div v-if="route.name != 'articleView'"
-        style="border-bottom: 1px solid rgba(215, 215, 215, 0.784); padding-bottom: 20px;">
+        style="padding-bottom: 20px;">
         <ARow justify="center" :gutter="[20, 20]">
             <ACol>
-                <ContentSearchCom v-model="searchData" :handler-search-article="handlerSearchArticle"/>
+                <ContentSearchCom v-model="searchData" :handler-search-article="handlerSearchArticle" />
             </ACol>
         </ARow>
     </div>
-
-    <router-view :articleData="currentArticleData" style="margin: auto;max-width: 1100px !important;min-width: 600px;">
-    </router-view>
+    <router-view v-model="searchData" :articleData="currentArticleData"
+                style="margin: auto;">
+            </router-view>
+    
 
 </template>
 <script setup>
+import { apiGetTopArticle } from '@/apis/article';
 import ContentSearchCom from '@/components/ContentSearch.vue'
 import { ref } from 'vue';
 import { reactive } from 'vue';
@@ -26,10 +28,9 @@ const searchData = reactive({
     orderBy: "created_at",
     descOrder: true
 })
-
+apiGetTopArticle(route.params.classfily, 1,)
 const handlerSearchArticle = (value) => {
 }
 
 
 </script>
-

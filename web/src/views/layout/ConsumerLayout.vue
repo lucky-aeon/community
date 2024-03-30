@@ -145,6 +145,7 @@ function clearMsg() {
 <style scoped>
 .layout-demo {
   height: 100%;
+  background-color: #f2f3f5;
 }
 
 .layout-demo :deep(.arco-layout-header),

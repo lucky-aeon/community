@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+
 	"xhyovo.cn/community/pkg/utils/page"
 
 	"xhyovo.cn/community/pkg/constant"
@@ -174,13 +175,8 @@ func articleLikeState(c *gin.Context) {
 }
 
 func articleTop(ctx *gin.Context) {
-	types, err := strconv.Atoi(ctx.Query("type"))
+	types := ctx.Query("type")
 	p, limit := page.GetPage(ctx)
-	if err != nil {
-		log.Warnf("用户id: %d 获取置顶文章失败,分类id: %d ,err: %s", middleware.GetUserId(ctx), types, err.Error())
-		result.Err(err.Error()).Json(ctx)
-		return
-	}
 	articles, count := articleService.PageTopArticle(types, p, limit)
 	result.Page(articles, count, nil).Json(ctx)
 }

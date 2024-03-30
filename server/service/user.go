@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+
 	"xhyovo.cn/community/pkg/mysql"
 
 	"xhyovo.cn/community/pkg/cache"
@@ -136,6 +137,7 @@ func (t *UserService) GetUserMenu() []*UserMenu {
 				"requiresAuth": true,
 				"icon":         "icon-dashboard",
 				"order":        1,
+				"id":           item.ID,
 			},
 		}
 	}
@@ -150,6 +152,7 @@ func (t *UserService) GetUserMenu() []*UserMenu {
 				"locale":       item.Title,
 				"requiresAuth": true,
 				"icon":         "icon-dashboard",
+				"id":           item.ID,
 			},
 		})
 	}

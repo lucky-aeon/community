@@ -1,5 +1,5 @@
 <template>
-    <a-table :columns="columns" :data="dataSources" :pagination="pagination" v-on:row-click="gotoObjectPage">
+    <a-table style="margin-top: 10px;" :columns="columns" :data="dataSources" :pagination="pagination" v-on:row-click="gotoObjectPage">
         <template #optional="{record }">
             <a-popconfirm content="确定要取消该订阅?" @ok="subscribe(record.eventId, record.businessId)">
                 <a-button>取消订阅</a-button>

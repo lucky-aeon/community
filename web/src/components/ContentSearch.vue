@@ -1,5 +1,5 @@
 <template>
-    <div class="search">
+    <div class="search" style="background-color: white;padding-bottom: 15px;">
         <ARow :gutter="[0, 10]">
             <ACol>
                 <h1>搜索内容</h1>

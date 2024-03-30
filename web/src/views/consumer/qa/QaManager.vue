@@ -4,10 +4,10 @@
             <a-row>
                 <a-col :span="24">
                     <a-space size="small">
-                        <ACard hoverable><a-statistic title="讨论人数" :value="userStatistics.likeCount"
+                        <ACard :bordered="false" hoverable><a-statistic title="讨论人数" :value="userStatistics.likeCount"
                                 show-group-separator />
                         </ACard>
-                        <ACard hoverable><a-statistic title="问答数量" :value="userStatistics.articleCount"
+                        <ACard :bordered="false" hoverable><a-statistic title="问答数量" :value="userStatistics.articleCount"
                                 show-group-separator />
                         </ACard>
                     </a-space>
@@ -23,17 +23,19 @@
                 </div>
                 </a-col>
                 <a-col :span="24">
+                    <a-card :bordered="false">
                     <QaListCom v-if="showList" style="margin-top: 10px;" :queryData="queryData" />
+                </a-card>
                 </a-col>
             </a-row>
         </ACol>
         <ACol :span="5">
             <ASpace direction="vertical" style="width: 100%;">
-                <ACard size="small" hoverable>
+                <ACard :bordered="false" size="small" hoverable>
                     <AButton long type="primary" @click="editArticle.show = true">发布问答</AButton>
                 </ACard>
 
-                <ACard title="标签" :extra="userStore.userTags.length">
+                <ACard :bordered="false" title="标签" :extra="userStore.userTags.length">
                     <ASpace wrap>
                         <ATag v-for="tagItem in userStore.userTags" :key="tagItem.TagId">{{ tagItem.TagName }}({{
         tagItem.ArticleCount }})</ATag>

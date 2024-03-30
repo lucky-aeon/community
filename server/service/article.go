@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-
 	mapset "github.com/deckarep/golang-set/v2"
 	"xhyovo.cn/community/server/request"
 
@@ -53,18 +52,9 @@ func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, 
 }
 
 func (a *ArticleService) PageByClassfily(tagId []string, article *model.Articles, page data.QueryPage, sort data.ListSortStrategy, currentUserId int) (result []*model.ArticleData, total int64, err error) {
-	query := mysql.GetInstance().Table("articles").
-		Select("articles.id, articles.title, articles.state, articles.`like`, articles.created_at,articles.updated_at," +
-			"tp.id as type_id, tp.title as type_title, tp.flag_name as type_flag, " +
-			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, " +
-			"  GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
-		Joins("LEFT JOIN article_tag_relations as atr on atr.article_id = articles.id").
-		Joins("LEFT JOIN article_tags as atg on atg.id = atr.tag_id").
-		Joins("LEFT JOIN types as tp on tp.id = articles.type").
-		Joins("LEFT JOIN users as u on u.id = articles.user_id").
-		Where("articles.deleted_at is null")
+	query := articleDao.GetArticleSql()
+	query.Where("articles.state = ?", article.State)
 	if article != nil {
-		query.Where("articles.state = ?", article.State)
 		if article.Type > 0 {
 			query.Where("articles.type = ?", article.Type)
 		}
@@ -297,7 +287,7 @@ func (a *ArticleService) GetLikeState(articleId, userId int) bool {
 
 func (a *ArticleService) PageArticles(p, limit int) (articleList []model.ArticleData, count int64) {
 	var articles []model.Articles
-	model.Article().Limit(limit).Offset((p-1)*limit).Select("id", "created_at", "title", "user_id", "state", "type").Order("created_at desc").Find(&articles)
+	model.Article().Limit(limit).Offset((p-1)*limit).Select("id", "created_at", "title", "user_id", "state", "type", "top_number").Order("created_at desc").Find(&articles)
 	model.Article().Count(&count)
 	if count == 0 {
 		return
@@ -312,6 +302,7 @@ func (a *ArticleService) PageArticles(p, limit int) (articleList []model.Article
 			ID:         articleO.ID,
 			Title:      articleO.Title,
 			State:      articleO.State,
+			TopNumber:  articleO.TopNumber,
 			CreatedAt:  articleO.CreatedAt,
 			UserSimple: model.UserSimple{UId: articleO.UserId},
 			TypeSimple: model.TypeSimple{TypeId: articleO.Type},
@@ -348,4 +339,40 @@ func (a *ArticleService) UpdateState(articleId, state int) {
 func (a *ArticleService) QAArticleCount(userId int) (count int64) {
 	model.Article().Where("user_id = ? and state = ? and state = ? and state = ? and state = ?", userId, constant.Pending, constant.Resolved, constant.PrivateQuestion, constant.QADraft).Count(&count)
 	return
+}
+
+func (a *ArticleService) PageTopArticle(types, page, limit int) (articles []model.ArticleData, count int64) {
+
+	query := articleDao.GetArticleSql()
+	query.Where("articles.state = ? and type = ?", constant.Top, types)
+	query.Group("articles.id").Count(&count)
+	rows, err := query.Order("top_number desc").Limit(limit).Offset((page - 1) * limit).Rows()
+	if err != nil {
+		return
+	}
+	for rows.Next() {
+		item := model.ArticleData{}
+		itemType := model.TypeSimple{}
+		itemUser := model.UserSimple{}
+		tags := ""
+		rows.Scan(
+			&item.ID, &item.Title, &item.State, &item.Like, &item.CreatedAt, &item.UpdatedAt,
+			&itemType.TypeId, &itemType.TypeTitle, &itemType.TypeFlag,
+			&itemUser.UName, &itemUser.UId, &itemUser.UAvatar,
+			&tags,
+		)
+		item.UserSimple = itemUser
+		item.TypeSimple = itemType
+		item.Tags = tags
+		if item.State != constant.Published {
+			item.StateName = constant.GetArticleName(item.State)
+		}
+		articles = append(articles, item)
+	}
+	return
+}
+
+func (a *ArticleService) UpdateArticleState(article request.TopArticle) error {
+
+	return model.Article().Where("id = ?", article.Id).Updates(&article).Error
 }

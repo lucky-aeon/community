@@ -203,7 +203,6 @@ func (s *UserService) Statistics(userId, types int) (m map[string]interface{}) {
 	ids := articleS.PublishArticlesSelectId(userId)
 	likeCount := articleS.ArticlesLikeCount(ids)
 	// 获取发布文章
-	count := len(ids)
 
 	m["articleCount"] = articleCount
 	m["likeCount"] = likeCount

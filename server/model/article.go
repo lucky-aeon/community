@@ -18,6 +18,7 @@ type Articles struct {
 	State     int            `json:"state"` // 状态:草稿/发布/待解决/已解决/私密提问
 	Like      int            `json:"like"`
 	Type      int            `json:"type"`
+	TopNumber int            `json:"topNumber"`
 	Tags      []int          `json:"tags" gorm:"-"`
 	Users     `gorm:"-" json:"user"`
 }
@@ -34,6 +35,7 @@ type ArticleData struct {
 	CreatedAt  time.LocalTime `json:"createdAt"`
 	UpdatedAt  time.LocalTime `json:"updatedAt"`
 	StateName  string         `json:"stateName"`
+	TopNumber  int            `json:"topNumber"`
 }
 
 func Article() *gorm.DB {

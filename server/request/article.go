@@ -9,3 +9,9 @@ type ReqArticle struct {
 	Type    int    `json:"type"`
 	Tags    []int  `json:"tags" gorm:"-"`
 }
+
+type TopArticle struct {
+	Id        int `json:"id"`
+	State     int `json:"state"`
+	TopNumber int `json:"topNumber"`
+}

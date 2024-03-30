@@ -3,6 +3,7 @@ package routers
 import (
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/result"
 	xt "xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/pkg/utils"
@@ -51,7 +52,8 @@ func Login(c *gin.Context) {
 		result.Err(err.Error()).Json(c)
 		return
 	}
-	c.SetCookie(middleware.AUTHORIZATION, token, 3600, "/", c.Request.Host, false, true)
+
+	c.SetCookie(middleware.AUTHORIZATION, token, int(constant.Token_TTl.Seconds()), "/", c.Request.Host, false, true)
 	loginLog.State = "登录成功"
 	logS.InsertLoginLog(loginLog)
 	result.OkWithMsg(map[string]string{"token": token}, "登录成功").Json(c)

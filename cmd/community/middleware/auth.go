@@ -6,6 +6,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/spf13/viper"
 	"time"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/result"
 )
 
@@ -45,7 +46,7 @@ func GenerateToken(id int, name string) (string, error) {
 		Name: name,
 		RegisteredClaims: jwt.RegisteredClaims{
 			// 设置过期时间 在当前基础上 添加一个小时后 过期
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(30 * 24 * time.Hour)),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(constant.Token_TTl)),
 			// 颁发时间 也就是生成时间
 			IssuedAt: jwt.NewNumericDate(time.Now()),
 			//主题

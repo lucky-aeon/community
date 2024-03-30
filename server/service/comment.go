@@ -170,3 +170,18 @@ func (a *CommentsService) GetById(id int) (comment model.Comments) {
 	model.Comment().Where("id = ?", id).Find(&comment)
 	return
 }
+
+func (a *CommentsService) ListAdoptionsByArticleId(articleId, page, limit int) (comments []*model.Comments, count int64) {
+	db := model.Comment().
+		Joins("JOIN qa_adoptions ON qa_adoptions.comment_id = comments.id").
+		Order("qa_adoptions.created_at DESC"). // 按照采纳时间降序排列
+		Where("qa_adoptions.article_id = ?", articleId)
+	db.Count(&count)
+	db.Limit(limit).Offset((page - 1) * limit)
+	db.Find(&comments)
+	for i := range comments {
+		comments[i].AdoptionState = true
+	}
+	setCommentUserInfoAndArticleTitle(comments)
+	return
+}

@@ -23,11 +23,28 @@ func InitCommentRouters(g *gin.Engine) {
 	group.GET("/byArticleId/:articleId", listCommentsByArticleId)
 	group.GET("/byRootId/:rootId", listCommentsByRootId)
 	group.GET("/allCommentsByArticleId/:articleId", listAllCommentsByArticleId)
+	group.GET("/adaptions", adaptions)
 	group.Use(middleware.OperLogger())
 	group.POST("/comment", comment)
 	group.DELETE("/:id", deleteComment)
 	group.POST("/adoption", adoption)
 
+}
+
+// 获取采纳评论
+func adaptions(ctx *gin.Context) {
+	articleId, err := strconv.Atoi(ctx.Query("articleId"))
+	userId := middleware.GetUserId(ctx)
+	if err != nil {
+		log.Warnf("用户id: %d 获取采纳评论解析参数失败,err: %s", userId, err.Error())
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	p, limit := page.GetPage(ctx)
+	commentsService := services.NewCommentService(ctx)
+
+	comments, count := commentsService.ListAdoptionsByArticleId(articleId, p, limit)
+	result.Page(comments, count, nil).Json(ctx)
 }
 
 // 发布评论

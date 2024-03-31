@@ -1,12 +1,15 @@
 <template>
     <ALayout>
         <ALayoutHeader v-if="!route.meta.hideSelf">
-            <a-card :bordered="false" direction="vertical" size="large" :body-style="{ paddingBottom: '0', paddingTop: '0' }">
+            <a-card :bordered="false" direction="vertical" size="large"
+                :body-style="{ paddingBottom: '0', paddingTop: '0' }">
                 <a-space>
-                    <a-upload :custom-request="userAvatar.uploadAvatar" :fileList="userAvatar.file ? [userAvatar.file] : []" :show-file-list="false"
+                    <a-upload :custom-request="userAvatar.uploadAvatar"
+                        :fileList="userAvatar.file ? [userAvatar.file] : []" :show-file-list="false"
                         @change="userAvatar.onChange" @progress="userAvatar.onProgress">
                         <template #upload-button>
-                            <div :class="`arco-upload-list-item${userAvatar.file && userAvatar.file.status === 'error' ? ' arco-upload-list-item-error' : ''}`">
+                            <div
+                                :class="`arco-upload-list-item${userAvatar.file && userAvatar.file.status === 'error' ? ' arco-upload-list-item-error' : ''}`">
                                 <div class="arco-upload-list-picture custom-upload-avatar"
                                     v-if="userAvatar.file && userAvatar.file.url">
                                     <img :src="userAvatar.file.url" />
@@ -46,12 +49,11 @@
 </template>
 
 <script setup>
-import { apiGetFile, apiUploadFile} from '@/apis/file';
+import { apiGetFile, apiUploadFile } from '@/apis/file';
 import { apiUserEditUserAvatar, apiGetUserTags2 as apiGetUserTags } from '@/apis/user';
 import { useUserStore } from '@/stores/UserStore';
-import { isLogin } from '@/utils/auth';
 import { IconEdit, IconPlus } from '@arco-design/web-vue/es/icon';
-import {ref, watch} from 'vue';
+import { ref, watch } from 'vue';
 import { onMounted } from 'vue';
 import { reactive } from 'vue';
 import { computed } from 'vue';
@@ -73,37 +75,38 @@ const userAvatar = reactive({
         userAvatar.file = currentFile;
     },
     uploadAvatar(options) {
-        apiUploadFile(userStore.userInfo.id, options.fileItem.file, (r, key)=>{
-            if(!r.ok) {
+        apiUploadFile(userStore.userInfo.id, options.fileItem.file, (r, key) => {
+            if (!r.ok) {
                 options.onError(r)
             }
             apiUserEditUserAvatar(key)
-        }, (progressed, event)=>{
+        }, (progressed, event) => {
             options.onProgress(progressed, event.event)
         })
     }
 })
-const userInfo=ref([])
-watch(()=>userStore.userInfo,()=>{
-  if (userSelfTags.value.length === 0) {
-    apiGetUserTags(userStore.userInfo.id).then(({ data, ok }) => {
-      if (!ok) return
-      userSelfTags.value = data
-    })
-  }
-  userInfo.value= [{
-    label: '账号',
-    value: userStore.userInfo.account,
-  },
+const userInfo = ref([])
+watch(() => userStore.userInfo, () => {
+    if (userSelfTags.value.length === 0) {
+        apiGetUserTags(userStore.userInfo.id).then(({ data, ok }) => {
+            if (!ok) return
+            userSelfTags.value = data
+        })
+    }
+    userInfo.value = [{
+        label: '账号',
+        value: userStore.userInfo.account,
+    },
     {
-      label: '注册时间',
-      value: userStore.userInfo.createdAt,
-    },{
-      label: "描述",
-      value: userStore.userInfo.desc
+        label: '注册时间',
+        value: userStore.userInfo.createdAt,
+    }, {
+        label: "描述",
+        value: userStore.userInfo.desc
     }]
-},{
-  deep:true
+}, {
+    immediate: true,
+    deep: true
 })
 userStore.refreshTags()
 onMounted(() => {

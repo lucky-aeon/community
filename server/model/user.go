@@ -14,7 +14,7 @@ type Users struct {
 	Name       string          `json:"name"`
 	Account    string          `json:"account,omitempty"`
 	Password   string
-	InviteCode int    `json:"inviteCode,omitempty"`
+	InviteCode string `json:"inviteCode,omitempty"`
 	Desc       string `json:"desc"`
 	Avatar     string `json:"avatar"`
 	Subscribe  int    `json:"subscribe"` // 1: 未订阅站内消息 2:订阅站内消息 (发送邮箱)

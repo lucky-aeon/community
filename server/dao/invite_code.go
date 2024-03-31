@@ -5,14 +5,8 @@ import "xhyovo.cn/community/server/model"
 type InviteCode struct {
 }
 
-func (*InviteCode) SaveCode(code int) {
-
-	model.InviteCode().Create(&model.InviteCodes{Code: code, State: false})
-
-}
-
 // 是否存在code
-func (*InviteCode) Exist(code int) bool {
+func (*InviteCode) Exist(code string) bool {
 
 	var count int64
 	object := &model.InviteCodes{}
@@ -27,9 +21,9 @@ func (*InviteCode) Del(code int) int64 {
 	return tx.RowsAffected
 }
 
-func (*InviteCode) SetState(id int) {
+func (*InviteCode) SetState(code string) {
 
-	model.InviteCode().Where("code = ?", id).Update("state", 1)
+	model.InviteCode().Where("code = ?", code).Update("state", 1)
 }
 
 func (c *InviteCode) GetCount() int64 {
@@ -40,7 +34,7 @@ func (c *InviteCode) GetCount() int64 {
 
 func (c *InviteCode) PageCodes(page int, limit int) []*model.InviteCodes {
 	var codes []*model.InviteCodes
-	model.InviteCode().Limit(limit).Offset((page - 1) * limit).Order("state").Find(&codes)
+	model.InviteCode().Limit(limit).Offset((page - 1) * limit).Order("id desc").Find(&codes)
 	return codes
 }
 

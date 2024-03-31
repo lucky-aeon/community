@@ -57,9 +57,7 @@ export const useUserStore = defineStore('UserStore', {
         return
       }
       let temp = Object.assign({}, authForm)
-      if (authForm.code.length == 8) {
-        temp.code = parseInt(temp.code)
-      } else {
+      if (authForm.code.length != 8) {
         temp.code = 0
       }
       const { data, ok } = await apiAuthAccount(temp)

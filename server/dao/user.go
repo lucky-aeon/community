@@ -47,9 +47,9 @@ func (*UserDao) QueryUserSimple(user *model.Users) (result model.UserSimple, err
 	return
 }
 
-func (*UserDao) CreateUser(account, name, pswd string, ininviteCode int) int {
+func (*UserDao) CreateUser(account, name, pswd, ininviteCode string) int {
 
-	user := model.Users{Account: account, Name: name, Password: pswd, InviteCode: ininviteCode}
+	user := model.Users{Account: account, Name: name, Password: pswd, InviteCode: ininviteCode, Subscribe: 1}
 	model.User().Create(&user)
 	return user.ID
 }

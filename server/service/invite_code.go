@@ -44,9 +44,9 @@ func (*CodeService) GenerateCode(m model.GenerateCode) error {
 
 	number := m.Number
 	var flag bool = true
-	var code int
+	var code string
 	// generate code
-	codes := make([]int, 0)
+	codes := make([]string, 0)
 	for ; number > 0; number-- {
 		for flag {
 			code = utils.GenerateCode(8)
@@ -76,8 +76,8 @@ func (*CodeService) DestroyCode(code int) error {
 	return nil
 }
 
-func (*CodeService) SetState(id int) {
-	codeDao.SetState(id)
+func (*CodeService) SetState(code string) {
+	codeDao.SetState(code)
 }
 
 func (s *CodeService) CountByMemberId(id int) (count int64) {

@@ -21,9 +21,17 @@ type ArticleService struct {
 func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, err error) {
 	var a model.Articles
 	model.Article().Where("id = ?", id).First(&a)
-	if (a.ID == 0 && a.UserId != userId && a.State == constant.Draft) || (userId != a.UserId && a.State == constant.PrivateQuestion) {
-		return nil, errors.New("文章不存在")
+	var u UserService
+	flag, err := u.IsAdmin(userId)
+	if err != nil {
+		return &model.ArticleData{}, err
 	}
+	if !flag {
+		if (a.ID == 0 && a.UserId != userId && a.State == constant.Draft) || (userId != a.UserId && a.State == constant.PrivateQuestion) {
+			return &model.ArticleData{}, errors.New("文章不存在")
+		}
+	}
+
 	var tags []*model.ArticleTagSimple
 	model.ArticleTag().Joins("LEFT JOIN article_tag_relations as atr ON atr.tag_id = article_tags.id").
 		Where("atr.article_id = ?", a.ID).Find(&tags)

@@ -82,10 +82,11 @@ func (a *ArticleService) PageByClassfily(typeFlag string, tagId []string, articl
 	rows, err := query.Offset((page.Page - 1) * page.Limit).
 		Limit(page.Limit).
 		Rows()
-	defer rows.Close()
 	if err != nil {
 		return
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		item := model.ArticleData{}
 		itemType := model.TypeSimple{}
@@ -363,6 +364,8 @@ func (a *ArticleService) PageTopArticle(types string, page, limit int) (articles
 	if err != nil {
 		return
 	}
+	defer rows.Close()
+
 	for rows.Next() {
 		item := model.ArticleData{}
 		itemType := model.TypeSimple{}

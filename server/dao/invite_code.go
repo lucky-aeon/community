@@ -16,7 +16,7 @@ func (*InviteCode) Exist(code int) bool {
 
 	var count int64
 	object := &model.InviteCodes{}
-	model.InviteCode().Where("code = ? and state = 0", code).Find(object).Count(&count)
+	model.InviteCode().Where("code = ?", code).Find(object).Count(&count)
 
 	return count == 1
 }
@@ -40,7 +40,7 @@ func (c *InviteCode) GetCount() int64 {
 
 func (c *InviteCode) PageCodes(page int, limit int) []*model.InviteCodes {
 	var codes []*model.InviteCodes
-	model.InviteCode().Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&codes)
+	model.InviteCode().Limit(limit).Offset((page - 1) * limit).Order("state").Find(&codes)
 	return codes
 }
 

@@ -161,9 +161,11 @@ func adoption(ctx *gin.Context) {
 		result.Err(msg).Json(ctx)
 		return
 	}
-	if !(state == constants.Pending || state == constants.Resolved) {
-		result.Err("该文章不是 QA 分类,无法进行采纳").Json(ctx)
-		return
+	if state != constant.PrivateQuestion {
+		if !(state == constants.Pending || state == constants.Resolved) {
+			result.Err("该文章不是 QA 分类,无法进行采纳").Json(ctx)
+			return
+		}
 	}
 
 	if !aS.Auth(userId, articleId) {
@@ -183,15 +185,18 @@ func adoption(ctx *gin.Context) {
 	msg = "取消采纳"
 	if adptionS.Adopt(articleId, commentId) {
 		var suS services.SubscriptionService
-
 		suS.Send(event.Adoption, constant.NOTICE, userId, comment.FromUserId, services.SubscribeData{CommentId: commentId, ArticleId: articleId, UserId: userId, CurrentBusinessId: articleId})
 		msg = "已采纳"
 	}
-	// 采纳了,但是状态为未解决,则改为已解决
-	if adptionS.QAAdoptState(articleId) && state == constants.Pending {
-		aS.UpdateState(articleId, constants.Resolved)
-	} else if !adptionS.QAAdoptState(articleId) && state == constants.Resolved {
-		aS.UpdateState(articleId, constants.Pending)
+	if state != constant.PrivateQuestion {
+		// 采纳了,但是状态为未解决,则改为已解决
+		if adptionS.QAAdoptState(articleId) && state == constants.Pending {
+			aS.UpdateState(articleId, constants.Resolved)
+		} else if !adptionS.QAAdoptState(articleId) && state == constants.Resolved {
+			aS.UpdateState(articleId, constants.Pending)
+		}
+	} else {
+		msg = "已采纳,当前版本私密提问采纳后无法变更为解决,请等待"
 	}
 
 	result.OkWithMsg(nil, msg).Json(ctx)

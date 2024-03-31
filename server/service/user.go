@@ -24,6 +24,7 @@ func (s UserService) IsAdmin(userId int) (bool, error) {
 	if err != nil {
 		return false, err
 	}
+	defer rows.Close()
 	var name string
 	if rows.Next() {
 		rows.Scan(&name)

@@ -13,7 +13,7 @@ import (
 )
 
 type registerForm struct {
-	Code     int    `binding:"required" form:"code" msg:"code不能为空" `
+	Code     string `binding:"required" form:"code" msg:"code不能为空" `
 	Account  string `binding:"required,email" form:"account" msg:"邮箱格式不正确"`
 	Name     string `binding:"required" form:"name" msg:"用户名不能为空"`
 	Password string `binding:"required" form:"password" msg:"密码不能为空"`

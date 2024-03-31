@@ -46,7 +46,7 @@ func (s UserService) ListUsers(name string) (users []model.Users) {
 func (*UserService) GetUserById(id int) *model.Users {
 
 	user := userDao.QueryUser(&model.Users{ID: id})
-	user.InviteCode = 0
+	user.InviteCode = ""
 	return user
 }
 
@@ -80,7 +80,7 @@ func (s *UserService) ListByIdsToMap(ids []int) map[int]model.Users {
 	return m
 }
 
-func Register(account, pswd, name string, inviteCode int) (int, error) {
+func Register(account, pswd, name, inviteCode string) (int, error) {
 
 	if err := utils.NotBlank(account, pswd, name, inviteCode); err != nil {
 		return 0, err

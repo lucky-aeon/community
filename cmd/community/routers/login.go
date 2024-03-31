@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/constant"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	xt "xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/pkg/utils"
@@ -45,6 +46,7 @@ func Login(c *gin.Context) {
 		result.Err(err.Error()).Json(c)
 		return
 	}
+
 	token, err := middleware.GenerateToken(user.ID, user.Name)
 	if err != nil {
 		loginLog.State = err.Error()
@@ -75,6 +77,12 @@ func Register(c *gin.Context) {
 		loginLog.State = err.Error()
 		logS.InsertLoginLog(loginLog)
 		result.Err(utils.GetValidateErr(form, err)).Json(c)
+		return
+	}
+
+	if err != nil {
+		log.Warnf("账户: %s 注册失败,获取加密密码错误,err %s", form.Account, err.Error())
+		result.Err(err.Error()).Json(c)
 		return
 	}
 

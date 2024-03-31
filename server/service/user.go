@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"golang.org/x/crypto/bcrypt"
 
 	"xhyovo.cn/community/pkg/mysql"
 
@@ -100,9 +101,12 @@ func Register(account, pswd, name string, inviteCode int) (int, error) {
 	if user.ID > 0 {
 		return 0, errors.New("用户昵称已存在,换一个吧")
 	}
-
+	pwd, err := GetPwd(pswd)
+	if err != nil {
+		return 0, err
+	}
 	// 保存用户
-	id := userDao.CreateUser(account, name, pswd, inviteCode)
+	id := userDao.CreateUser(account, name, string(pwd), inviteCode)
 	// 修改code状态
 	var c CodeService
 	c.SetState(inviteCode)
@@ -225,10 +229,26 @@ func Login(login model.LoginForm) (*model.Users, error) {
 	if !cache.CountLimit(key, 5, constant.TTL_LIMIT_lOGIN) {
 		return &model.Users{}, errors.New("操作次数过多,请稍后重试")
 	}
-	user := userDao.QueryUser(&model.Users{Account: login.Account, Password: login.Password})
+	user := userDao.QueryUser(&model.Users{Account: login.Account})
 	if user.ID == 0 {
-		return &model.Users{}, errors.New("登录失败！账号或密码错误")
+		return &model.Users{}, errors.New("登录失败！账号不存在")
 	}
+	if !ComparePswd(user.Password, login.Password) {
+		return &model.Users{}, errors.New("登录失败！密码错误")
 
+	}
 	return user, nil
+}
+
+func ComparePswd(oldPwsd, newPswd string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(oldPwsd), []byte(newPswd))
+	if err != nil {
+		return false
+	} else {
+		return true
+	}
+}
+func GetPwd(pwd string) ([]byte, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	return hash, err
 }

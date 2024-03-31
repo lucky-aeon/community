@@ -38,17 +38,17 @@
         <a-form :model="form1"  :style="{ width: '600px' }" @submit="editPswd">
           <a-form-item field="oldPassword" label="旧密码" :rules="[{required:true,message:'请输入旧密码'}]">
             <a-input
-                v-model="form1.oldPassword"
+                v-model="form1.oldPassword" type="password"
             />
           </a-form-item>
           <a-form-item field="newPassword" label="新密码" :rules="[{required:true,message:'请输入新密码'}]">
             <a-input
-                v-model="form1.newPassword"
+                v-model="form1.newPassword" type="password"
             />
           </a-form-item>
           <a-form-item field="confirmPassword" label="确认密码" :rules="[{required:true,message:'请输入二次密码'}]">
             <a-input
-                v-model="form1.confirmPassword"
+                v-model="form1.confirmPassword" type="password"
             />
           </a-form-item>
           <a-form-item>

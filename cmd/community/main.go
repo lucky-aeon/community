@@ -13,7 +13,6 @@ import (
 )
 
 func main() {
-
 	log.Init()
 	r := gin.Default()
 	r.SetFuncMap(utils.GlobalFunc())
@@ -32,5 +31,4 @@ func main() {
 	if err != nil {
 		log.Errorln(err)
 	}
-
 }

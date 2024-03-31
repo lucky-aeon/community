@@ -90,7 +90,8 @@ func updateUser(ctx *gin.Context) {
 			return
 		}
 		// check 旧密码
-		if form.OldPassword != userService.GetUserById(userId).Password {
+
+		if !services.ComparePswd(userService.GetUserById(userId).Password, form.OldPassword) {
 			var msg = "旧密码不一致"
 			log.Warnf("用户id: %d 修改密码失败,err: %s", userId, msg)
 			result.Err(msg).Json(ctx)
@@ -103,7 +104,14 @@ func updateUser(ctx *gin.Context) {
 			result.Err(msg).Json(ctx)
 			return
 		}
-		userService.UpdateUser(&model.Users{Password: form.ConfirmPassword, ID: userId})
+		pwd, err := services.GetPwd(form.ConfirmPassword)
+		if err != nil {
+			var msg = "加密密码错误"
+			log.Warnf("用户id: %d 修改密码失败,err: %s", userId, msg)
+			result.Err(msg).Json(ctx)
+			return
+		}
+		userService.UpdateUser(&model.Users{Password: string(pwd), ID: userId})
 	case "avatar":
 		type avatar struct {
 			Avatar string `json:"avatar" binding:"required" msg:"头像不能为空"`

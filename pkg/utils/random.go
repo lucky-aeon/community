@@ -2,11 +2,10 @@ package utils
 
 import (
 	"math/rand"
-	"strconv"
 	"time"
 )
 
-func GenerateCode(length int) int {
+func GenerateCode(length int) string {
 
 	rand.Seed(time.Now().UnixNano())
 
@@ -16,6 +15,5 @@ func GenerateCode(length int) int {
 		randomIndex := rand.Intn(len(charSet))
 		code[i] = charSet[randomIndex]
 	}
-	atoi, _ := strconv.Atoi(string(code))
-	return atoi
+	return string(code)
 }

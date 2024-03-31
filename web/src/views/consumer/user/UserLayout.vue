@@ -51,7 +51,7 @@ import { apiUserEditUserAvatar, apiGetUserTags2 as apiGetUserTags } from '@/apis
 import { useUserStore } from '@/stores/UserStore';
 import { isLogin } from '@/utils/auth';
 import { IconEdit, IconPlus } from '@arco-design/web-vue/es/icon';
-import { ref } from 'vue';
+import {ref, watch} from 'vue';
 import { onMounted } from 'vue';
 import { reactive } from 'vue';
 import { computed } from 'vue';
@@ -83,27 +83,27 @@ const userAvatar = reactive({
         })
     }
 })
-const userInfo = computed(() => {
-    if (!isLogin()) {
-        return {}
-    }
-    if (userSelfTags.value.length == 0) {
-        apiGetUserTags(userStore.userInfo.id).then(({ data, ok }) => {
-            if (!ok) return
-            userSelfTags.value = data
-        })
-    }
-    return [{
-        label: '账号',
-        value: userStore.userInfo.account,
-    },
+const userInfo=ref([])
+watch(()=>userStore.userInfo,()=>{
+  if (userSelfTags.value.length === 0) {
+    apiGetUserTags(userStore.userInfo.id).then(({ data, ok }) => {
+      if (!ok) return
+      userSelfTags.value = data
+    })
+  }
+  userInfo.value= [{
+    label: '账号',
+    value: userStore.userInfo.account,
+  },
     {
-        label: '注册时间',
-        value: userStore.userInfo.createdAt,
+      label: '注册时间',
+      value: userStore.userInfo.createdAt,
     },{
-        label: "描述",
-        value: userStore.userInfo.desc
+      label: "描述",
+      value: userStore.userInfo.desc
     }]
+},{
+  deep:true
 })
 userStore.refreshTags()
 onMounted(() => {

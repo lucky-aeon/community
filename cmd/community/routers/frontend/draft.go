@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
@@ -17,10 +18,16 @@ func InitDraftRouters(r *gin.Engine) {
 
 func getDraft(ctx *gin.Context) {
 	var d services.Draft
-	draft := d.Get(middleware.GetUserId(ctx))
+	articleId, err := strconv.Atoi(ctx.Query("articleId"))
+	if err != nil {
+		articleId = 0
+	}
+	userId := middleware.GetUserId(ctx)
+	draft := d.Get(userId, articleId)
 	result.Ok(draft, "").Json(ctx)
 }
 
+// 如何实现临时保存文本，和文章相关联
 func saveDraft(ctx *gin.Context) {
 	var draft model.Drafts
 	userId := middleware.GetUserId(ctx)

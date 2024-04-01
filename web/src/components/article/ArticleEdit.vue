@@ -59,6 +59,7 @@ import { IconDown } from '@arco-design/web-vue/es/icon';
 import { computed, ref, watch } from 'vue';
 import MarkdownEdit from '../MarkdownEdit.vue';
 import TagSearch from '../TagSearch.vue';
+import { Message } from '@arco-design/web-vue';
 const props = defineProps({
     articleId: {
         type: Number,
@@ -77,11 +78,15 @@ const artilceTypes = ref([])
 const modalTitile = computed(() => props.articleId > 0 ? "编辑文章" : "添加文章")
 const loading = ref(false)
 const updateArticle = (state=1) => {
-    loading.value = true
     let postData = Object.assign({}, data.value)
+    if(!postData.type) {
+        Message.error("请选择分类")
+        return
+    }
     postData.type = postData.type.value
     delete postData.createdAt
     delete postData.updatedAt
+    loading.value = true
     apiArticleUpdate({...postData, state}, props.articleId == 0).then(({data, ok})=>{
         loading.value=false
         props.callResponse(data, ok)

@@ -265,6 +265,8 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 		subscriptionService.Do(event.UserFollowingEvent, b)
 		subscriptionService.ConstantAtSend(event.ArticleAt, id, articleObject.Content, b)
 	}
+	var d Draft
+	go d.Del(article.UserId)
 	return id, nil
 }
 

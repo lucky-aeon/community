@@ -78,7 +78,7 @@
             </a-sub-menu>
           </a-menu>
         </a-layout-sider>
-        <a-layout-content style="padding: 15px;">
+        <a-layout-content style="padding: 15px; background-color: #f2f3f5;">
           <RouterView />
         </a-layout-content>
       </a-layout>

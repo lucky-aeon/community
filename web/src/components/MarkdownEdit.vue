@@ -51,6 +51,11 @@ const props = defineProps({
     showNav: {
         type: Boolean,
         default: true
+    },
+    renderNav: {
+        type: Function,
+        default(){
+        }
     }
 })
 /**
@@ -132,7 +137,7 @@ var cherryConfig = {
 
     },
     editor: {
-        defaultModel: 'editOnly',
+        defaultModel: props.previewOnly ? "previewOnly": "editOnly",
     },
     callback: {
         onClickPreview: function (e) {
@@ -151,6 +156,7 @@ var cherryConfig = {
             }
         },
         afterChange(e, b, c) {
+            props.renderNav(cherryInstance.getToc())
             model.value = e
             if (e[e.length - 1] == '@') {
                 nextTick(() => { 

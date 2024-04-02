@@ -13,7 +13,8 @@
     "cherry-markdown": "^0.8.38",
     "pinia": "^2.1.7",
     "vue": "^3.3.11",
-    "vue-router": "4"
+    "vue-router": "4",
+    "xgplayer": "^3.0.15"
   },
   "devDependencies": {
     "@arco-design/web-vue": "^2.54.3",

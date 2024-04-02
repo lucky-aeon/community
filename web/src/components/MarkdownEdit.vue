@@ -1,20 +1,23 @@
 <template>
     <a-spin :loading="loading" tip="This may take a while..." style="width: 100%;height: 100%;">
         <div :id="`${markId}`"></div>
-        <a-modal v-model:visible="searchAt.show" :ok-loading="loading"  v-on:ok="handlerAtOk">
-    <template #title>
-      请搜索要提起的人
-    </template>
-    <div>
-        <a-auto-complete v-model:model-value="searchAt.select" :data="searchAt.data" :loading="loading" v-on:search="searchAt.search"/>
-    </div>
-  </a-modal>
+        <a-modal v-model:visible="searchAt.show" :ok-loading="loading" v-on:ok="handlerAtOk">
+            <template #title>
+                请搜索要提起的人
+            </template>
+            <div>
+                <a-auto-complete v-model:model-value="searchAt.select" :data="searchAt.data" :loading="loading"
+                    v-on:search="searchAt.search" />
+            </div>
+        </a-modal>
     </a-spin>
 </template>
 <script setup>
+import XgPlayer from 'xgplayer';
+import 'xgplayer/dist/index.min.css';
 import { apiGetFile, apiUploadFile } from '@/apis/file';
 import { useUserStore } from '@/stores/UserStore';
-import {apiSearchUserByName} from '@/apis/user'
+import { apiSearchUserByName } from '@/apis/user'
 import { Message } from '@arco-design/web-vue';
 import Cherry from 'cherry-markdown';
 import 'cherry-markdown/dist/cherry-markdown.css';
@@ -28,19 +31,19 @@ const searchAt = reactive({
     show: false,
     data: [],
     select: "",
-    search(v){
-        apiSearchUserByName(v).then(({data, ok})=> {
-            if(!ok) return
-            searchAt.data = data.map(item=> ({
+    search(v) {
+        apiSearchUserByName(v).then(({ data, ok }) => {
+            if (!ok) return
+            searchAt.data = data.map(item => ({
                 value: `@(${item.name})[${item.id}]`,
                 label: item.name
             }))
         })
     }
 })
-const handlerAtOk = ()=> {
+const handlerAtOk = () => {
     searchAt.data = []
-    model.value = model.value.substring(0, model.value.length-1).concat(searchAt.select)
+    model.value = model.value.substring(0, model.value.length - 1).concat(searchAt.select)
     searchAt.select = ""
 }
 const props = defineProps({
@@ -54,7 +57,7 @@ const props = defineProps({
     },
     renderNav: {
         type: Function,
-        default(){
+        default() {
         }
     }
 })
@@ -66,20 +69,38 @@ var CustomHookA = Cherry.createSyntaxHook('important', Cherry.constants.HOOKS_TY
         return str.replace(this.RULE.reg, function (whole, m1, m2) {
 
             return `<a class="chip" href="/user/${m2}" target="_blank">@${m1}</a>`
-            // h(
-            //     "a-tag",
-            //     {
-            //         color: "blue",
-            //         icon: "icon-user"
-            //     },
-            //     {
-            //         m1
-            //     }
-            // );
         });
     },
     rule(str) {
         return { reg: /@\((.*?)\)\[(.*?)\]/g };
+    },
+});
+const audioPlayers = []
+var CustomHookAudioPlayer = Cherry.createSyntaxHook('myBlock', Cherry.constants.HOOKS_TYPE_LIST.PAR, {
+    makeHtml(str) {
+        return str.replace(this.RULE.reg, function (whole, m1, m2) {
+            let audioPlayerObj = {
+                id: "audioPlayer-" + (Math.random().toString()),
+                url: m2,
+                width: "100%",
+                tryCount: 0,
+            }
+            let currentTimeOut = setInterval(() => {
+                let el = document.getElementById(audioPlayerObj.id)
+                if (el) {
+                    new XgPlayer(audioPlayerObj)
+                    clearInterval(currentTimeOut)
+                }else if(audioPlayerObj.tryCount > 15){
+                    clearInterval(currentTimeOut)
+                } else{
+                    audioPlayerObj.tryCount++
+                }
+            }, 100)
+            return `<div id="${audioPlayerObj.id}"></div>`
+        });
+    },
+    rule(str) {
+        return { reg: /\!video\[(.*?)\]\((.*?)\)/g };
     },
 });
 var cherryInstance = undefined
@@ -126,6 +147,11 @@ var cherryConfig = {
                 syntaxClass: CustomHookA,
                 force: true,
             },
+            myBlock: {
+                syntaxClass: CustomHookAudioPlayer,
+                force: true,
+                before: 'blockquote',
+            }
         },
     },
     toolbars: {
@@ -137,7 +163,7 @@ var cherryConfig = {
 
     },
     editor: {
-        defaultModel: props.previewOnly ? "previewOnly": "editOnly",
+        defaultModel: props.previewOnly ? "previewOnly" : "editOnly",
     },
     callback: {
         onClickPreview: function (e) {
@@ -156,10 +182,14 @@ var cherryConfig = {
             }
         },
         afterChange(e, b, c) {
+            console.log(audioPlayers)
+            audioPlayers.forEach(item => {
+                new XgPlayer(item)
+            })
             props.renderNav(cherryInstance.getToc())
             model.value = e
             if (e[e.length - 1] == '@') {
-                nextTick(() => { 
+                nextTick(() => {
                     searchAt.show = true
                 })
             } else {
@@ -231,10 +261,6 @@ watch(model, () => {
 
 .cherry-flex-toc {
     position: fixed
-}
-
-.cherry video {
-    width: 50%;
 }
 
 .chip {

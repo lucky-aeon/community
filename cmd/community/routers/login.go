@@ -93,6 +93,9 @@ func Register(c *gin.Context) {
 		result.Err(err.Error()).Json(c)
 		return
 	}
+	var d services.Draft
+	go d.Save(model.Drafts{UserId: id, Content: "", State: 2})
+
 	loginLog.State = "注册成功"
 	logS.InsertLoginLog(loginLog)
 	token, err := middleware.GenerateToken(id, form.Name)

@@ -14,16 +14,33 @@ func InitDraftRouters(r *gin.Engine) {
 	group := r.Group("/community/draft")
 	group.GET("", getDraft)
 	group.POST("", saveDraft)
+	//group.GET("/init", initDraft)
+}
+
+func initDraft(ctx *gin.Context) {
+
+	// 获取所有用户
+	var userIds []int
+	model.User().Select("id").Find(&userIds)
+
+	var drafts = make([]model.Drafts, 0, len(userIds))
+	for i := range userIds {
+		drafts = append(drafts, model.Drafts{UserId: userIds[i], State: 2})
+		drafts = append(drafts, model.Drafts{UserId: userIds[i], State: 1})
+	}
+	model.Draft().Create(drafts)
+	result.Ok(nil, "").Json(ctx)
 }
 
 func getDraft(ctx *gin.Context) {
 	var d services.Draft
-	articleId, err := strconv.Atoi(ctx.Query("articleId"))
-	if err != nil {
-		articleId = 0
+	state, _ := strconv.Atoi(ctx.Query("state"))
+	if state != 1 && state != 2 {
+		result.Err("state 非法").Json(ctx)
+		return
 	}
 	userId := middleware.GetUserId(ctx)
-	draft := d.Get(userId, articleId)
+	draft := d.Get(userId, state)
 	result.Ok(draft, "").Json(ctx)
 }
 

@@ -69,3 +69,29 @@ export function apiGetTopArticle(type, page=1, limit=10) {
         }
     })
 }
+
+export function apiAutoSaveArticle(
+    /** 文章id */
+    articleId = 0, 
+    /** 正文 */
+    content="", 
+    /** 标签 */
+    labels=[], 
+    /** 文章类型 */
+    type=0) {
+    return axios.post(`/community/draft`, {
+        articleId,
+        content,
+        labels,
+        type
+    })
+}
+
+export function apiGetAutoSaveArticle(articleId=0) {
+    let req = {
+        articleId
+    }
+    return axios.get(`/community/draft`, {
+        params: req
+    })
+}

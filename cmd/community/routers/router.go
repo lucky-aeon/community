@@ -1,6 +1,8 @@
 package routers
 
 import (
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/cmd/community/routers/backend"
@@ -10,6 +12,17 @@ import (
 // init router
 
 func InitFrontedRouter(r *gin.Engine) {
+	fileInfo, err := os.Stat("./web/assets")
+	if err == nil && fileInfo.IsDir() {
+		r.Static("/assets", "./web/assets")
+	}
+	fileInfo, err = os.Stat("./web/index.html")
+	if err == nil && !fileInfo.IsDir() {
+		r.LoadHTMLFiles("./web/index.html")
+		r.GET("/", func(ctx *gin.Context) {
+			ctx.HTML(200, "index.html", nil)
+		})
+	}
 
 	InitLoginRegisterRouters(r)
 	frontend.InitFileRouters(r)

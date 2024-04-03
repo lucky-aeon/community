@@ -51,6 +51,10 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 	b.SubscribeId = comment.BusinessId
 	subscriptionService.ConstantAtSend(event.CommentAt, comment.FromUserId, comment.Content, b)
 	subscriptionService.Do(event.CommentUpdateEvent, b)
+	var articles ArticleService
+
+	// 文章发布者收到消息
+	subscriptionService.Send(event.CommentUpdateEvent, constant.NOTICE, comment.FromUserId, articles.GetById(comment.BusinessId).UserId, b)
 	return nil
 }
 

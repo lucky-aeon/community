@@ -52,8 +52,9 @@ func comment(ctx *gin.Context) {
 	var comment model.Comments
 	userId := middleware.GetUserId(ctx)
 	if err := ctx.ShouldBindJSON(&comment); err != nil {
-		log.Warnf("用户id: %d 发布评论失败,err: %s", userId, err.Error())
-		result.Err(utils.GetValidateErr(comment, err)).Json(ctx)
+		msg := utils.GetValidateErr(comment, err)
+		log.Warnf("用户id: %d 发布评论失败,err: %s", userId, msg)
+		result.Err(msg).Json(ctx)
 		return
 	}
 	comment.FromUserId = userId
@@ -141,8 +142,9 @@ func adoption(ctx *gin.Context) {
 	var adoption model.QaAdoptions
 	userId := middleware.GetUserId(ctx)
 	if err := ctx.ShouldBindJSON(&adoption); err != nil {
-		log.Warnf("用户id: %d 采纳评论参数解析失败,err :%s", userId, err.Error())
-		result.Err(err.Error()).Json(ctx)
+		msg := utils.GetValidateErr(comment, err)
+		log.Warnf("用户id: %d 采纳评论参数解析失败,err :%s", userId, msg)
+		result.Err(msg).Json(ctx)
 		return
 	}
 	var cS services.CommentsService

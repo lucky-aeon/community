@@ -50,8 +50,9 @@ func subscribe(ctx *gin.Context) {
 
 	var subscription model.Subscriptions
 	if err := ctx.ShouldBindJSON(&subscription); err != nil {
-		log.Warnf("用户id: %d 订阅事件参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
-		result.Err(utils.GetValidateErr(subscription, err)).Json(ctx)
+		msg := utils.GetValidateErr(comment, err)
+		log.Warnf("用户id: %d 订阅事件参数解析失败,err: %s", middleware.GetUserId(ctx), msg)
+		result.Err(msg).Json(ctx)
 		return
 	}
 	userId := middleware.GetUserId(ctx)

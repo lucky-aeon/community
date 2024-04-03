@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"errors"
 
 	mapset "github.com/deckarep/golang-set/v2"
@@ -95,6 +96,12 @@ func (a *ArticleService) PageByClassfily(typeFlag string, tagId []string, articl
 	}
 	defer rows.Close()
 
+	result = buildResultArticles(rows)
+	return
+}
+
+func buildResultArticles(rows *sql.Rows) []*model.ArticleData {
+	var result []*model.ArticleData
 	for rows.Next() {
 		item := model.ArticleData{}
 		itemType := model.TypeSimple{}
@@ -114,7 +121,7 @@ func (a *ArticleService) PageByClassfily(typeFlag string, tagId []string, articl
 		}
 		result = append(result, &item)
 	}
-	return
+	return result
 }
 
 func (a *ArticleService) Count() int64 {
@@ -368,7 +375,7 @@ func (a *ArticleService) QAArticleCount(userId int) (count int64) {
 	return c1 + c2 + c3 + c4
 }
 
-func (a *ArticleService) PageTopArticle(types string, page, limit int) (articles []model.ArticleData, count int64) {
+func (a *ArticleService) PageTopArticle(types string, page, limit int) (result []*model.ArticleData, count int64) {
 
 	query := articleDao.GetArticleSql()
 	query.Where("articles.state = ? and tp.flag_name = ?", constant.Top, types)
@@ -379,25 +386,7 @@ func (a *ArticleService) PageTopArticle(types string, page, limit int) (articles
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		item := model.ArticleData{}
-		itemType := model.TypeSimple{}
-		itemUser := model.UserSimple{}
-		tags := ""
-		rows.Scan(
-			&item.ID, &item.Title, &item.State, &item.Like, &item.CreatedAt, &item.UpdatedAt,
-			&itemType.TypeId, &itemType.TypeTitle, &itemType.TypeFlag,
-			&itemUser.UName, &itemUser.UId, &itemUser.UAvatar,
-			&tags,
-		)
-		item.UserSimple = itemUser
-		item.TypeSimple = itemType
-		item.Tags = tags
-		if item.State != constant.Published {
-			item.StateName = constant.GetArticleName(item.State)
-		}
-		articles = append(articles, item)
-	}
+	result = buildResultArticles(rows)
 	return
 }
 func (a *ArticleService) UpdateArticleState(article request.TopArticle) error {

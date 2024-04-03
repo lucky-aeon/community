@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+
 jobs:
     get-latest-sources:
         runs-on: ubuntu-latest

@@ -50,20 +50,35 @@ func subscribe(ctx *gin.Context) {
 
 	var subscription model.Subscriptions
 	if err := ctx.ShouldBindJSON(&subscription); err != nil {
-		log.Warnf("用户id: %d 订阅事件参数解析失败,err: %s", middleware.GetUserId(ctx), err.Error())
-		result.Err(utils.GetValidateErr(subscription, err)).Json(ctx)
+		msg := utils.GetValidateErr(comment, err)
+		log.Warnf("用户id: %d 订阅事件参数解析失败,err: %s", middleware.GetUserId(ctx), msg)
+		result.Err(msg).Json(ctx)
 		return
 	}
 	userId := middleware.GetUserId(ctx)
 	subscription.SubscriberId = userId
+	businessId := subscription.BusinessId
 
-	if subscription.EventId == event.UserFollowingEvent && subscription.BusinessId == userId {
+	// 如果是订阅文章则找文章信息
+	var a services.ArticleService
+	var flag bool = false
+	if subscription.EventId == event.CommentUpdateEvent {
+		if a.GetById(businessId).UserId == userId {
+			flag = true
+		}
+	}
+
+	if subscription.EventId == event.UserFollowingEvent && businessId == userId {
 		result.Err("关注用户不能是自己").Json(ctx)
 		return
+	} else if flag {
+		result.Err("订阅文章不能是自己所发布").Json(ctx)
+		return
 	}
+
 	var su services.SubscriptionService
 	msg := "取消订阅"
-	flag := false
+	flag = false
 	if su.Subscribe(&subscription) {
 		msg = "订阅成功"
 		flag = true

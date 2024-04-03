@@ -123,8 +123,9 @@ func articleDeleted(c *gin.Context) {
 func articleSave(c *gin.Context) {
 	var o request.ReqArticle
 	if err := c.ShouldBindJSON(&o); err != nil {
-		log.Warnf("用户id: %d 保存文章解析文章失败 ,err: %s", middleware.GetUserId(c), err.Error())
-		result.Err(err.Error()).Json(c)
+		msg := utils.GetValidateErr(o, err)
+		log.Warnf("用户id: %d 保存文章解析文章失败 ,err: %s", middleware.GetUserId(c), msg)
+		result.Err(msg).Json(c)
 		return
 	}
 	o.UserId = middleware.GetUserId(c)

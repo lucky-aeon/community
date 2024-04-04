@@ -1,10 +1,12 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/constant"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
 )
@@ -55,12 +57,15 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 
 	// 文章发布者收到消息
 	subscriptionService.Send(event.CommentUpdateEvent, constant.NOTICE, comment.FromUserId, articles.GetById(comment.BusinessId).UserId, b)
+	jsonBody, _ := json.Marshal(comment)
+	log.Infof("用户id: %d,发布评论: %s", comment.FromUserId, jsonBody)
 	return nil
 }
 
 // 删除评论
 func (a *CommentsService) DeleteComment(id, userId int) bool {
 
+	log.Infof("用户id: %d,删除评论: %d", userId, id)
 	return commentDao.Delete(id, userId) == 1
 }
 

@@ -1,7 +1,10 @@
 package services
 
 import (
+	"database/sql"
+	"encoding/json"
 	"errors"
+	"xhyovo.cn/community/pkg/log"
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"xhyovo.cn/community/server/request"
@@ -95,6 +98,12 @@ func (a *ArticleService) PageByClassfily(typeFlag string, tagId []string, articl
 	}
 	defer rows.Close()
 
+	result = buildResultArticles(rows)
+	return
+}
+
+func buildResultArticles(rows *sql.Rows) []*model.ArticleData {
+	var result []*model.ArticleData
 	for rows.Next() {
 		item := model.ArticleData{}
 		itemType := model.TypeSimple{}
@@ -114,7 +123,7 @@ func (a *ArticleService) PageByClassfily(typeFlag string, tagId []string, articl
 		}
 		result = append(result, &item)
 	}
-	return
+	return result
 }
 
 func (a *ArticleService) Count() int64 {
@@ -245,7 +254,8 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 	} else {
 		model.Article().Where("user_id = ? and id = ?", articleObject.UserId, articleObject.ID).Updates(&articleObject)
 	}
-
+	jsonBody, _ := json.Marshal(articleObject)
+	log.Infof("用户id: %d,保存文章: %s", articleObject.UserId, jsonBody)
 	id = articleObject.ID
 	// 关联关系
 	db := model.ArticleTagRelation
@@ -283,6 +293,7 @@ func (a *ArticleService) DeleteByUserId(articleId, userId int) (err error) {
 	}
 	// 删除文章标签表
 	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
+	log.Infof("用户id: %d,删除文章: %d", userId, articleId)
 	return
 }
 
@@ -368,7 +379,7 @@ func (a *ArticleService) QAArticleCount(userId int) (count int64) {
 	return c1 + c2 + c3 + c4
 }
 
-func (a *ArticleService) PageTopArticle(types string, page, limit int) (articles []model.ArticleData, count int64) {
+func (a *ArticleService) PageTopArticle(types string, page, limit int) (result []*model.ArticleData, count int64) {
 
 	query := articleDao.GetArticleSql()
 	query.Where("articles.state = ? and tp.flag_name = ?", constant.Top, types)
@@ -379,25 +390,7 @@ func (a *ArticleService) PageTopArticle(types string, page, limit int) (articles
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		item := model.ArticleData{}
-		itemType := model.TypeSimple{}
-		itemUser := model.UserSimple{}
-		tags := ""
-		rows.Scan(
-			&item.ID, &item.Title, &item.State, &item.Like, &item.CreatedAt, &item.UpdatedAt,
-			&itemType.TypeId, &itemType.TypeTitle, &itemType.TypeFlag,
-			&itemUser.UName, &itemUser.UId, &itemUser.UAvatar,
-			&tags,
-		)
-		item.UserSimple = itemUser
-		item.TypeSimple = itemType
-		item.Tags = tags
-		if item.State != constant.Published {
-			item.StateName = constant.GetArticleName(item.State)
-		}
-		articles = append(articles, item)
-	}
+	result = buildResultArticles(rows)
 	return
 }
 func (a *ArticleService) UpdateArticleState(article request.TopArticle) error {

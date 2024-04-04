@@ -1,8 +1,10 @@
 package services
 
 import (
+	"encoding/json"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/dustin/go-humanize"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -10,6 +12,8 @@ type FileService struct{}
 
 func (*FileService) Save(file *model.Files) {
 	file.TenantId = 1
+	jsonBody, _ := json.Marshal(file)
+	log.Infof("用户id: %d,上传文件: %s", file.UserId, jsonBody)
 	fileDao.Save(file)
 }
 

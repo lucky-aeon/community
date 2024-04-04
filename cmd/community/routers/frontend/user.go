@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"strconv"
+	"xhyovo.cn/community/pkg/utils/page"
 
 	"xhyovo.cn/community/pkg/log"
 
@@ -38,8 +39,16 @@ func InitUserRouters(r *gin.Engine) {
 	group.GET("/statistics", statistics)
 	group.GET("", listUsers)
 	group.GET("/tags/:userId", getTagsByUserId)
+	group.GET("/active", activeUsers)
 	group.Use(middleware.OperLogger())
 	group.POST("/edit/:tab", updateUser)
+}
+func activeUsers(ctx *gin.Context) {
+	var u services.UserService
+	p, limit := page.GetPage(ctx)
+	users, count := u.ActiveUsers(p, limit)
+	result.Page(users, count, nil).Json(ctx)
+
 }
 
 func getUserMenu(ctx *gin.Context) {

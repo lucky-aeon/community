@@ -15,6 +15,19 @@ import (
 type UserService struct {
 }
 
+func (s UserService) ActiveUsers(page, limit int) (users []*model.UserSimple, count int64) {
+	tx := model.User().Select("users.id", "users.name", "users.avatar,users.desc").Joins("left join articles a ON users.id = a.user_id").
+		Group("users.id, users.name").
+		Having("COUNT(a.id) > 0").
+		Order("COUNT(a.id) DESC")
+	tx.Count(&count)
+	if count == 0 {
+		return []*model.UserSimple{}, 0
+	}
+	tx.Limit(limit).Offset((page - 1) * limit).Find(&users)
+	return
+}
+
 func (s UserService) IsAdmin(userId int) (bool, error) {
 
 	query := mysql.GetInstance().Table("users as u").Select("m.name").

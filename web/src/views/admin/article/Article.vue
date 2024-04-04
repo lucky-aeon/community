@@ -15,7 +15,7 @@
   </a-modal>
   <a-space direction="vertical" size="large" fill>
     <a-table row-key="id" :columns="columns" :data="articleData"
-             :pagination="pagination" >
+             :pagination="pagination" @page-change="getArticles">
       <template #optional="{ record, rowIndex }">
         <a-space>
         <a-button type="primary" @click="updateState(rowIndex)">修改</a-button>

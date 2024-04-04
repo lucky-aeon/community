@@ -2,7 +2,9 @@ package services
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
+	"xhyovo.cn/community/pkg/log"
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"xhyovo.cn/community/server/request"
@@ -252,7 +254,8 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 	} else {
 		model.Article().Where("user_id = ? and id = ?", articleObject.UserId, articleObject.ID).Updates(&articleObject)
 	}
-
+	jsonBody, _ := json.Marshal(articleObject)
+	log.Infof("用户id: %d,保存文章: %s", articleObject.UserId, jsonBody)
 	id = articleObject.ID
 	// 关联关系
 	db := model.ArticleTagRelation
@@ -290,6 +293,7 @@ func (a *ArticleService) DeleteByUserId(articleId, userId int) (err error) {
 	}
 	// 删除文章标签表
 	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
+	log.Infof("用户id: %d,删除文章: %d", userId, articleId)
 	return
 }
 

@@ -268,7 +268,6 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 	var subscriptionService SubscriptionService
 	var d Draft
 	if flag {
-		go d.Del(article.UserId, 2)
 		var b SubscribeData
 		b.UserId = articleObject.UserId
 		b.ArticleId = articleObject.ID
@@ -276,10 +275,8 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 		b.SubscribeId = articleObject.UserId
 		subscriptionService.Do(event.UserFollowingEvent, b)
 		subscriptionService.ConstantAtSend(event.ArticleAt, id, articleObject.Content, b)
-	} else {
-		go d.Del(article.UserId, 1)
 	}
-
+	go d.DelDraft(article.UserId)
 	return id, nil
 }
 

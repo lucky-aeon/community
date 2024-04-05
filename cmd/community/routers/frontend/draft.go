@@ -2,7 +2,6 @@ package frontend
 
 import (
 	"github.com/gin-gonic/gin"
-	"strconv"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
@@ -26,7 +25,6 @@ func initDraft(ctx *gin.Context) {
 	var drafts = make([]model.Drafts, 0, len(userIds))
 	for i := range userIds {
 		drafts = append(drafts, model.Drafts{UserId: userIds[i], State: 2})
-		drafts = append(drafts, model.Drafts{UserId: userIds[i], State: 1})
 	}
 	model.Draft().Create(drafts)
 	result.Ok(nil, "").Json(ctx)
@@ -34,13 +32,8 @@ func initDraft(ctx *gin.Context) {
 
 func getDraft(ctx *gin.Context) {
 	var d services.Draft
-	state, _ := strconv.Atoi(ctx.Query("state"))
-	if state != 1 && state != 2 {
-		result.Err("state 非法").Json(ctx)
-		return
-	}
 	userId := middleware.GetUserId(ctx)
-	draft := d.Get(userId, state)
+	draft := d.Get(userId)
 	result.Ok(draft, "").Json(ctx)
 }
 

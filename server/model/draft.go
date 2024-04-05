@@ -14,7 +14,7 @@ type Drafts struct {
 	Labels    []int          `json:"labels" gorm:"-"`
 	UserId    int            `json:"userId"`
 	ArticleId int            `json:"articleId"`
-	State     int            `json:"state"` // 临时保存文章状态： 编辑 ，发布
+	State     int            `json:"state"` // 是否存在临时文本,1:存在，2：不存在
 	CreatedAt time.LocalTime `json:"createdAt"`
 }
 

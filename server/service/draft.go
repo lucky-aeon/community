@@ -10,9 +10,9 @@ import (
 type Draft struct {
 }
 
-func (*Draft) Get(userId, state int) *model.Drafts {
+func (*Draft) Get(userId int) *model.Drafts {
 	draft := new(model.Drafts)
-	model.Draft().Where("user_id = ? and state = ?", userId, state).Find(&draft)
+	model.Draft().Where("user_id = ?", userId).Find(&draft)
 	if len(draft.LabelIds) > 0 {
 		split := strings.Split(draft.LabelIds, ",")
 		var ids = make([]int, 0, len(split))
@@ -40,10 +40,10 @@ func (*Draft) Save(draft model.Drafts) {
 		}
 		draft.LabelIds = strings.Join(ls, ",")
 	}
-	model.Draft().Where("user_id = ? and state = ?", draft.UserId, draft.State).Updates(&draft)
+	model.Draft().Where("user_id = ? and state = ?", draft.UserId, 2).Updates(&draft)
 }
 
-func (*Draft) Del(userId, state int) {
+func (*Draft) DelDraft(userId int) {
 
-	model.Draft().Where("user_id = ? and state = ?", userId, state).Updates(map[string]interface{}{"content": "", "type": 0, "label_ids": ""})
+	model.Draft().Where("user_id = ? and state = ?", userId, 1).Updates(map[string]interface{}{"content": "", "type": 0, "label_ids": ""})
 }

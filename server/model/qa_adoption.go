@@ -8,7 +8,7 @@ import (
 
 type QaAdoptions struct {
 	ID        int            `gorm:"primarykey" json:"id"`
-	ArticleId int            `json:"articleId" binding:"required" msg:"采纳文章不能未空"`
+	ArticleId int            `json:"articleId"`
 	CommentId int            `json:"commentId" binding:"required" msg:"采纳评论不能未空"`
 	CreatedAt time.LocalTime `json:"createdAt"`
 }

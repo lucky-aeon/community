@@ -142,7 +142,7 @@ func adoption(ctx *gin.Context) {
 	var adoption model.QaAdoptions
 	userId := middleware.GetUserId(ctx)
 	if err := ctx.ShouldBindJSON(&adoption); err != nil {
-		msg := utils.GetValidateErr(comment, err)
+		msg := utils.GetValidateErr(adoption, err)
 		log.Warnf("用户id: %d 采纳评论参数解析失败,err :%s", userId, msg)
 		result.Err(msg).Json(ctx)
 		return

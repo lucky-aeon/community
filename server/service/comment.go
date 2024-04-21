@@ -23,7 +23,9 @@ func NewCommentService(ctx *gin.Context) *CommentsService {
 func (a *CommentsService) Comment(comment *model.Comments) error {
 
 	articleId := comment.BusinessId
-	if f := articleDao.ExistById(articleId); !f {
+	article := articleDao.GetById(articleId)
+
+	if article.ID == 0 {
 		return errors.New("文章不存在")
 	}
 
@@ -42,7 +44,7 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 		b.CurrentBusinessId = comment.BusinessId
 		s.Send(event.ReplyComment, constant.NOTICE, comment.FromUserId, comment.ToUserId, b)
 	}
-
+	comment.BusinessUserId = article.UserId
 	commentDao.AddComment(comment)
 	var subscriptionService SubscriptionService
 	var b SubscribeData
@@ -134,9 +136,9 @@ func setCommentUserInfoAndArticleTitle(comments []*model.Comments) {
 	}
 }
 
-// 查询文章下的所有评论(可指定)
+// 查询用户的评论(管理端)
 func (*CommentsService) GetAllCommentsByArticleID(page, limit, userId, businessId int) ([]*model.Comments, int64) {
-	comments, count := commentDao.GetAllCommentsByArticleID(page, userId, limit, businessId)
+	comments, count := commentDao.GetAllCommentsByArticleID(page, limit, userId, businessId)
 	if count == 0 {
 		return comments, count
 	}

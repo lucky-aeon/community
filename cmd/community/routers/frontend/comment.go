@@ -131,7 +131,7 @@ func listAllCommentsByArticleId(ctx *gin.Context) {
 	}
 	userId := middleware.GetUserId(ctx)
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetAllCommentsByArticleID(p, userId, limit, articleId)
+	comments, count := commentsService.GetAllCommentsByArticleID(p, limit, userId, articleId)
 	var adS services.QAAdoption
 	adS.SetAdoptionComment(comments)
 	result.Ok(page.New(comments, count), "").Json(ctx)

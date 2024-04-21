@@ -30,12 +30,13 @@ func (a *CommentDao) Create(comment *model.Comments) error {
 	return model.Comment().Model(&model.Comments{}).Create(comment).Error
 }
 
-// 查询文章下的所有评论
+// 查询用户所管理的评论
 func (a *CommentDao) GetAllCommentsByArticleID(page, limit, fromUserId, businessId int) ([]*model.Comments, int64) {
 	var comments []*model.Comments
 	var count int64
-	model.Comment().Where("from_user_id = ? or to_user_id = ?", fromUserId, fromUserId).Order("created_at desc").Limit(limit).Offset((page - 1) * limit).Find(&comments)
-	model.Comment().Where("from_user_id = ? or to_user_id = ?", fromUserId, fromUserId).Count(&count)
+	db := model.Comment().Where("from_user_id = ? or to_user_id = ? or business_user_id = ?", fromUserId, fromUserId, fromUserId)
+	db.Count(&count)
+	db.Order("created_at desc").Limit(limit).Offset((page - 1) * limit).Find(&comments)
 	return comments, count
 }
 

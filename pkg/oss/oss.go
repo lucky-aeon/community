@@ -35,7 +35,7 @@ func Init(endpoint, accessKey, accessSec, bucketN string) {
 }
 
 func SingUrl(fileKey string) string {
-	singUrl, err := bucket.SignURL(fileKey, oss.HTTPGet, 10)
+	singUrl, err := bucket.SignURL(fileKey, oss.HTTPGet, 3600)
 	if err != nil {
 		log.Errorf("获取 oss bucket 失败,err: %s", err.Error())
 		return ""

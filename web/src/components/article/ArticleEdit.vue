@@ -1,5 +1,5 @@
 <template>
-    <a-modal :disabled="loading" :mask-closable="false" :fullscreen="fullScreen" :body-style="{ height: '100%' }"
+    <a-modal :esc-to-close="false" :disabled="loading" :mask-closable="false" :fullscreen="fullScreen" :body-style="{ height: '100%' }"
         v-model:visible="visible" @cancel="handleCancel" draggable
         :modal-style="{ minWidth: '800px', maxHeight: fullScreen ? '' : '90%' }">
         <template #title>
@@ -80,6 +80,7 @@ const fullScreen = ref(false);
 const artilceTypes = ref([])
 const modalTitile = computed(() => props.articleId > 0 ? "编辑文章" : "添加文章")
 const loading = ref(false)
+const lastEdit = ref(0)
 const updateArticle = (state = 1) => {
     let postData = Object.assign({}, data.value)
     if (!postData.type) {
@@ -124,6 +125,7 @@ watch(() => visible.value, (newV) => {
         }).finally(() => {
             apiGetAutoSaveArticle(props.articleId).then(({ data, ok }) => {
                 if (!ok) return
+                lastEdit.value = 1
                 data.value.content = data.content
                 data.value.tagIds = data.labelIds
                 data.value.defaultType = data.type
@@ -133,6 +135,7 @@ watch(() => visible.value, (newV) => {
         data.value = Object.assign({}, defaultData)
         apiGetAutoSaveArticle().then(({ data, ok }) => {
             if (!ok) return
+            if(data.title) {}
             data.value.content = data.content
             data.value.tagIds = data.labelIds
             data.value.defaultType = data.type
@@ -142,10 +145,9 @@ watch(() => visible.value, (newV) => {
 // 自动保存定时任务
 let autoSaveInterval = undefined;
 onMounted(() => {
-    autoSaveInterval = setInterval(() => {
-        console.log("auto save");
+    /* autoSaveInterval = setInterval(() => {
         autoSave()
-    }, 1000 * 10)
+    }, 1000 * 10) */
 })
 
 onUnmounted(() => {

@@ -132,7 +132,7 @@ func getPolicy(ctx *gin.Context) {
 func getUrl(ctx *gin.Context) {
 	fileKey := ctx.Query("fileKey")
 	if fileKey == "" {
-		log.Warnf("用户id: %d 获取 %s 失败,因为 %s 为空", middleware.GetUserId(ctx), fileKey, fileKey)
+		log.Warnf("用户id: %d 获取文件 %s 失败,因为文件key %s 为空", middleware.GetUserId(ctx), fileKey, fileKey)
 		result.Err("fileKey 为空").Json(ctx)
 		return
 	}

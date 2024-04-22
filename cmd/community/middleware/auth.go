@@ -36,6 +36,11 @@ func Auth(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
+	if claims.ID < 1 {
+		result.Err("id 不正确").Json(ctx)
+		ctx.Abort()
+		return
+	}
 	ctx.Set(AUTHORIZATION, claims.ID)
 	ctx.Next()
 }

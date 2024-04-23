@@ -59,8 +59,9 @@
           </a-space>
         </div>
       </a-page-header>
-      <MarkdownEdit :render-nav="setArticleNavs" preview-only :show-nav="false" v-model="articleData.content" />      <a-card :bordered="false" style="margin-top: 10px;">
-        <comment-edit :callback="getRootComment" :article-id="articleData.id"  style="margin-bottom: 15px;"/>
+      <MarkdownEdit :render-nav="setArticleNavs" preview-only :show-nav="false" v-model="articleData.content" /> <a-card
+        :bordered="false" style="margin-top: 10px;">
+        <comment-edit :callback="getRootComment" :article-id="articleData.id" style="margin-bottom: 15px;" />
         <template v-if="articleCommentList.length">
           <comment-item :article="articleData" :callback="getRootComment" v-for="comment in articleCommentList"
             :comment="comment" :key="comment.id" />
@@ -73,14 +74,37 @@
       </a-card>
     </a-col>
     <a-col span="7">
-      <UserInfoCard :user-id="articleData.user.id" />
-      <a-affix>
-      <a-card style="margin-top: 10px;max-height: 400px;" :bordered="false" title="目录">
-        <a-anchor smooth style="width: 100%;max-height: 300px;" >
-          <MyAnchorLink v-for="item in articleNavs" :data="item" style="width: 100%;"/>
-      </a-anchor>
-      </a-card>
-    </a-affix>
+      <a-grid :row-gap="5" :cols="1">
+        <a-col>
+          <UserInfoCard :user-id="articleData.user.id" />
+        </a-col>
+        <a-col v-if="articleNavs.length > 0">
+          <a-affix>
+            <a-card style="margin-top: 10px;max-height: 400px;" :bordered="false" title="目录">
+              <a-anchor smooth style="width: 100%;max-height: 300px;">
+                <MyAnchorLink v-for="item in articleNavs" :data="item" style="width: 100%;" />
+              </a-anchor>
+            </a-card>
+          </a-affix>
+        </a-col>
+        <a-col>
+          <a-card :bordered="false" body-style="padding: 0px;" title="相似问答">
+            <a-list :loading="loadingState.similarArticle" :split="false" :size="'small'" :bordered="false"
+              :data="similarArticle">
+              <template #item="{ item }">
+                <a-list-item class="list-demo-item" style="padding: 0 9px;" action-layout="vertical"
+                  @click="router.push(`/article/view/${item.id}`)">
+                  <a-list-item-meta :title="item.title">
+                    <template #description>
+                      <small>{{ item.like }}点赞</small>
+                    </template>
+                  </a-list-item-meta>
+                </a-list-item>
+              </template>
+            </a-list>
+          </a-card>
+        </a-col>
+      </a-grid>
     </a-col>
   </a-row>
 </template>
@@ -88,7 +112,7 @@
 <script setup>
 import MyAnchorLink from '@/components/MyAnchorLink.vue'
 import { apiSubscribe, apiSubscribeState, } from "@/apis/apiSubscribe.js";
-import { apiArticleLike, apiArticleLikeState, apiArticleView } from '@/apis/article';
+import { apiArticleLike, apiArticleLikeState, apiArticleList, apiArticleView } from '@/apis/article';
 import { apiGetArticleComment } from '@/apis/comment';
 import { apiGetFile } from "@/apis/file";
 import CommentEdit from '@/components/comment/CommentEdit.vue';
@@ -101,12 +125,19 @@ import 'cherry-markdown/dist/cherry-markdown.css';
 import { nextTick, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import MarkdownEdit from '@/components/MarkdownEdit.vue';
+import { reactive } from 'vue';
 const getFileUrl = (fileKey) => apiGetFile(fileKey)
 const articleNavs = ref([])
 
 const articleData = ref(null)
 const route = useRoute()
 const likeState = ref(true)
+const similarArticle = ref([])
+const loadingState = reactive({
+  comment: true,
+  similarArticle: true,
+  article: true
+})
 
 const articleSubscribe = ref("订阅问题")
 
@@ -129,6 +160,9 @@ function getRootComment() {
 }
 
 watch(() => route.fullPath, () => {
+  loadingState.similarArticle = true
+  loadingState.comment = true
+  loadingState.article = true
   apiArticleView(route.params.id).then(({ data }) => {
     articleData.value = data
     nextTick(() => {
@@ -146,6 +180,10 @@ watch(() => route.fullPath, () => {
     apiSubscribeState(2, articleData.value.user.id).then((data) => {
       userSubscribe.value = data.data ? "用户已订阅" : "订阅用户"
     })
+    apiArticleList({ tags: data.tags.id, state: 3 }, 1, 5).then(({ data, ok }) => {
+      if (!ok) return
+      similarArticle.value = data.list
+    }).finally(() => loadingState.similarArticle = false)
     getRootComment()
   }).catch(() => {
     router.back()
@@ -174,7 +212,7 @@ function arrayToTree(arr, level = 1) {
 
   for (let i = 0; i < arr.length; i++) {
     const item = arr[i];
-    if(level != 1 && item.level == 1) break
+    if (level != 1 && item.level == 1) break
     if (item.level === level) {
       const node = {
         id: item.id,
@@ -190,7 +228,7 @@ function arrayToTree(arr, level = 1) {
 
 function setArticleNavs(arr) {
   console.log(arr)
-  articleNavs.value =  arrayToTree(arr)
+  articleNavs.value = arrayToTree(arr)
 }
 </script>
 

@@ -32,3 +32,10 @@ func (t *Type) List(parentId int) []model.Types {
 
 	return types
 }
+
+func (t *Type) GetById(typeId int) model.Types {
+	var typeObject model.Types
+	model.Type().Where("id = ?", typeId).Find(&typeObject)
+	return typeObject
+
+}

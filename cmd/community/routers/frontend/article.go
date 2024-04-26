@@ -41,8 +41,11 @@ func InitArticleRouter(r *gin.Engine) {
 	group.GET("/top", articleTop)
 	group.POST("", articlePageBySearch)
 	group.GET("/like/state/:articleId", articleLikeState)
+	group.GET("/list", articlesByTypeId)
+	group.GET("/latest", articleLatest)
 	group.Use(middleware.OperLogger())
 	group.POST("/update", articleSave)
+	group.POST("/publish", publish)
 	group.DELETE("/:id", articleDeleted)
 	group.POST("/like", articleLike)
 
@@ -129,19 +132,19 @@ func articleSave(c *gin.Context) {
 		return
 	}
 	o.UserId = middleware.GetUserId(c)
-	id, err := articleService.SaveArticle(o)
+	article, err := articleService.SaveArticle(o)
 	if err != nil {
 		log.Warnf("用户id: %d 保存文章失败,err: %s", middleware.GetUserId(c), err.Error())
 		result.Err(utils.GetValidateErr(o, err)).Json(c)
 		return
 	}
-	articleData, err := articleService.GetArticleData(id, o.UserId)
+	articleData, err := articleService.GetArticleData(article.ID, o.UserId)
 	if err != nil {
-		log.Warnf("用户id: %d 获取文章失败,文章id: %d ,err: %s", middleware.GetUserId(c), id, err.Error())
+		log.Warnf("用户id: %d 获取文章失败,文章id: %d ,err: %s", middleware.GetUserId(c), article.ID, err.Error())
 		result.Err(err.Error()).Json(c)
 		return
 	}
-	result.OkWithMsg(articleData, constant.GetArticleMsg(o.State)).Json(c)
+	result.OkWithMsg(articleData, "保存成功").Json(c)
 }
 
 func articleLike(c *gin.Context) {
@@ -180,4 +183,48 @@ func articleTop(ctx *gin.Context) {
 	p, limit := page.GetPage(ctx)
 	articles, count := articleService.PageTopArticle(types, p, limit)
 	result.Page(articles, count, nil).Json(ctx)
+}
+
+func articleLatest(ctx *gin.Context) {
+	articles := articleService.LatestArticle()
+	result.Ok(articles, "").Json(ctx)
+}
+
+// 根据分类查询文章
+// 不用状态来区分文章，根据 普通分类 以及 QA分类 来决定对应状态即可
+// 文章状态: 发布，待解决，已解决，
+// 私密状态：发给 vx 单独处理
+func articlesByTypeId(ctx *gin.Context) {
+	typeId, err := strconv.Atoi(ctx.DefaultQuery("typeId", "0"))
+	userId := middleware.GetUserId(ctx)
+	if err != nil {
+		log.Warnf("用户id: %d 获取文章解析分类 id 失败, ,err: %s", userId, typeId, err.Error())
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	searchUserId, _ := strconv.Atoi(ctx.DefaultQuery("userId", "0"))
+
+	if userId != searchUserId {
+		userId = 0
+	}
+	result.Ok(articleService.ListByTypeId(typeId, searchUserId, userId), "").Json(ctx)
+	return
+}
+func publish(c *gin.Context) {
+	var o request.ReqArticle
+	if err := c.ShouldBindJSON(&o); err != nil {
+		msg := utils.GetValidateErr(o, err)
+		log.Warnf("用户id: %d 保存文章解析文章失败 ,err: %s", middleware.GetUserId(c), msg)
+		result.Err(msg).Json(c)
+		return
+	}
+	o.UserId = middleware.GetUserId(c)
+
+	article, err := articleService.PublishArticle(o)
+	if err != nil {
+		log.Warnf("用户id: %d 保存文章失败 ,err: %s", middleware.GetUserId(c), err.Error())
+		result.Err(err.Error()).Json(c)
+		return
+	}
+	result.OkWithMsg(nil, constant.GetArticleMsg(article.State)).Json(c)
 }

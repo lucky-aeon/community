@@ -100,6 +100,14 @@ func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content str
 
 }
 
+// 触发 @ 事件，直接通知用户
+func (s *SubscriptionService) NoticeUsers(eventId, triggerId int, userIds []int, b SubscribeData) {
+	go func(eventId, triggerId int, userIds []int, b SubscribeData) {
+		send(userIds, eventId, constant.MENTION, triggerId, b)
+	}(eventId, triggerId, userIds, b)
+
+}
+
 func (s *SubscriptionService) Send(eventId, eventType, fromId, toId int, b SubscribeData) {
 	go func(eventId, fromId, toId int, b SubscribeData) {
 		send([]int{toId}, eventId, eventType, fromId, b)

@@ -24,6 +24,7 @@ func InitCommentRouters(g *gin.Engine) {
 	group.GET("/byRootId/:rootId", listCommentsByRootId)
 	group.GET("/allCommentsByArticleId/:articleId", listAllCommentsByArticleId)
 	group.GET("/adaptions", adaptions)
+	group.GET("/byArticleId", listCommentsByArticleIdNoTree)
 	group.Use(middleware.OperLogger())
 	group.POST("/comment", comment)
 	group.DELETE("/:id", deleteComment)
@@ -160,7 +161,7 @@ func adoption(ctx *gin.Context) {
 	if article.UserId != userId {
 		msg = fmt.Sprintf("用户id: %d 采纳评论无权限,文章id: %d", userId, articleId)
 		log.Warnln(msg)
-		result.Err(msg).Json(ctx)
+		result.Err("只有发布者运行采纳").Json(ctx)
 		return
 	}
 	if state != constant.PrivateQuestion {
@@ -202,4 +203,24 @@ func adoption(ctx *gin.Context) {
 	}
 
 	result.OkWithMsg(nil, msg).Json(ctx)
+}
+
+// 返回文章下的所有评论，非树形结构
+func listCommentsByArticleIdNoTree(ctx *gin.Context) {
+	articleId, err := strconv.Atoi(ctx.Query("articleId"))
+	if err != nil {
+		result.Err("获取文章下的所有评论,文章 id 解析失败, err:" + err.Error()).Json(ctx)
+		return
+	}
+	// 校验文章
+	article := articleService.GetById(articleId)
+	if article.ID == 0 || article.State == constant.Draft || article.State == constant.QADraft {
+		result.Ok(nil, "文章不存在")
+		return
+	}
+	var cS services.CommentsService
+	comments := cS.ListCommentsByArticleIdNoTree(articleId)
+	var adS services.QAAdoption
+	adS.SetAdoptionComment(comments)
+	result.Ok(comments, "").Json(ctx)
 }

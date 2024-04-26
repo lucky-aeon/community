@@ -101,7 +101,7 @@ func (a *Article) UpdateCount(articleId, number int) {
 
 func (a *Article) GetArticleSql() *gorm.DB {
 	query := mysql.GetInstance().Table("articles").
-		Select("articles.id, articles.title, articles.state, articles.`like`, articles.created_at,articles.updated_at," +
+		Select("articles.id, articles.title, LEFT(articles.content, 100) as `desc`, articles.cover,articles.state, articles.`like`, articles.created_at,articles.updated_at," +
 			"tp.id as type_id, tp.title as type_title, tp.flag_name as type_flag, " +
 			"u.name as u_name, u.id as u_id, u.avatar as u_avatar, " +
 			"  GROUP_CONCAT(DISTINCT atg.tag_name) as tags").
@@ -110,5 +110,17 @@ func (a *Article) GetArticleSql() *gorm.DB {
 		Joins("LEFT JOIN types as tp on tp.id = articles.type").
 		Joins("LEFT JOIN users as u on u.id = articles.user_id").
 		Where("articles.deleted_at is null")
+	return query
+}
+
+// 用这个
+func (a *Article) GetQueryArticleSql() *gorm.DB {
+	query := mysql.GetInstance().Table("articles").
+		Select("articles.id, articles.title, articles.abstract,articles.cover,articles.state,articles.`like`,articles.created_at,articles.updated_at,types.id as type_id,types.title as type_title,types.flag_name as type_flag,users.`name` as u_name,users.id as u_id,users.avatar as u_avatar,GROUP_CONCAT(at.tag_name SEPARATOR ', ') AS tags").
+		Joins("LEFT JOIN article_tag_relations atr ON articles.id = atr.article_id").
+		Joins("LEFT JOIN article_tags at ON atr.tag_id = at.id").
+		Joins("join users on users.id = articles.user_id").
+		Joins("JOIN types on types.id = articles.type").
+		Group("articles.id, articles.title")
 	return query
 }

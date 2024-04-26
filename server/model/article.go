@@ -19,6 +19,8 @@ type Articles struct {
 	Like      int            `json:"like"`
 	Type      int            `json:"type"`
 	TopNumber int            `json:"topNumber"`
+	Cover     string         `json:"cover"`
+	Abstract  string         `json:"abstract"`
 	Tags      []int          `json:"tags" gorm:"-"`
 	Users     `gorm:"-" json:"user"`
 }
@@ -28,6 +30,8 @@ type ArticleData struct {
 	Title      string `json:"title"`
 	State      int    `json:"state"` // 状态:草稿/发布/待解决/已解决/已关闭
 	Like       int    `json:"like"`
+	Cover      string `json:"cover"`
+	Abstract   string `json:"abstract"`
 	Tags       any    `json:"tags"`
 	TypeSimple `json:"type"`
 	UserSimple `json:"user"`

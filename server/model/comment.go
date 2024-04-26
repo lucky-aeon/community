@@ -26,6 +26,7 @@ type Comments struct {
 	ToUserName         string          `json:"toUserName" gorm:"-"`
 	ArticleTitle       string          `json:"articleTitle" gorm:"-"`
 	FromUserAvatar     string          `json:"fromUserAvatar" gorm:"-"`
+	ToUserAvatar       string          `json:"toUserAvatar" gorm:"-"`
 	AdoptionState      bool            `json:"adoptionState" gorm:"-"`
 }
 

@@ -11,6 +11,7 @@ import (
 func InitTypeRouters(r *gin.Engine) {
 	g := r.Group("/community/classfiys")
 	g.GET("", list)
+	g.GET("/tree", treeTypes)
 }
 
 func list(ctx *gin.Context) {
@@ -20,4 +21,10 @@ func list(ctx *gin.Context) {
 	}
 	var typeService services.TypeService
 	result.Ok(typeService.List(parentId), "").Json(ctx)
+}
+
+func treeTypes(ctx *gin.Context) {
+	var typeService services.TypeService
+	types, _ := typeService.PageTypes(1, 99)
+	result.Ok(types, "").Json(ctx)
 }

@@ -39,6 +39,7 @@ func (*ArticleTagService) CreateTag(tag model.ArticleTags) (result *model.Articl
 		model.ArticleTag().Save(&tag)
 		tagId = tag.Id
 	}
+	tag.Id = tagId
 	model.ArticleTagUserRelation().Create(&model.ArticleTagUserRelations{UserId: tag.UserId, TagId: tagId})
 	return &tag, nil
 }

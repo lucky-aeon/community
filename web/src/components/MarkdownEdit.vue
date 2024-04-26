@@ -182,7 +182,6 @@ var cherryConfig = {
             }
         },
         afterChange(e, b, c) {
-            console.log(audioPlayers)
             audioPlayers.forEach(item => {
                 new XgPlayer(item)
             })
@@ -235,12 +234,14 @@ onMounted(() => {
 })
 
 watch(() => props.previewOnly, () => {
+
     refreshMarkdown(true)
 }, { immediate: true, deep: true })
 watch(() => props.showNav, () => {
     refreshMarkdown()
 }, { immediate: true, deep: true })
 watch(model, () => {
+
     refreshMarkdown()
 })
 

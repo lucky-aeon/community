@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"xhyovo.cn/community/pkg/log"
-
 	mapset "github.com/deckarep/golang-set/v2"
+	"regexp"
+	"xhyovo.cn/community/pkg/log"
+	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/request"
 
 	"gorm.io/gorm"
@@ -49,6 +50,7 @@ func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, 
 	}
 	var typeData model.TypeSimple
 	model.Type().Where("id = ?", a.Type).First(&typeData)
+
 	return &model.ArticleData{
 		ID:         a.ID,
 		Title:      a.Title,
@@ -60,6 +62,8 @@ func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, 
 		TypeSimple: typeData,
 		CreatedAt:  a.CreatedAt,
 		UpdatedAt:  a.UpdatedAt,
+		StateName:  constant.GetArticleName(a.State),
+		Abstract:   a.Abstract,
 	}, err
 }
 
@@ -110,7 +114,7 @@ func buildResultArticles(rows *sql.Rows) []*model.ArticleData {
 		itemUser := model.UserSimple{}
 		tags := ""
 		rows.Scan(
-			&item.ID, &item.Title, &item.State, &item.Like, &item.CreatedAt, &item.UpdatedAt,
+			&item.ID, &item.Title, &item.Abstract, &item.Cover, &item.State, &item.Like, &item.CreatedAt, &item.UpdatedAt,
 			&itemType.TypeId, &itemType.TypeTitle, &itemType.TypeFlag,
 			&itemUser.UName, &itemUser.UId, &itemUser.UAvatar,
 			&tags,
@@ -118,9 +122,8 @@ func buildResultArticles(rows *sql.Rows) []*model.ArticleData {
 		item.UserSimple = itemUser
 		item.TypeSimple = itemType
 		item.Tags = tags
-		if item.State != constant.Published {
-			item.StateName = constant.GetArticleName(item.State)
-		}
+		item.StateName = constant.GetArticleName(item.State)
+
 		result = append(result, &item)
 	}
 	return result
@@ -195,7 +198,7 @@ func (a *ArticleService) ArticlesLikeCount(ids []int) (count int64) {
 	return
 }
 
-func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
+func (a *ArticleService) SaveArticle(article request.ReqArticle) (*model.Articles, error) {
 
 	id := article.ID
 	typeO := article.Type
@@ -203,10 +206,10 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 	var typeS TypeService
 	types := typeS.GetById(typeO)
 	if types.ID == 0 {
-		return 0, errors.New("分类不存在")
+		return nil, errors.New("分类不存在")
 	}
 	if types.ParentId == 0 {
-		return 0, errors.New("不能选择一级分类")
+		return nil, errors.New("不能选择一级分类")
 	}
 
 	types = typeS.GetById(types.ParentId)
@@ -215,12 +218,12 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 
 	// QA 状态校验
 	if (state == constant.Resolved || state == constant.Pending || state == constant.QADraft) && state == constant.Published {
-		return 0, errors.New("QA不能选择已发布")
+		return nil, errors.New("QA不能选择已发布")
 	} else if state == constant.Published || state == constant.Draft {
 		// 文章 状态校验
 		if state == constant.Pending || state == constant.Resolved || state == constant.PrivateQuestion {
 			msg := constant.GetArticleName(state)
-			return 0, errors.New("文章不支持该状态:" + msg)
+			return nil, errors.New("文章不支持该状态:" + msg)
 		}
 	}
 	// 修改
@@ -232,11 +235,11 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 		// 修改 一级分类不能修改,如果parent不同则修改了一级分类
 		newTypeParentId := types.ID
 		if oldTypeParentId != newTypeParentId {
-			return 0, errors.New("修改的分类只能属于同一级分类下")
+			return nil, errors.New("修改的分类只能属于同一级分类下")
 		}
 		// 老文章状态如果为非草稿状态，则新文章不可修改为草稿状态
 		if (oldArticle.State != constant.Draft && state == constant.Draft) || (oldArticle.State != constant.QADraft && state == constant.QADraft) {
-			return 0, errors.New("旧文章状态不可从非草稿转为草稿")
+			return nil, errors.New("旧文章状态不可从非草稿转为草稿")
 		}
 	}
 
@@ -277,7 +280,7 @@ func (a *ArticleService) SaveArticle(article request.ReqArticle) (int, error) {
 		subscriptionService.ConstantAtSend(event.ArticleAt, id, articleObject.Content, b)
 	}
 	go d.DelDraft(article.UserId)
-	return id, nil
+	return articleObject, nil
 }
 
 func (a *ArticleService) DeleteByUserId(articleId, userId int) (err error) {
@@ -377,11 +380,8 @@ func (a *ArticleService) QAArticleCount(userId int) (count int64) {
 }
 
 func (a *ArticleService) PageTopArticle(types string, page, limit int) (result []*model.ArticleData, count int64) {
-
-	query := articleDao.GetArticleSql()
-	query.Where("articles.state = ? and tp.flag_name = ?", constant.Top, types)
-	query.Group("articles.id").Count(&count)
-	rows, err := query.Order("articles.top_number desc").Limit(limit).Offset((page - 1) * limit).Rows()
+	query := articleDao.GetQueryArticleSql()
+	rows, err := query.Where("articles.top_number > 0").Order("articles.top_number desc").Rows()
 	if err != nil {
 		return
 	}
@@ -393,4 +393,152 @@ func (a *ArticleService) PageTopArticle(types string, page, limit int) (result [
 func (a *ArticleService) UpdateArticleState(article request.TopArticle) error {
 
 	return model.Article().Where("id = ?", article.Id).Updates(&article).Error
+}
+
+// 根据分类查询文章
+func (a *ArticleService) ListByTypeId(typeId, searchUserId, currentUserId int) []*model.ArticleData {
+	query := articleDao.GetQueryArticleSql()
+
+	typeObject := typeDao.GetById(typeId)
+	if typeObject.ID == 0 {
+		return []*model.ArticleData{}
+	}
+	if searchUserId == 0 && currentUserId == 0 {
+		if typeObject.Title == "QA" {
+			query.Where("articles.state = ? or articles.state = ?", constant.Pending, constant.Resolved)
+		} else if typeObject.Title == "文章" {
+			query.Where("articles.state = ?", constant.Published)
+		} else {
+			// 当前分类的父分类
+			parentType := typeDao.GetById(typeObject.ParentId)
+			if parentType.Title == "QA" {
+				query.Where("articles.state = ? or articles.state = ?", constant.Pending, constant.Resolved)
+			} else if parentType.Title == "文章" {
+				query.Where("articles.state = ?", constant.Published)
+			}
+			query.Where("articles.type = ?", typeId)
+		}
+	} else if searchUserId != 0 && searchUserId != currentUserId {
+		// 查看别人的文章
+		query.Where("articles.state in (?)", []int{constant.Published, constant.Pending, constant.Resolved})
+	} else {
+		query.Where("articles.user_id = ?", currentUserId)
+	}
+	query.Where("articles.deleted_at is NULL")
+	query.Order("articles.created_at desc")
+	rows, err := query.Rows()
+	if err != nil {
+		return []*model.ArticleData{}
+	}
+	defer rows.Close()
+
+	return buildResultArticles(rows)
+}
+
+func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.Articles, error) {
+
+	id := reqArticle.ID
+	typeO := reqArticle.Type
+	flag := true
+	var typeS TypeService
+	types := typeS.GetById(typeO)
+	if types.ID == 0 {
+		return nil, errors.New("分类不存在")
+	}
+	if types.ParentId == 0 {
+		return nil, errors.New("不能选择一级分类")
+	}
+
+	types = typeS.GetById(types.ParentId)
+	// 状态是否存在
+	state := reqArticle.State
+
+	if (types.Title == "文章") && state != constant.Published && state != constant.Draft {
+		return nil, errors.New("发布普通文章状态只能选择 草稿 / 发布")
+	} else if (types.Title == "QA") && state != constant.Draft && state != constant.Resolved && state != constant.Pending && state != constant.Published {
+		return nil, errors.New("发布QA文章状态只能选择 草稿 / 待解决 / 已解决")
+	} else if (types.Title == "QA") && state == constant.Published {
+		state = constant.Pending
+	}
+
+	// 只需要处理修改情况
+	if id != 0 {
+		// QA 无法从已解决变更为待解决
+		flag = false
+		// 获取老文章
+		oldArticle := a.GetById(id)
+		oldTypeParentId := typeS.GetById(oldArticle.Type).ParentId
+		// 修改 一级分类不能修改,如果parent不同则修改了一级分类
+		newTypeParentId := types.ID
+		if oldTypeParentId != newTypeParentId {
+			return nil, errors.New("修改的分类只能属于同一级分类下")
+		}
+
+		if (types.Title == "QA") && (state == constant.Draft || state == constant.Pending) && oldArticle.State == constant.Resolved {
+			return nil, errors.New("不允许从已解决变更为草稿或者待解决")
+		}
+	}
+	if reqArticle.Abstract == "" {
+		var n = 100
+		if len(reqArticle.Content) < 100 {
+			n = len(reqArticle.Content)
+		}
+		reqArticle.Abstract = reqArticle.Content[0:n]
+		re := regexp.MustCompile(`\s+`)
+		reqArticle.Abstract = re.ReplaceAllString(reqArticle.Abstract, " ")
+	}
+	articleObject := &model.Articles{
+		ID:       reqArticle.ID,
+		Title:    reqArticle.Title,
+		Content:  reqArticle.Content,
+		UserId:   reqArticle.UserId,
+		State:    state,
+		Type:     reqArticle.Type,
+		Abstract: reqArticle.Abstract,
+	}
+	cover := utils.GetFirstImage(articleObject.Content)
+	articleObject.Cover = cover
+	// 分开写，避免更新 0 值
+	if reqArticle.ID == 0 {
+		mysql.GetInstance().Save(&articleObject)
+	} else {
+		model.Article().Where("user_id = ? and id = ?", articleObject.UserId, articleObject.ID).Updates(&articleObject)
+	}
+	jsonBody, _ := json.Marshal(articleObject)
+	log.Infof("用户id: %d,保存文章: %s", articleObject.UserId, jsonBody)
+	id = articleObject.ID
+	// 关联关系
+	db := model.ArticleTagRelation
+	db().Where("article_id = ?", id).Delete(nil)
+	var tags []model.ArticleTagRelations
+	for i := range reqArticle.Tags {
+		tags = append(tags, model.ArticleTagRelations{ArticleId: id, TagId: reqArticle.Tags[i], UserId: reqArticle.UserId})
+	}
+	db().Create(&tags)
+	var subscriptionService SubscriptionService
+	var d Draft
+	if flag {
+		var b SubscribeData
+		b.UserId = articleObject.UserId
+		b.ArticleId = articleObject.ID
+		b.CurrentBusinessId = articleObject.ID
+		b.SubscribeId = articleObject.UserId
+		subscriptionService.Do(event.UserFollowingEvent, b)
+		subscriptionService.NoticeUsers(event.ArticleAt, id, reqArticle.NoticeUser, b)
+	}
+	go d.DelDraft(reqArticle.UserId)
+	return articleObject, nil
+}
+
+func (a *ArticleService) LatestArticle() (result []*model.ArticleData) {
+	query := articleDao.GetQueryArticleSql()
+	query.Where("articles.state in (?)", []int{constant.Published, constant.Resolved, constant.Pending})
+	rows, err := query.Order("articles.created_at desc").Limit(10).Rows()
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	result = buildResultArticles(rows)
+	return result
 }

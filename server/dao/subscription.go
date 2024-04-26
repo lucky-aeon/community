@@ -12,7 +12,7 @@ type SubscriptionDao struct {
 func (*SubscriptionDao) ListSubscription(userId, event, page, limit int) []model.Subscriptions {
 	var subscriptions []model.Subscriptions
 
-	model.Subscription().Where(&model.Subscriptions{SubscriberId: userId, EventId: event}).Offset((page - 1) * limit).Limit(limit).Find(&subscriptions)
+	model.Subscription().Where(&model.Subscriptions{SubscriberId: userId, EventId: event}).Offset((page - 1) * limit).Limit(limit).Order("created_at desc").Find(&subscriptions)
 	return subscriptions
 }
 

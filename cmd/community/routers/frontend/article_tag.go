@@ -51,7 +51,7 @@ func saveArticleTags(c *gin.Context) {
 		result.Err(err.Error()).Json(c)
 		return
 	}
-	result.Ok(tag, "").Json(c)
+	result.Ok(tag, "创建成功").Json(c)
 }
 
 func deleteArticleTags(c *gin.Context) {

@@ -132,6 +132,7 @@ func setCommentUserInfoAndArticleTitle(comments []*model.Comments) {
 		comment.FromUserAvatar = userNameMap[comment.FromUserId].Avatar
 		if comment.ParentId != 0 {
 			comment.ToUserName = userNameMap[comment.ToUserId].Name
+			comment.ToUserAvatar = userNameMap[comment.ToUserId].Avatar
 		}
 	}
 }
@@ -195,4 +196,11 @@ func (a *CommentsService) ListAdoptionsByArticleId(articleId, page, limit int) (
 	}
 	setCommentUserInfoAndArticleTitle(comments)
 	return
+}
+
+func (a *CommentsService) ListCommentsByArticleIdNoTree(id int) (comments []*model.Comments) {
+
+	model.Comment().Where("business_id = ? and tenant_id = ? ", id, 0).Order("created_at desc").Find(&comments)
+	setCommentUserInfoAndArticleTitle(comments)
+	return comments
 }

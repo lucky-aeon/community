@@ -40,6 +40,7 @@ func InitUserRouters(r *gin.Engine) {
 	group.GET("", listUsers)
 	group.GET("/tags/:userId", getTagsByUserId)
 	group.GET("/active", activeUsers)
+	group.GET("/all", listAllUsers)
 	group.Use(middleware.OperLogger())
 	group.POST("/edit/:tab", updateUser)
 }
@@ -165,4 +166,20 @@ func getTagsByUserId(ctx *gin.Context) {
 	}
 	tagNames := userTagS.GetTagsByUserId(userId)
 	result.Ok(tagNames, "").Json(ctx)
+}
+
+// 查询所有用户
+func listAllUsers(ctx *gin.Context) {
+	var data []model.Users
+	model.User().Select("id", "name").Find(&data)
+
+	users := []map[string]interface{}{}
+
+	for _, item := range data {
+		users = append(users, map[string]interface{}{
+			"name": item.Name,
+			"code": item.ID,
+		})
+	}
+	result.Ok(users, "").Json(ctx)
 }

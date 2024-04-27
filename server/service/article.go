@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
-	"regexp"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/request"
@@ -478,15 +477,7 @@ func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.A
 			return nil, errors.New("不允许从已解决变更为草稿或者待解决")
 		}
 	}
-	if reqArticle.Abstract == "" {
-		var n = 100
-		if len(reqArticle.Content) < 100 {
-			n = len(reqArticle.Content)
-		}
-		reqArticle.Abstract = reqArticle.Content[0:n]
-		re := regexp.MustCompile(`\s+`)
-		reqArticle.Abstract = re.ReplaceAllString(reqArticle.Abstract, " ")
-	}
+
 	articleObject := &model.Articles{
 		ID:       reqArticle.ID,
 		Title:    reqArticle.Title,

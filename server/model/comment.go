@@ -17,7 +17,7 @@ type Comments struct {
 	Content            string          `json:"content" binding:"required" msg:"请评论内容"`
 	FromUserId         int             `json:"FromUserId"`
 	ToUserId           int             `json:"toUserId"`
-	BusinessId         int             `json:"articleId" binding:"required" msg:"请选择对应的文章进行评论"`
+	BusinessId         int             `json:"businessId" binding:"required" msg:"评论对象不可为空"`
 	BusinessUserId     int             `json:"businessUserId"`
 	TenantId           int             `json:"tenantId"`
 	ChildComments      []*Comments     `gorm:"-" json:"childComments"`

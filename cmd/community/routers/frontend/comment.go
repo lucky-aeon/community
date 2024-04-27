@@ -122,17 +122,17 @@ func listCommentsByRootId(ctx *gin.Context) {
 
 // 查询用户文章下的所有评论，文章id为空则查询所有(管理端)
 func listAllCommentsByArticleId(ctx *gin.Context) {
-	articleId, err := strconv.Atoi(ctx.Param("articleId"))
-	p, limit := page.GetPage(ctx)
-
+	businessUserId, err := strconv.Atoi(ctx.Param("businessUserId"))
 	if err != nil {
 		log.Warnf("用户id: %d 查询用户文章下的所有评论失败,err: %s", middleware.GetUserId(ctx), err.Error())
-		result.Err("文章不可为空").Json(ctx)
+		result.Err("查询对应业务id不可为空").Json(ctx)
 		return
 	}
+	p, limit := page.GetPage(ctx)
+
 	userId := middleware.GetUserId(ctx)
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetAllCommentsByArticleID(p, limit, userId, articleId)
+	comments, count := commentsService.GetAllCommentsByArticleID(p, limit, userId, businessUserId, 0)
 	var adS services.QAAdoption
 	adS.SetAdoptionComment(comments)
 	result.Ok(page.New(comments, count), "").Json(ctx)
@@ -207,19 +207,20 @@ func adoption(ctx *gin.Context) {
 
 // 返回文章下的所有评论，非树形结构
 func listCommentsByArticleIdNoTree(ctx *gin.Context) {
-	articleId, err := strconv.Atoi(ctx.Query("articleId"))
+	businessId, err := strconv.Atoi(ctx.Query("businessId"))
 	if err != nil {
 		result.Err("获取文章下的所有评论,文章 id 解析失败, err:" + err.Error()).Json(ctx)
 		return
 	}
-	// 校验文章
-	article := articleService.GetById(articleId)
-	if article.ID == 0 || article.State == constant.Draft || article.State == constant.QADraft {
-		result.Ok(nil, "文章不存在")
+	tenantId, err := strconv.Atoi(ctx.Query("tenantId"))
+	if err != nil {
+		log.Warnf("用户id: %d 查询用户文章下的所有评论失败,err: %s", middleware.GetUserId(ctx), err.Error())
+		result.Err("查询对应模块id不可为空").Json(ctx)
 		return
 	}
+
 	var cS services.CommentsService
-	comments := cS.ListCommentsByArticleIdNoTree(articleId)
+	comments := cS.ListCommentsByArticleIdNoTree(businessId, tenantId)
 	var adS services.QAAdoption
 	adS.SetAdoptionComment(comments)
 	result.Ok(comments, "").Json(ctx)

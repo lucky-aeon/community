@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/constant"
@@ -22,13 +21,6 @@ func NewCommentService(ctx *gin.Context) *CommentsService {
 // 发布评论
 func (a *CommentsService) Comment(comment *model.Comments) error {
 
-	articleId := comment.BusinessId
-	article := articleDao.GetById(articleId)
-
-	if article.ID == 0 {
-		return errors.New("文章不存在")
-	}
-
 	parentId := comment.ParentId
 	// 父评论是否存在
 	if parentId != 0 {
@@ -44,21 +36,35 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 		b.CurrentBusinessId = comment.BusinessId
 		s.Send(event.ReplyComment, constant.NOTICE, comment.FromUserId, comment.ToUserId, b)
 	}
-	comment.BusinessUserId = article.UserId
 	commentDao.AddComment(comment)
 	var subscriptionService SubscriptionService
 	var b SubscribeData
-	b.CommentId = comment.BusinessId
+	b.CommentId = comment.ID
 	b.UserId = comment.FromUserId
 	b.ArticleId = comment.BusinessId
 	b.CurrentBusinessId = comment.BusinessId
 	b.SubscribeId = comment.BusinessId
+	b.SectionId = comment.BusinessId
+	b.CourseId = comment.BusinessId
+	eventId := event.CommentUpdateEvent
+	userId := 0
+	if comment.TenantId == 0 {
+		var articles ArticleService
+		userId = articles.GetById(comment.BusinessId).UserId
+	}
+	if comment.TenantId == 1 {
+		var courS CourseService
+		userId = courS.GetCourseSectionDetail(comment.BusinessId).UserId
+		eventId = event.SectionComment
+	} else if comment.TenantId == 2 {
+		var courS CourseService
+		userId = courS.GetCourseDetail(comment.BusinessId).UserId
+		eventId = event.CourseComment
+	}
 	subscriptionService.ConstantAtSend(event.CommentAt, comment.FromUserId, comment.Content, b)
-	subscriptionService.Do(event.CommentUpdateEvent, b)
-	var articles ArticleService
-
+	subscriptionService.Do(eventId, b)
 	// 文章发布者收到消息
-	subscriptionService.Send(event.CommentUpdateEvent, constant.NOTICE, comment.FromUserId, articles.GetById(comment.BusinessId).UserId, b)
+	subscriptionService.Send(eventId, constant.NOTICE, comment.FromUserId, userId, b)
 	jsonBody, _ := json.Marshal(comment)
 	log.Infof("用户id: %d,发布评论: %s", comment.FromUserId, jsonBody)
 	return nil
@@ -138,8 +144,8 @@ func setCommentUserInfoAndArticleTitle(comments []*model.Comments) {
 }
 
 // 查询用户的评论(管理端)
-func (*CommentsService) GetAllCommentsByArticleID(page, limit, userId, businessId int) ([]*model.Comments, int64) {
-	comments, count := commentDao.GetAllCommentsByArticleID(page, limit, userId, businessId)
+func (*CommentsService) GetAllCommentsByArticleID(page, limit, userId, businessId, tenantId int) ([]*model.Comments, int64) {
+	comments, count := commentDao.GetAllCommentsByArticleID(page, limit, userId, businessId, tenantId)
 	if count == 0 {
 		return comments, count
 	}
@@ -198,9 +204,9 @@ func (a *CommentsService) ListAdoptionsByArticleId(articleId, page, limit int) (
 	return
 }
 
-func (a *CommentsService) ListCommentsByArticleIdNoTree(id int) (comments []*model.Comments) {
+func (a *CommentsService) ListCommentsByArticleIdNoTree(businessId, tenantId int) (comments []*model.Comments) {
 
-	model.Comment().Where("business_id = ? and tenant_id = ? ", id, 0).Order("created_at desc").Find(&comments)
+	model.Comment().Where("business_id = ? and tenant_id = ? ", businessId, tenantId).Order("created_at desc").Find(&comments)
 	setCommentUserInfoAndArticleTitle(comments)
 	return comments
 }

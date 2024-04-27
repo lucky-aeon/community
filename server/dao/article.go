@@ -121,6 +121,7 @@ func (a *Article) GetQueryArticleSql() *gorm.DB {
 		Joins("LEFT JOIN article_tags at ON atr.tag_id = at.id").
 		Joins("join users on users.id = articles.user_id").
 		Joins("JOIN types on types.id = articles.type").
-		Group("articles.id, articles.title")
+		Group("articles.id, articles.title").
+		Where("articles.deleted_at is null")
 	return query
 }

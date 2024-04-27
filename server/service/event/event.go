@@ -7,6 +7,9 @@ const (
 	CommentAt                     // 评论中@
 	ReplyComment                  // 评论回复
 	Adoption                      // 评论回复
+	SectionComment                // 章节评论
+	CourseComment                 // 课程回复
+	CourseUpdate                  // 课程更新
 )
 
 var events []*event

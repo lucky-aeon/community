@@ -62,6 +62,9 @@ func (*SubscriptionService) Subscribe(subscription *model.Subscriptions) bool {
 		model.Article().Where("id = ?", businessId).Select("user_id").First(&subscription.SendId)
 	} else if event.UserFollowingEvent == subscription.EventId {
 		model.User().Where("id = ?", businessId).Select("id").First(&subscription.SendId)
+	} else if event.CourseUpdate == subscription.EventId {
+		model.Course().Where("id = ?", businessId).Select("user_id").First(&subscription.SendId)
+
 	}
 
 	return subscriptionDao.Subscribe(subscription)

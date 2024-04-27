@@ -31,6 +31,14 @@ func init() {
 		"comment.ToUserName":   "to_user_name",
 		"comment.ArticleTitle": "article_title",
 	}
+	messageTemplateVar["course"] = map[string]string{
+		"course.id":    "id",
+		"course.title": "title",
+	}
+	messageTemplateVar["courses_section"] = map[string]string{
+		"courses_section.id":    "id",
+		"courses_section.title": "title",
+	}
 }
 
 // 发送消息中消息模板需要用到的业务id
@@ -40,6 +48,8 @@ type SubscribeData struct {
 	CommentId         int
 	CurrentBusinessId int // 当前主业务id
 	SubscribeId       int // 订阅业务的id(在消息中可以点击跳转的)
+	SectionId         int // 章节id
+	CourseId          int // 课程id
 }
 
 type MessageService struct {
@@ -140,9 +150,11 @@ func (m *MessageService) GetMsg(template string, b SubscribeData) string {
 
 func businessIdToMap(b SubscribeData) map[string]int {
 	m := map[string]int{
-		"user":    b.UserId,
-		"article": b.ArticleId,
-		"comment": b.CommentId,
+		"user":            b.UserId,
+		"article":         b.ArticleId,
+		"comment":         b.CommentId,
+		"course":          b.CourseId,
+		"courses_section": b.SectionId,
 	}
 	return m
 }

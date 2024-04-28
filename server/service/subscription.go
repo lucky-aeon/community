@@ -20,13 +20,15 @@ func (*SubscriptionService) ListSubscription(userId, eventId, page, limit int) [
 
 	var userIds []int
 	var articleIds []int
-
+	var courseIds []int
 	for i := range subscriptions {
 		v := subscriptions[i]
 		if v.EventId == event.CommentUpdateEvent {
 			articleIds = append(articleIds, v.BusinessId)
 		} else if v.EventId == event.UserFollowingEvent {
 			userIds = append(userIds, v.BusinessId)
+		} else if v.EventId == event.CourseUpdate {
+			courseIds = append(courseIds, v.BusinessId)
 		}
 	}
 	var articleService ArticleService
@@ -35,6 +37,8 @@ func (*SubscriptionService) ListSubscription(userId, eventId, page, limit int) [
 	var userService UserService
 	nameMap := userService.ListByIdsToMap(userIds)
 
+	var courseService CourseService
+	courseMap := courseService.ListByIdsSelectIdTitleMap(courseIds)
 	for i := range subscriptions {
 		v := &subscriptions[i]
 		businessId := v.BusinessId
@@ -42,6 +46,8 @@ func (*SubscriptionService) ListSubscription(userId, eventId, page, limit int) [
 			v.BusinessName = articleMap[businessId]
 		} else if v.EventId == event.UserFollowingEvent {
 			v.BusinessName = nameMap[businessId].Name
+		} else if v.EventId == event.CourseUpdate {
+			v.BusinessName = courseMap[businessId]
 		}
 		v.EventName = event.GetMsg(v.EventId)
 	}

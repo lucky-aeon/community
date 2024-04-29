@@ -9,18 +9,24 @@ import (
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
 	services "xhyovo.cn/community/server/service"
+	"xhyovo.cn/community/server/service/event"
 )
 
 func InitMessageRouters(r *gin.Engine) {
 	group := r.Group("/community/message")
 	group.GET("/unReader/count", getUnReadMsgCount)
 	group.GET("", listMsg)
+	group.GET("/pageName/:eventId", pageName)
 	group.Use(middleware.OperLogger())
 	group.POST("/read", readMsg)
 	group.DELETE("/UnReadMsg/:type", clearUnReadMsg)
 
 }
 
+func pageName(ctx *gin.Context) {
+	eventId, _ := strconv.Atoi(ctx.Param("eventId"))
+	result.Ok(event.PageName()[eventId], "").Json(ctx)
+}
 func getUnReadMsgCount(ctx *gin.Context) {
 	userId := middleware.GetUserId(ctx)
 	var msgService services.MessageService

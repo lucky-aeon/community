@@ -24,6 +24,9 @@ func init() {
 	events = append(events, &event{Id: CommentAt, Msg: "评论 @"})
 	events = append(events, &event{Id: ReplyComment, Msg: "评论回复"})
 	events = append(events, &event{Id: Adoption, Msg: "采纳"})
+	events = append(events, &event{Id: SectionComment, Msg: "章节回复"})
+	events = append(events, &event{Id: CourseComment, Msg: "课程回复"})
+	events = append(events, &event{Id: CourseUpdate, Msg: "课程更新"})
 
 	eventMap[CommentUpdateEvent] = "文章评论"
 	eventMap[UserFollowingEvent] = "用户文章更新"

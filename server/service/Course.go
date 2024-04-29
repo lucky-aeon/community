@@ -84,3 +84,22 @@ func (*CourseService) DeleteCourseSection(id int) {
 	model.CoursesSection().Delete("id = ?", id)
 	// 对应评论一并删除 todo
 }
+
+func (c *CourseService) ListByIdsSelectIdTitleMap(ids []int) (m map[int]string) {
+	rows, err := model.Course().Where("id in ?", ids).Select("id", "title").Rows()
+	defer rows.Close()
+	if err != nil {
+		// 处理错误
+		return nil
+	}
+	m = make(map[int]string)
+	for rows.Next() {
+		var id int
+		var title string
+		if err := rows.Scan(&id, &title); err != nil {
+			// 处理错误
+		}
+		m[id] = title
+	}
+	return
+}

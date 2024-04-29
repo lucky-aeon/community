@@ -122,17 +122,12 @@ func listCommentsByRootId(ctx *gin.Context) {
 
 // 查询用户文章下的所有评论，文章id为空则查询所有(管理端)
 func listAllCommentsByArticleId(ctx *gin.Context) {
-	businessUserId, err := strconv.Atoi(ctx.Param("businessUserId"))
-	if err != nil {
-		log.Warnf("用户id: %d 查询用户文章下的所有评论失败,err: %s", middleware.GetUserId(ctx), err.Error())
-		result.Err("查询对应业务id不可为空").Json(ctx)
-		return
-	}
+
 	p, limit := page.GetPage(ctx)
 
 	userId := middleware.GetUserId(ctx)
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetAllCommentsByArticleID(p, limit, userId, businessUserId, 0)
+	comments, count := commentsService.GetAllCommentsByArticleID(p, limit, userId, 0, 0)
 	var adS services.QAAdoption
 	adS.SetAdoptionComment(comments)
 	result.Ok(page.New(comments, count), "").Json(ctx)

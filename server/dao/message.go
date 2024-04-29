@@ -51,7 +51,7 @@ func (*MessageDao) DeleteMessageLogs(id []int) {
 }
 
 // 保存消息
-func (*MessageDao) SaveMessage(from, types, businessId int, to []int, content string) {
+func (*MessageDao) SaveMessage(from, types, eventId, businessId int, to []int, content string) {
 	var msgs []*model.MessageStates
 	for i := range to {
 		state := &model.MessageStates{
@@ -60,6 +60,7 @@ func (*MessageDao) SaveMessage(from, types, businessId int, to []int, content st
 			Content:   content,
 			Type:      types,
 			State:     1,
+			EventId:   eventId,
 			ArticleId: businessId,
 		}
 		msgs = append(msgs, state)

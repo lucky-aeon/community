@@ -16,6 +16,8 @@ var events []*event
 
 var eventMap = make(map[int]string)
 
+var eventPage = make(map[int]string)
+
 func init() {
 	events = append(events, nil)
 	events = append(events, &event{Id: CommentUpdateEvent, Msg: "文章评论"})
@@ -34,6 +36,20 @@ func init() {
 	eventMap[CommentAt] = "评论 @"
 	eventMap[ReplyComment] = "评论回复"
 	eventMap[Adoption] = "采纳"
+	eventMap[SectionComment] = "章节回复"
+	eventMap[CourseComment] = "课程回复"
+	eventMap[CourseUpdate] = "课程更新"
+
+	eventPage[CommentUpdateEvent] = "articleView"
+	eventPage[UserFollowingEvent] = "articleView"
+	eventPage[ArticleAt] = "articleView"
+	eventPage[CommentAt] = "articleView"
+	eventPage[ReplyComment] = "articleView"
+	eventPage[Adoption] = "articleView"
+	eventPage[SectionComment] = "articleView"
+	eventPage[CourseComment] = ""
+	eventPage[CourseUpdate] = ""
+
 }
 
 // 事件
@@ -52,4 +68,8 @@ func List() []*event {
 }
 func Map() map[int]string {
 	return eventMap
+}
+
+func PageName() map[int]string {
+	return eventPage
 }

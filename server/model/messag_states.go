@@ -15,6 +15,7 @@ type MessageStates struct {
 	State     int            `json:"state"`     // 消息状态:未读:1 已读:0
 	Type      int            `json:"type"`      // 消息类型:通知消息:1 @:2
 	ArticleId int            `json:"articleId"` // 文章id
+	EventId   int            `json:"eventId"`   // 事件id
 	CreatedAt time.LocalTime `json:"createdAt"` // 发送时间
 }
 

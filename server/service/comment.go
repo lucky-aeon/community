@@ -22,31 +22,31 @@ func NewCommentService(ctx *gin.Context) *CommentsService {
 func (a *CommentsService) Comment(comment *model.Comments) error {
 
 	parentId := comment.ParentId
+	var subscriptionService SubscriptionService
+	var b SubscribeData
+
 	// 父评论是否存在
+
 	if parentId != 0 {
 		parentComment := commentDao.GetByParentId(parentId)
 		comment.ToUserId = parentComment.FromUserId
 		comment.RootId = parentComment.RootId
 		comment.BusinessId = parentComment.BusinessId
 		comment.RootId = parentComment.RootId
-		var s SubscriptionService
-		var b SubscribeData
-		b.UserId = comment.FromUserId
-		b.ArticleId = comment.BusinessId
-		b.CurrentBusinessId = comment.BusinessId
-		s.Send(event.ReplyComment, constant.NOTICE, comment.FromUserId, comment.ToUserId, b)
 	}
 	commentDao.AddComment(comment)
-	var subscriptionService SubscriptionService
-	var b SubscribeData
-	b.CommentId = comment.ID
 	b.UserId = comment.FromUserId
 	b.ArticleId = comment.BusinessId
 	b.CurrentBusinessId = comment.BusinessId
 	b.SubscribeId = comment.BusinessId
 	b.SectionId = comment.BusinessId
 	b.CourseId = comment.BusinessId
+	b.CommentId = comment.ID
 	eventId := event.CommentUpdateEvent
+	// 延迟发送评论事件
+	if parentId != 0 {
+		subscriptionService.Send(event.ReplyComment, constant.NOTICE, comment.FromUserId, comment.ToUserId, b)
+	}
 	userId := 0
 	if comment.TenantId == 0 {
 		var articles ArticleService

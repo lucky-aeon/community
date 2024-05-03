@@ -14,6 +14,5 @@ type ReqArticle struct {
 
 type TopArticle struct {
 	Id        int `json:"id"`
-	State     int `json:"state"`
 	TopNumber int `json:"topNumber"`
 }

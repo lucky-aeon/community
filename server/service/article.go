@@ -533,3 +533,7 @@ func (a *ArticleService) LatestArticle() (result []*model.ArticleData) {
 	result = buildResultArticles(rows)
 	return result
 }
+
+func (a *ArticleService) UpdateTopNumber(article request.TopArticle) {
+	model.Article().Where("id = ?", article.Id).Updates(&article)
+}

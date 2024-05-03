@@ -15,7 +15,7 @@ var courseService services.CourseService
 
 func InitCourseRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/courses")
-
+	group.GET("/tree", ListCourseTree)
 	group.POST("", PublishCourse)
 	group.DELETE("/:id", DeleteCourse)
 	group.POST("/section", PublishSection)
@@ -81,4 +81,14 @@ func DeleteCourseSection(ctx *gin.Context) {
 	}
 	courseService.DeleteCourseSection(id)
 	result.OkWithMsg(nil, "删除成功").Json(ctx)
+}
+
+// 获取所有的课程以及章节为树形
+func ListCourseTree(ctx *gin.Context) {
+
+	result.Ok(courseService.ListCourseTree(), "").Json(ctx)
+}
+
+func ListCourseTitle() {
+
 }

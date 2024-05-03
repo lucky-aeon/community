@@ -15,9 +15,11 @@ import (
 func InitArticleRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/article")
 	group.GET("/page", listArticles)
-	group.DELETE("/:id", deleteArticle, middleware.OperLogger())
-	group.POST("/state", articleState, middleware.OperLogger())
 	group.GET("/states", listStates)
+	group.Use(middleware.OperLogger())
+	group.DELETE("/:id", deleteArticle)
+	group.POST("/state", articleState)
+	group.POST("/topNumber", updateTopNumber)
 }
 
 func listArticles(ctx *gin.Context) {
@@ -61,4 +63,16 @@ func articleState(ctx *gin.Context) {
 
 func listStates(ctx *gin.Context) {
 	result.Ok(constant.ListState(), "").Json(ctx)
+}
+
+func updateTopNumber(ctx *gin.Context) {
+	var topArticle request.TopArticle
+	if err := ctx.ShouldBindJSON(&topArticle); err != nil {
+		log.Warnf("修改文章置顶失败,err: %s", err.Error())
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	var a services.ArticleService
+	a.UpdateTopNumber(topArticle)
+	result.OkWithMsg(nil, "修改成功").Json(ctx)
 }

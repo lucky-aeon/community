@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"sort"
 	"strings"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
@@ -102,4 +103,34 @@ func (c *CourseService) ListByIdsSelectIdTitleMap(ids []int) (m map[int]string) 
 		m[id] = title
 	}
 	return
+}
+
+func (c *CourseService) ListCourseTree() (courses []model.Courses) {
+	// 获取所有章节
+	model.Course().Find(&courses)
+	// 获取所有课程
+	var sections []model.CoursesSections
+	model.CoursesSection().Find(&sections)
+	// 构建课程树
+	c.buildCourseTree(courses, sections)
+	return courses
+}
+
+func (c *CourseService) buildCourseTree(courses []model.Courses, sections []model.CoursesSections) {
+	// 章节转为 map
+	var sectionMap = make(map[int][]model.CoursesSections)
+	for i := range sections {
+		sectionMap[sections[i].CourseId] = append(sectionMap[sections[i].CourseId], sections[i])
+	}
+	// 对课程中的章节排序
+	for i := range sectionMap {
+
+		sort.Slice(sectionMap[i], func(j, k int) bool {
+			return sectionMap[i][j].Sort < sectionMap[i][k].Sort
+		})
+	}
+	// 遍历课程，对应的章节数组放入课程
+	for i := range courses {
+		courses[i].Sections = sectionMap[courses[i].ID]
+	}
 }

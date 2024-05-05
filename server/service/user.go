@@ -3,7 +3,6 @@ package services
 import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
-
 	"xhyovo.cn/community/pkg/mysql"
 
 	"xhyovo.cn/community/pkg/cache"
@@ -13,6 +12,14 @@ import (
 )
 
 type UserService struct {
+}
+
+func (s UserService) DeleteUser(id int) {
+	var user model.Users
+	model.User().Where("id = ?", id).Find(&user)
+	mysql.GetInstance().Where("id = ?", id).Delete(&model.Users{})
+	mysql.GetInstance().Delete(&model.InviteCodes{}, user.InviteCode)
+
 }
 
 func (s UserService) ActiveUsers(page, limit int) (users []*model.UserSimple, count int64) {

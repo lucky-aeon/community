@@ -134,3 +134,9 @@ func (c *CourseService) buildCourseTree(courses []model.Courses, sections []mode
 		courses[i].Sections = sectionMap[courses[i].ID]
 	}
 }
+
+func (c *CourseService) ListCourseTitle() []model.Courses {
+	var courses []model.Courses
+	model.Course().Select("id", "title").Find(&courses)
+	return courses
+}

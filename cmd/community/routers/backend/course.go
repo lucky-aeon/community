@@ -16,6 +16,7 @@ var courseService services.CourseService
 func InitCourseRouters(r *gin.Engine) {
 	group := r.Group("/community/admin/courses")
 	group.GET("/tree", ListCourseTree)
+	group.GET("/map", ListCourseTitle)
 	group.POST("", PublishCourse)
 	group.DELETE("/:id", DeleteCourse)
 	group.POST("/section", PublishSection)
@@ -89,6 +90,7 @@ func ListCourseTree(ctx *gin.Context) {
 	result.Ok(courseService.ListCourseTree(), "").Json(ctx)
 }
 
-func ListCourseTitle() {
+func ListCourseTitle(ctx *gin.Context) {
 
+	result.Ok(courseService.ListCourseTitle(), "").Json(ctx)
 }

@@ -16,7 +16,7 @@ type MessageLogs struct {
 	ArticleId int            `json:"articleId"`
 	EventId   int            `json:"eventId"`
 	CreatedAt time.LocalTime `json:"createdAt"`
-	DeletedAt time.LocalTime `json:"deletedAt"`
+	DeletedAt gorm.DeletedAt `json:"deletedAt"`
 }
 
 func MessageLog() *gorm.DB {

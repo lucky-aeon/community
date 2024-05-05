@@ -7,12 +7,12 @@ import (
 )
 
 type Users struct {
-	ID         int             `json:"id"`
-	CreatedAt  time.LocalTime  `json:"createdAt,omitempty"`
-	UpdatedAt  time.LocalTime  `json:"updatedAt,omitempty"`
-	DeletedAt  *time.LocalTime `json:"deletedAt,omitempty" gorm:"index"`
-	Name       string          `json:"name"`
-	Account    string          `json:"account,omitempty"`
+	ID         int            `json:"id"`
+	CreatedAt  time.LocalTime `json:"createdAt,omitempty"`
+	UpdatedAt  time.LocalTime `json:"updatedAt,omitempty"`
+	DeletedAt  gorm.DeletedAt `json:"deletedAt,omitempty" gorm:"index"`
+	Name       string         `json:"name"`
+	Account    string         `json:"account,omitempty"`
 	Password   string
 	InviteCode string `json:"inviteCode,omitempty"`
 	Desc       string `json:"desc"`

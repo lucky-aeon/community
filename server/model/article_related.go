@@ -10,7 +10,7 @@ type ArticleRelations struct {
 	ID        int            `gorm:"primarykey"`
 	CreatedAt time.LocalTime `json:"createdAt"`
 	UpdatedAt time.LocalTime `json:"updatedAt"`
-	DeletedAt time.LocalTime `gorm:"index"`
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 	ParentId  int            `json:"parentId"`
 	RootId    int            `json:"rootId"`
 	ArticleId int            `json:"articleId"`

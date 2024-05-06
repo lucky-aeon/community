@@ -10,6 +10,7 @@ type ReqArticle struct {
 	Type       int    `json:"type"`
 	Tags       []int  `json:"tags" gorm:"-"`
 	NoticeUser []int  `json:"noticeUser"`
+	Cover      string `json:"cover"`
 }
 
 type TopArticle struct {

@@ -11,6 +11,7 @@ type MemberInfos struct {
 	ID        int            `gorm:"primarykey" json:"id"`
 	Name      string         `json:"name"`
 	Desc      string         `json:"desc"`
+	Money     int            `json:"money"`
 	CreatedAt time.LocalTime `json:"createdAt"`
 	UpdatedAt time.LocalTime `json:"updatedAt"`
 }

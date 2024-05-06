@@ -6,7 +6,6 @@ import (
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
 	"xhyovo.cn/community/pkg/log"
-	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/request"
 
 	"gorm.io/gorm"
@@ -486,9 +485,8 @@ func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.A
 		State:    state,
 		Type:     reqArticle.Type,
 		Abstract: reqArticle.Abstract,
+		Cover:    reqArticle.Cover,
 	}
-	cover := utils.GetFirstImage(articleObject.Content)
-	articleObject.Cover = cover
 	// 分开写，避免更新 0 值
 	if reqArticle.ID == 0 {
 		mysql.GetInstance().Save(&articleObject)

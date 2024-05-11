@@ -30,6 +30,7 @@ type ArticleData struct {
 	Title      string `json:"title"`
 	State      int    `json:"state"` // 状态:草稿/发布/待解决/已解决/已关闭
 	Like       int    `json:"like"`
+	Comments   int    `json:"comments"`
 	Cover      string `json:"cover"`
 	Abstract   string `json:"abstract"`
 	Tags       any    `json:"tags"`

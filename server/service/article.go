@@ -115,7 +115,7 @@ func buildResultArticles(rows *sql.Rows) []*model.ArticleData {
 			&item.ID, &item.Title, &item.Abstract, &item.Cover, &item.State, &item.Like, &item.CreatedAt, &item.UpdatedAt,
 			&itemType.TypeId, &itemType.TypeTitle, &itemType.TypeFlag,
 			&itemUser.UName, &itemUser.UId, &itemUser.UAvatar,
-			&tags,
+			&item.Comments, &tags,
 		)
 		item.UserSimple = itemUser
 		item.TypeSimple = itemType

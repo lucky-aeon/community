@@ -62,6 +62,7 @@ func (*ArticleService) GetArticleData(id, userId int) (data *model.ArticleData, 
 		UpdatedAt:  a.UpdatedAt,
 		StateName:  constant.GetArticleName(a.State),
 		Abstract:   a.Abstract,
+		Cover:      a.Cover,
 	}, err
 }
 

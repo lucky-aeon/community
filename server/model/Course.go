@@ -16,6 +16,7 @@ type Courses struct {
 	UserId      int               `json:"userId,omitempty"`
 	Money       int               `json:"money"`
 	Cover       string            `json:"cover"`
+	Score       int               `json:"score"`
 	State       int               `json:"state"`
 	CreatedAt   time.LocalTime    `json:"createdAt"`
 	UpdatedAt   time.LocalTime    `json:"updatedAt"`

@@ -16,6 +16,14 @@ func (*CourseService) Publish(course model.Courses) {
 	course.Technology = strings.Join(course.TechnologyS, ",")
 	if course.ID == 0 {
 		model.Course().Save(&course)
+		var subscriptionService SubscriptionService
+		var b SubscribeData
+		b.UserId = course.UserId
+		b.CurrentBusinessId = course.ID
+		b.CourseId = course.ID
+		b.SubscribeId = course.UserId
+		var messageTemp = "你关注的用户 ${user.name} 发布了最新课程: ${course.title}"
+		subscriptionService.DoWithMessageTempl(event.UserFollowingEvent, b, messageTemp)
 	} else {
 		model.Course().Where("id = ?", course.ID).Updates(&course)
 	}
@@ -53,11 +61,20 @@ func (c *CourseService) PublishSection(section model.CoursesSections) error {
 		var b SubscribeData
 		var subscriptionService SubscriptionService
 		b.UserId = section.UserId
-		b.CurrentBusinessId = section.CourseId
+		b.CurrentBusinessId = section.ID
 		b.SubscribeId = section.CourseId
 		b.CourseId = section.CourseId
 		b.SectionId = section.ID
 		subscriptionService.Do(event.CourseUpdate, b)
+
+		var b2 SubscribeData
+		b2.UserId = section.UserId
+		b2.CurrentBusinessId = section.ID
+		b2.CourseId = section.CourseId
+		b2.SubscribeId = section.UserId
+		b2.SectionId = section.ID
+		var messageTemp = "你关注的用户 ${user.name} 在课程: ${course.title} 发布了最新章节: ${courses_section.title}"
+		subscriptionService.DoWithMessageTempl(event.UserFollowingEvent, b2, messageTemp)
 	} else {
 		model.CoursesSection().Where("id = ?", section.ID).Updates(&section)
 	}

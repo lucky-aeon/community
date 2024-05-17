@@ -4,6 +4,7 @@ import (
 	"errors"
 	"golang.org/x/crypto/bcrypt"
 	"xhyovo.cn/community/pkg/mysql"
+	"xhyovo.cn/community/server/service/event"
 
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/constant"
@@ -131,6 +132,13 @@ func Register(account, pswd, name, inviteCode string) (int, error) {
 	var c CodeService
 	c.SetState(inviteCode)
 
+	// 自动订阅 xhyovo
+	var subscription model.Subscriptions
+	subscription.SubscriberId = id
+	subscription.EventId = event.UserFollowingEvent
+	subscription.BusinessId = 13
+	var su SubscriptionService
+	su.Subscribe(&subscription)
 	return id, nil
 }
 

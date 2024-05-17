@@ -83,9 +83,7 @@ func (*SubscriptionService) ListSubscriptionUserId(event, businessId int) []mode
 
 // 触发订阅事件
 func (s *SubscriptionService) Do(eventId int, b SubscribeData) {
-
 	go func(eventId int, b SubscribeData) {
-
 		subscriptions := s.ListSubscriptionUserId(eventId, b.SubscribeId)
 		if len(subscriptions) > 0 {
 			var userIds []int
@@ -93,7 +91,22 @@ func (s *SubscriptionService) Do(eventId int, b SubscribeData) {
 				userIds = append(userIds, subscriptions[i].SubscriberId)
 			}
 			sendId := subscriptions[0].SendId
-			send(userIds, eventId, constant.NOTICE, sendId, b)
+			send(userIds, eventId, constant.NOTICE, sendId, b, "")
+		}
+
+	}(eventId, b)
+}
+
+func (s *SubscriptionService) DoWithMessageTempl(eventId int, b SubscribeData, messageTempl string) {
+	go func(eventId int, b SubscribeData) {
+		subscriptions := s.ListSubscriptionUserId(eventId, b.SubscribeId)
+		if len(subscriptions) > 0 {
+			var userIds []int
+			for i := range subscriptions {
+				userIds = append(userIds, subscriptions[i].SubscriberId)
+			}
+			sendId := subscriptions[0].SendId
+			send(userIds, eventId, constant.NOTICE, sendId, b, messageTempl)
 		}
 
 	}(eventId, b)
@@ -104,7 +117,7 @@ func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content str
 	go func(eventId, triggerId int, content string, b SubscribeData) {
 
 		ids := findAtUser(content)
-		send(ids, eventId, constant.MENTION, triggerId, b)
+		send(ids, eventId, constant.MENTION, triggerId, b, "")
 	}(eventId, triggerId, content, b)
 
 }
@@ -112,14 +125,14 @@ func (s *SubscriptionService) ConstantAtSend(eventId, triggerId int, content str
 // 触发 @ 事件，直接通知用户
 func (s *SubscriptionService) NoticeUsers(eventId, triggerId int, userIds []int, b SubscribeData) {
 	go func(eventId, triggerId int, userIds []int, b SubscribeData) {
-		send(userIds, eventId, constant.MENTION, triggerId, b)
+		send(userIds, eventId, constant.MENTION, triggerId, b, "")
 	}(eventId, triggerId, userIds, b)
 
 }
 
 func (s *SubscriptionService) Send(eventId, eventType, fromId, toId int, b SubscribeData) {
 	go func(eventId, fromId, toId int, b SubscribeData) {
-		send([]int{toId}, eventId, eventType, fromId, b)
+		send([]int{toId}, eventId, eventType, fromId, b, "")
 	}(eventId, fromId, toId, b)
 }
 
@@ -140,7 +153,7 @@ func findAtUser(content string) []int {
 	return ids.ToSlice()
 }
 
-func send(userIds []int, eventId, eventType, sendId int, b SubscribeData) {
+func send(userIds []int, eventId, eventType, sendId int, b SubscribeData, messageTemp string) {
 	if len(userIds) == 0 {
 		return
 	}
@@ -157,8 +170,10 @@ func send(userIds []int, eventId, eventType, sendId int, b SubscribeData) {
 			emails = append(emails, users[i].Account)
 		}
 	}
-	messageTemplate := messageDao.GetMessageTemplate(eventId)
-	msg := m.GetMsg(messageTemplate, b)
+	if messageTemp == "" {
+		messageTemp = messageDao.GetMessageTemplate(eventId)
+	}
+	msg := m.GetMsg(messageTemp, b)
 	m.SendMessages(sendId, eventType, eventId, b.CurrentBusinessId, ids, msg)
 	email.Send(emails, msg, "技术鸭社区")
 }

@@ -9,11 +9,13 @@ type SubscriptionDao struct {
 }
 
 // 查看订阅列表
-func (*SubscriptionDao) ListSubscription(userId, event, page, limit int) []model.Subscriptions {
+func (*SubscriptionDao) ListSubscription(userId, event, page, limit int) ([]model.Subscriptions, int64) {
 	var subscriptions []model.Subscriptions
-
-	model.Subscription().Where(&model.Subscriptions{SubscriberId: userId, EventId: event}).Offset((page - 1) * limit).Limit(limit).Order("created_at desc").Find(&subscriptions)
-	return subscriptions
+	var count int64
+	tx := model.Subscription().Where(&model.Subscriptions{SubscriberId: userId, EventId: event})
+	tx.Count(&count)
+	tx.Offset((page - 1) * limit).Limit(limit).Order("created_at desc").Find(&subscriptions)
+	return subscriptions, count
 }
 
 // 查看对应事件订阅状态

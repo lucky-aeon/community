@@ -395,12 +395,14 @@ func (a *ArticleService) UpdateArticleState(article request.TopArticle) error {
 }
 
 // 根据分类查询文章
-func (a *ArticleService) ListByTypeId(typeId, searchUserId, currentUserId int) []*model.ArticleData {
+func (a *ArticleService) ListByTypeId(typeId, searchUserId, currentUserId, page, limit int, title string) ([]*model.ArticleData, int64) {
 	query := articleDao.GetQueryArticleSql()
-
+	if title != "" {
+		query.Where("articles.title like ?", "%"+title+"%")
+	}
 	typeObject := typeDao.GetById(typeId)
 	if typeObject.ID == 0 {
-		return []*model.ArticleData{}
+		return []*model.ArticleData{}, 0
 	}
 	if searchUserId == 0 && currentUserId == 0 {
 		if typeObject.Title == "QA" {
@@ -424,14 +426,18 @@ func (a *ArticleService) ListByTypeId(typeId, searchUserId, currentUserId int) [
 		query.Where("articles.user_id = ?", currentUserId)
 	}
 	query.Where("articles.deleted_at is NULL")
+	var count int64
+	query.Count(&count)
+
+	query.Limit(limit).Offset((page - 1) * limit)
 	query.Order("articles.created_at desc")
 	rows, err := query.Rows()
 	if err != nil {
-		return []*model.ArticleData{}
+		return []*model.ArticleData{}, 0
 	}
 	defer rows.Close()
 
-	return buildResultArticles(rows)
+	return buildResultArticles(rows), count
 }
 
 func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.Articles, error) {

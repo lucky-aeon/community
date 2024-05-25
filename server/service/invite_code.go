@@ -10,8 +10,8 @@ import (
 type CodeService struct {
 }
 
-func (*CodeService) PageCodes(page, limit int) (codes []*model.InviteCodes, count int64) {
-	codes = codeDao.PageCodes(page, limit)
+func (*CodeService) PageCodes(page, limit int, code string) (codes []*model.InviteCodes, count int64) {
+	codes = codeDao.PageCodes(page, limit, code)
 	count = codeDao.GetCount()
 
 	if count == 0 {

@@ -22,7 +22,8 @@ func InitCodeRouters(r *gin.Engine) {
 func listCode(ctx *gin.Context) {
 	var c services.CodeService
 	p, limit := page.GetPage(ctx)
-	codes, count := c.PageCodes(p, limit)
+	code := ctx.Query("code")
+	codes, count := c.PageCodes(p, limit, code)
 	result.Page(codes, count, nil).Json(ctx)
 }
 

@@ -195,7 +195,9 @@ func articleLatest(ctx *gin.Context) {
 // 文章状态: 发布，待解决，已解决，
 // 私密状态：发给 vx 单独处理
 func articlesByTypeId(ctx *gin.Context) {
+	p, limit := page.GetPage(ctx)
 	typeId, err := strconv.Atoi(ctx.DefaultQuery("typeId", "0"))
+	title := ctx.Query("title")
 	userId := middleware.GetUserId(ctx)
 	if err != nil {
 		log.Warnf("用户id: %d 获取文章解析分类 id 失败, ,err: %s", userId, typeId, err.Error())
@@ -207,7 +209,8 @@ func articlesByTypeId(ctx *gin.Context) {
 	if userId != searchUserId {
 		userId = 0
 	}
-	result.Ok(articleService.ListByTypeId(typeId, searchUserId, userId), "").Json(ctx)
+	articles, count := articleService.ListByTypeId(typeId, searchUserId, userId, p, limit, title)
+	result.Page(articles, count, nil).Json(ctx)
 	return
 }
 func publish(c *gin.Context) {

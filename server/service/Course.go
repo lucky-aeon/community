@@ -84,7 +84,25 @@ func (c *CourseService) PublishSection(section model.CoursesSections) error {
 // 获取章节详细信息
 func (*CourseService) GetCourseSectionDetail(id int) *model.CoursesSections {
 	var sections *model.CoursesSections
-	model.CoursesSection().Where("id = ?", id).Find(&sections)
+	var courseId int
+	var courses []model.CoursesSections
+	model.CoursesSection().Where("id = ?", id).Select("course_id").Find(&courseId)
+	model.CoursesSection().Where("course_id = ? ", courseId).Order("sort").Find(&courses)
+	// 遍历course 找到id 和 id相同的
+	for i := range courses {
+		if courses[i].ID == id {
+			sections = &courses[i]
+			// 如果当前下标还有上一个则设置PreId
+			if i > 0 {
+				sections.PreId = courses[i-1].ID
+			}
+			// 如果还有下一个下标
+			if i < len(courses)-1 {
+				sections.NextId = courses[i+1].ID
+			}
+			break
+		}
+	}
 	var userS UserService
 	sections.UserSimple = userS.GetUserSimpleById(sections.UserId)
 	return sections
@@ -92,8 +110,8 @@ func (*CourseService) GetCourseSectionDetail(id int) *model.CoursesSections {
 
 // 获取课程列表
 func (*CourseService) PageCourseSection(page, limit, courseId int) (courses []model.CoursesSections, count int64) {
-	model.CoursesSection().Limit(limit).Offset((page-1)*limit).Where("course_id = ? ", courseId).Select("id", "title").Find(&courses)
-	model.CoursesSection().Where("course_id = ? ", courseId).Count(&count)
+	model.CoursesSection().Where("course_id = ? ", courseId).Order("sort").Select("id", "title").Find(&courses)
+	count = int64(len(courses))
 	return
 }
 

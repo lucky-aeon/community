@@ -16,6 +16,8 @@ type CoursesSections struct {
 	CourseId    int            `json:"courseId" binding:"required" msg:"对应课程不能未空"`
 	CreatedAt   time.LocalTime `json:"createdAt"`
 	DeletedAt   gorm.DeletedAt `json:"deletedAt,omitempty" gorm:"index,omitempty"`
+	PreId       int            `json:"preId" gorm:"-"`
+	NextId      int            `json:"nextId" gorm:"-"`
 }
 
 func CoursesSection() *gorm.DB {

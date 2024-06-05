@@ -1,9 +1,10 @@
 package backend
 
 import (
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
-	"strconv"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
@@ -19,6 +20,7 @@ func InitUserRouters(r *gin.Engine) {
 	group.Use(middleware.OperLogger())
 	group.POST("", updateUser)
 	group.DELETE("/:id", deleteUser)
+	group.PUT("/reset/pwd", setRangePassword)
 }
 
 func listUser(ctx *gin.Context) {
@@ -49,6 +51,21 @@ func updateUser(ctx *gin.Context) {
 	user.Tags = userTagS.AssignUserLabel(user.ID, user.Tags)
 
 	result.OkWithMsg(user, "修改成功").Json(ctx)
+}
+
+// 重置用户密码，随机生成
+func setRangePassword(ctx *gin.Context) {
+	account := ctx.Query("account")
+	if account == "" {
+		result.Err("用户名不能为空").Json(ctx)
+		return
+	}
+	var u services.UserService
+	if u.ResetPwd(account) {
+		result.OkWithMsg(nil, "重置成功, 密码已发送至邮箱").Json(ctx)
+		return
+	}
+	result.OkWithMsg(nil, "重置失败，用户不存在").Json(ctx)
 }
 
 func deleteUser(ctx *gin.Context) {

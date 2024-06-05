@@ -2,7 +2,11 @@ package services
 
 import (
 	"errors"
+	"math/rand"
+	"time"
+
 	"golang.org/x/crypto/bcrypt"
+	"xhyovo.cn/community/pkg/email"
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/server/service/event"
 
@@ -83,6 +87,25 @@ func (*UserService) UpdateUser(user *model.Users) {
 
 	userDao.UpdateUser(user)
 
+}
+
+func (*UserService) ResetPwd(account string) bool {
+	characters := []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()")
+	length := 10
+	password := make([]rune, length)
+	rand.Seed(time.Now().UnixNano())
+
+	for i := 0; i < length; i++ {
+		password[i] = characters[rand.Intn(len(characters))]
+	}
+	newPwd := string(password)
+	newPwdHash, _ := GetPwd(newPwd)
+	tx := model.User().Where("account = ?", account).Limit(1).Update("password", newPwdHash)
+	if tx.RowsAffected == 0 {
+		return false
+	}
+	email.Send([]string{account}, "您的密码已重置为: "+newPwd, "重置密码")
+	return true
 }
 
 func (*UserService) ListByIdsSelectEmail(id ...int) []string {

@@ -32,9 +32,13 @@ func (c *InviteCode) GetCount() int64 {
 	return count
 }
 
-func (c *InviteCode) PageCodes(page int, limit int) []*model.InviteCodes {
+func (c *InviteCode) PageCodes(page int, limit int, code string) []*model.InviteCodes {
 	var codes []*model.InviteCodes
-	model.InviteCode().Limit(limit).Offset((page - 1) * limit).Order("id desc").Find(&codes)
+	tx := model.InviteCode()
+	if code != "" {
+		tx.Where("code like ?", "%"+code+"%")
+	}
+	tx.Limit(limit).Offset((page - 1) * limit).Order("id desc").Find(&codes)
 	return codes
 }
 

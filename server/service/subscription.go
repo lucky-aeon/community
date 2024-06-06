@@ -15,8 +15,8 @@ type SubscriptionService struct {
 }
 
 // 查看订阅列表
-func (*SubscriptionService) ListSubscription(userId, eventId, page, limit int) []model.Subscriptions {
-	subscriptions := subscriptionDao.ListSubscription(userId, eventId, page, limit)
+func (*SubscriptionService) ListSubscription(userId, eventId, page, limit int) ([]model.Subscriptions, int64) {
+	subscriptions, count := subscriptionDao.ListSubscription(userId, eventId, page, limit)
 
 	var userIds []int
 	var articleIds []int
@@ -52,7 +52,7 @@ func (*SubscriptionService) ListSubscription(userId, eventId, page, limit int) [
 		v.EventName = event.GetMsg(v.EventId)
 	}
 
-	return subscriptions
+	return subscriptions, count
 }
 
 // 查看对应事件订阅状态

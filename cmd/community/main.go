@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 	"xhyovo.cn/community/cmd/community/routers"
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/config"
@@ -32,4 +34,11 @@ func main() {
 	if err != nil {
 		log.Errorln(err)
 	}
+
+	pwd, _ := GetPwd("123456")
+	fmt.Println(string(pwd))
+}
+func GetPwd(pwd string) ([]byte, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
+	return hash, err
 }

@@ -7,7 +7,7 @@ import (
 )
 
 type Dashboard struct {
-	UserCount    int   `json:"userCount"`
+	UserCount    int64 `json:"userCount"`
 	Profit       int   `json:"profit"`
 	ArticleCount int64 `json:"articleCount"`
 }
@@ -18,9 +18,13 @@ func InitDashboardRouters(r *gin.Engine) {
 }
 func dashboard(ctx *gin.Context) {
 	// 查出用户数量
+
 	var codes []model.InviteCodes
 	model.InviteCode().Where("state = 1").Select("id", "member_id").Find(&codes)
-	var userCount = len(codes)
+	var userCount int64
+
+	model.User().Count(&userCount)
+
 	// 查出文章数量
 	var articleCount int64
 	model.Article().Count(&articleCount)

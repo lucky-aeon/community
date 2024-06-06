@@ -14,10 +14,10 @@ var courseService services.CourseService
 
 func InitCourseRouters(r *gin.Engine) {
 	group := r.Group("/community/courses")
-	group.GET("/:id", GetCourseDetail)
 	group.GET("", ListCourse)
-
 	group.GET("/section", ListCourseSection)
+	group.Use(middleware.OperLogger())
+	group.GET("/:id", GetCourseDetail)
 	group.GET("/section/:id", GetCourseSectionDetail)
 
 }

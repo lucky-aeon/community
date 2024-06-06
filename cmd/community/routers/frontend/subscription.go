@@ -7,6 +7,7 @@ import (
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
+	page2 "xhyovo.cn/community/pkg/utils/page"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
 	"xhyovo.cn/community/server/service/event"
@@ -26,9 +27,9 @@ func listSubscription(ctx *gin.Context) {
 	var su services.SubscriptionService
 	userId := middleware.GetUserId(ctx)
 	eventId, _ := strconv.Atoi(ctx.DefaultQuery("eventId", "0"))
-	page, _ := strconv.Atoi(ctx.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(ctx.DefaultQuery("limit", "15"))
-	result.Ok(su.ListSubscription(userId, eventId, page, limit), "").Json(ctx)
+	page, limit := page2.GetPage(ctx)
+	subscriptions, count := su.ListSubscription(userId, eventId, page, limit)
+	result.Page(subscriptions, count, nil).Json(ctx)
 }
 
 // 查看对应事件订阅状态

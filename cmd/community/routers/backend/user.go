@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -26,9 +27,13 @@ func InitUserRouters(r *gin.Engine) {
 func listUser(ctx *gin.Context) {
 	p, limit := page.GetPage(ctx)
 
+	conditionUser := model.UserSimple{
+		Account: fmt.Sprintf("%%%s%%", ctx.Query("account")),
+	}
+
 	var u services.UserService
 
-	users, count := u.PageUsers(p, limit)
+	users, count := u.PageUsers(p, limit, conditionUser)
 	result.Page(users, count, nil).Json(ctx)
 }
 

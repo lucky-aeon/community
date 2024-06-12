@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/oss"
@@ -137,7 +138,11 @@ func getUrl(ctx *gin.Context) {
 		return
 	}
 	singUrl := oss.SingUrl(fileKey)
-	ctx.Redirect(http.StatusFound, singUrl)
+
+	replace := strings.Replace(singUrl, fmt.Sprintf("%s.%s", oss.GetInstance().BucketName, oss.GetEndpoint()),
+		config.GetInstance().OssConfig.Cdn, 1)
+
+	ctx.Redirect(http.StatusFound, replace)
 }
 
 func uploadCallback(ctx *gin.Context) {

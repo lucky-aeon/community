@@ -19,6 +19,7 @@ func InitMessageRouters(r *gin.Engine) {
 	group.GET("/pageName/:eventId", pageName)
 	group.Use(middleware.OperLogger())
 	group.POST("/read", readMsg)
+	group.POST("/readMsg2", readMsg2)
 	group.DELETE("/UnReadMsg/:type", clearUnReadMsg)
 
 }
@@ -57,6 +58,16 @@ func readMsg(ctx *gin.Context) {
 	}
 	var msgService services.MessageService
 	number := msgService.ReadMessage(ids, middleware.GetUserId(ctx))
+	result.OkWithMsg(nil, fmt.Sprintf("已读%d消息", number)).Json(ctx)
+}
+
+func readMsg2(ctx *gin.Context) {
+	typee, _ := strconv.Atoi(ctx.Query("type"))
+	eventId, _ := strconv.Atoi(ctx.Query("eventId"))
+	businessId, _ := strconv.Atoi("businessId")
+
+	var msgService services.MessageService
+	number := msgService.ReadMessage2(typee, eventId, businessId, middleware.GetUserId(ctx))
 	result.OkWithMsg(nil, fmt.Sprintf("已读%d消息", number)).Json(ctx)
 }
 

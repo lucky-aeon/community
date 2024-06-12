@@ -24,8 +24,9 @@ type OssConfig struct {
 	AccessKey string `yaml:"accessKey"`
 	SecretKey string `yaml:"secretKey"`
 	Bucket    string `yaml:"bucket"`
-	Endpoint  string `yaml:"endpoint"`
+	Cdn       string `yaml:"cdn"`
 	Callback  string `json:"callback"`
+	Endpoint  string `yaml:"endpoint"`
 }
 
 type EmailConfig struct {
@@ -58,8 +59,9 @@ func Init() {
 			AccessKey: os.Getenv("OSS_ACCESS_KEY"),
 			Bucket:    os.Getenv("OSS_BUCKET"),
 			SecretKey: os.Getenv("OSS_SECRET_KEY"),
-			Endpoint:  os.Getenv("OSS_ENDPOINT"),
+			Cdn:       os.Getenv("OSS_CDN"),
 			Callback:  os.Getenv("OSS_CALLBACK"),
+			Endpoint:  os.Getenv("OSS_ENDPOINT"),
 		},
 		EmailConfig: EmailConfig{
 			Address:   os.Getenv("ADDRESS"),

@@ -15,7 +15,7 @@ import (
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/oss"
-	xt "xhyovo.cn/community/pkg/time"
+	"xhyovo.cn/community/pkg/utils/page"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/request"
 	services "xhyovo.cn/community/server/service"
@@ -27,7 +27,7 @@ import (
 	"xhyovo.cn/community/pkg/result"
 )
 
-var expire_time int64 = 30
+var expire_time int64 = 5000
 
 type ConfigStruct struct {
 	Expiration string     `json:"expiration"`
@@ -54,6 +54,8 @@ func InitFileRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community/file")
 	group.POST("/upload", uploadCallback)
 	group.Use(middleware.Auth)
+	group.GET("", listFiles)
+	group.GET("/byKey", getFileByKey)
 	group.Use(middleware.OperLogger())
 	group.GET("/policy", getPolicy)
 	group.GET("/singUrl", getUrl)
@@ -139,7 +141,7 @@ func getUrl(ctx *gin.Context) {
 	}
 	singUrl := oss.SingUrl(fileKey)
 
-	replace := strings.Replace(singUrl, fmt.Sprintf("%s.%s", oss.GetInstance().BucketName, oss.GetEndpoint()),
+	replace := strings.Replace(singUrl, fmt.Sprintf("http://%s.%s", oss.GetInstance().BucketName, oss.GetEndpoint()),
 		config.GetInstance().OssConfig.Cdn, 1)
 
 	ctx.Redirect(http.StatusFound, replace)
@@ -164,7 +166,7 @@ func uploadCallback(ctx *gin.Context) {
 	file := &model.Files{
 		FileKey: callback.FileKey,
 		Size:    callback.Size,
-		Format:  callback.MineType,
+		Format:  callback.MimeType,
 		UserId:  callback.UserId,
 	}
 
@@ -182,9 +184,52 @@ func uploadCallback(ctx *gin.Context) {
 		return
 	}
 
-	file.CreatedAt = xt.Now()
-	file.UpdatedAt = xt.Now()
 	var fileS services.FileService
 	fileS.Save(file)
 	result.Ok(nil, "").Json(ctx)
+}
+
+// 查询用户的资源
+func listFiles(ctx *gin.Context) {
+	p, limit := page.GetPage(ctx)
+	userId := middleware.GetUserId(ctx)
+	var fileS services.FileService
+	files, count := fileS.PageFiles(p, limit, userId)
+	result.Page(files, count, nil).Json(ctx)
+}
+
+func getFileByKey(ctx *gin.Context) {
+	fileKey := ctx.Query("fileKey")
+
+	// 先从 db 拿
+	var fileS services.FileService
+	if !fileS.ExistFile(fileKey) {
+		// 从 oss 拿
+		bucket := oss.GetInstance()
+		exist, err := bucket.IsObjectExist(fileKey)
+		if err != nil {
+			result.Err("查询资源出错:" + err.Error()).Json(ctx)
+			return
+		}
+		// 如果存在则放入 db
+		if exist {
+			meta, err := bucket.GetObjectDetailedMeta(fileKey)
+			if err == nil {
+				size := meta.Get("Content-Length")
+				atoi, _ := strconv.Atoi(size)
+				file := &model.Files{
+					FileKey: fileKey,
+					Size:    int64(atoi),
+					Format:  meta.Get("Content-Type"),
+					UserId:  middleware.GetUserId(ctx),
+				}
+				fileS.Save(file)
+				result.OkWithMsg(true, "上传资源成功,如未能显示,则从资源库中复制获取").Json(ctx)
+				return
+			}
+		}
+		return
+	}
+	result.OkWithMsg(true, "上传资源成功,如未能显示,则从资源库中复制获取").Json(ctx)
+	return
 }

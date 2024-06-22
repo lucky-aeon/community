@@ -21,7 +21,6 @@ export async function apiGetUploadPolicy() {
 }
 export async function apiUploadFile(userId, file, callback, progress=()=>{}) {
   let policy = await apiGetUploadPolicy()
-  console.log(policy)
   if (!policy.ok) return Promise.reject("无法获取授权")
   let key = `${userId}/${new Date().getTime()}`
   let result = await axios.postForm(`https://luckly-community.${policy.data.host}`, {

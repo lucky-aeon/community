@@ -27,7 +27,7 @@ func (*FileService) Deletes(userId, businessId, tenantcdId int) {
 
 func (s *FileService) PageFiles(p, limit, userId int) (files []model.Files, count int64) {
 
-	files = fileDao.PageFiles(p, limit)
+	files = fileDao.PageFiles(p, limit, userId)
 	if len(files) == 0 {
 		return []model.Files{}, 0
 	}
@@ -44,4 +44,10 @@ func (s *FileService) PageFiles(p, limit, userId int) (files []model.Files, coun
 	count = fileDao.Count()
 
 	return files, count
+}
+
+func (s *FileService) ExistFile(key string) bool {
+	var count int64
+	model.File().Where("file_key = ?", key).Count(&count)
+	return count == 1
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 	"xhyovo.cn/community/cmd/community/routers"
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/config"
@@ -15,7 +16,13 @@ import (
 )
 
 func main() {
-
+	// 设置程序使用中国时区
+	chinaLoc, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		fmt.Println("Error loading China location:", err)
+		return
+	}
+	time.Local = chinaLoc
 	log.Init()
 	r := gin.Default()
 	r.SetFuncMap(utils.GlobalFunc())
@@ -30,13 +37,13 @@ func main() {
 	routers.InitFrontedRouter(r)
 	cache.Init()
 
-	err := r.Run(":8080")
+	err = r.Run(":8080")
 	if err != nil {
 		log.Errorln(err)
 	}
-
-	pwd, _ := GetPwd("123456")
-	fmt.Println(string(pwd))
+	/*
+		pwd, _ := GetPwd("123456")
+		fmt.Println(string(pwd))*/
 }
 func GetPwd(pwd string) ([]byte, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)

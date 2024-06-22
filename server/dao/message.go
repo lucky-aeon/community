@@ -69,6 +69,13 @@ func (*MessageDao) SaveMessage(from, types, eventId, businessId int, to []int, c
 	model.MessageState().Create(&msgs)
 }
 
+func (*MessageDao) ReadMessage2(typee, eventId, businessId, userId int) int64 {
+	tx := model.MessageState().Where("type = ? and event_id = ? and article_id = ? and `to` = ?", typee, eventId, businessId, userId).Updates(map[string]interface{}{
+		"state": 0,
+	})
+	return tx.RowsAffected
+}
+
 // 删除用户收到的消息(确认消息),
 func (*MessageDao) ReadMessage(id []int, userId int) int64 {
 	tx := model.MessageState().Where("id in ? and `to` = ?", id, userId).Updates(map[string]interface{}{

@@ -112,6 +112,10 @@ func (m *MessageService) SendMessages(from, types, eventId, businessId int, to [
 	m.AddMessageLogs(from, types, eventId, businessId, to, content)
 }
 
+func (*MessageService) ReadMessage2(typee, eventId, businessId, userId int) int64 {
+	return messageDao.ReadMessage2(typee, eventId, businessId, userId)
+}
+
 func (*MessageService) ReadMessage(id []int, userId int) int64 {
 	return messageDao.ReadMessage(id, userId)
 }

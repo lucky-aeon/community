@@ -141,7 +141,7 @@ func getUrl(ctx *gin.Context) {
 	}
 	singUrl := oss.SingUrl(fileKey)
 
-	replace := strings.Replace(singUrl, fmt.Sprintf("http://%s.%s", oss.GetInstance().BucketName, oss.GetEndpoint()),
+	replace := strings.Replace(singUrl, fmt.Sprintf("%s.%s", oss.GetInstance().BucketName, oss.GetEndpoint()),
 		config.GetInstance().OssConfig.Cdn, 1)
 
 	ctx.Redirect(http.StatusFound, replace)

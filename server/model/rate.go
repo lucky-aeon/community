@@ -13,7 +13,7 @@ type Rates struct {
 	Avatar    string         `json:"avatar"`
 	CreatedAt time.LocalTime `json:"createdAt"`
 	UpdatedAt time.LocalTime `json:"updateAt"`
-	Nickname  string         `json:"nickName"`
+	Nickname  string         `json:"nickName" gorm:"-"`
 }
 
 func Rate() *gorm.DB {

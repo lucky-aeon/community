@@ -52,5 +52,6 @@ func InitFrontedRouter(r *gin.Engine) {
 	backend.InitUserTagRouters(r)
 	backend.InitCourseRouters(r)
 	backend.InitDashboardRouters(r)
+	backend.InitOrderRouters(r)
 
 }

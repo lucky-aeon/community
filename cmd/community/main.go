@@ -13,6 +13,7 @@ import (
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/pkg/oss"
 	"xhyovo.cn/community/pkg/utils"
+	"xhyovo.cn/community/server/model"
 )
 
 func main() {
@@ -41,9 +42,23 @@ func main() {
 	if err != nil {
 		log.Errorln(err)
 	}
-	/*
-		pwd, _ := GetPwd("123456")
-		fmt.Println(string(pwd))*/
+
+	var users = make([]model.Users, 0)
+	model.User().Find(&users)
+	var orders = make([]model.Orders, 0)
+	for i := range users {
+		user := users[i]
+
+		order := model.Orders{
+			InviteCode:      user.InviteCode,
+			Price:           70,
+			Purchaser:       user.ID,
+			AcquisitionType: 2,
+			Creator:         13,
+		}
+		orders = append(orders, order)
+	}
+	model.Order().Save(orders)
 }
 func GetPwd(pwd string) ([]byte, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/rand"
 	"time"
+	"xhyovo.cn/community/server/dao"
 
 	"golang.org/x/crypto/bcrypt"
 	"xhyovo.cn/community/pkg/email"
@@ -162,6 +163,23 @@ func Register(account, pswd, name, inviteCode string) (int, error) {
 	subscription.BusinessId = 13
 	var su SubscriptionService
 	su.Subscribe(&subscription)
+
+	// 生成账单
+	var mS = MemberInfoService{}
+
+	// 查出邀请码
+	codeObject := c.GetByCode(inviteCode)
+	member := mS.GetById(codeObject.MemberId)
+	order := model.Orders{
+		InviteCode:      inviteCode,
+		Price:           member.Money,
+		Purchaser:       id,
+		AcquisitionType: codeObject.AcquisitionType,
+		Creator:         codeObject.Creator,
+	}
+	orderDao := dao.OrderDao{}
+	orderDao.Save(order)
+
 	return id, nil
 }
 

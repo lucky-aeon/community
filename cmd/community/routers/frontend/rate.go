@@ -15,9 +15,8 @@ var noteService services.RateService
 
 func InitNoteRouters(r *gin.Engine) {
 	group := r.Group("/community/rate")
-
-	group.Use(middleware.OperLogger())
 	group.GET("", getRate)
+	group.Use(middleware.OperLogger())
 	group.POST("", commentRate)
 	group.DELETE("/:id", deleteRate)
 }

@@ -2,7 +2,6 @@ package services
 
 import (
 	"xhyovo.cn/community/pkg/mysql"
-	"xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -10,9 +9,6 @@ type RateService struct {
 }
 
 func (RateService) Comment(notes model.Rates) {
-	if notes.ID == 0 {
-		notes.CreatedAt = time.Now()
-	}
 	mysql.GetInstance().Save(&notes)
 }
 

@@ -35,6 +35,7 @@ func generate(ctx *gin.Context) {
 		result.Err(utils.GetValidateErr(v, err)).Json(ctx)
 		return
 	}
+	v.Creator = middleware.GetUserId(ctx)
 	if err := c.GenerateCode(v); err != nil {
 		log.Warn("用户id: %d 生成邀请码失败,err: %s", middleware.GetUserId(ctx), err.Error())
 		result.Err(err.Error()).Json(ctx)

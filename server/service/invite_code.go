@@ -59,8 +59,10 @@ func (*CodeService) GenerateCode(m model.GenerateCode) error {
 	codeList := []*model.InviteCodes{}
 	for i := range codes {
 		c := &model.InviteCodes{
-			Code:     codes[i],
-			MemberId: m.MemberId,
+			Code:            codes[i],
+			MemberId:        m.MemberId,
+			Creator:         m.Creator,
+			AcquisitionType: m.AcquisitionType,
 		}
 		codeList = append(codeList, c)
 	}
@@ -83,4 +85,9 @@ func (*CodeService) SetState(code string) {
 func (s *CodeService) CountByMemberId(id int) (count int64) {
 	model.InviteCode().Where("member_id = ?", id).Count(&count)
 	return count
+}
+
+func (s *CodeService) GetByCode(code string) (codeObject model.InviteCodes) {
+	model.InviteCode().Where("code = ?", code).Find(&codeObject)
+	return
 }

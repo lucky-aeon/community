@@ -49,3 +49,9 @@ func (s *MemberInfoService) ListNameByIds(ids []int) map[int]string {
 
 	return m
 }
+
+func (s *MemberInfoService) GetById(id int) (member model.MemberInfos) {
+	model.MemberInfo().Where("id = ?", id).Find(&member)
+	return
+
+}

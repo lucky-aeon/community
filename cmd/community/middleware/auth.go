@@ -8,6 +8,7 @@ import (
 	"time"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/result"
+	services "xhyovo.cn/community/server/service"
 )
 
 const AUTHORIZATION = "Authorization"
@@ -41,6 +42,25 @@ func Auth(ctx *gin.Context) {
 		ctx.Abort()
 		return
 	}
+
+	var blackService = services.BlacklistService{}
+
+	// 判断token 黑名单
+	exist := blackService.ExistToken(token)
+	if exist {
+		result.Err("你已涉嫌违规社区文化，token 失效，请重新登陆").Json(ctx)
+		ctx.Abort()
+		return
+	}
+
+	// 判断用户黑名单
+	var userService = services.UserService{}
+	if userService.IsBlack(claims.ID) {
+		result.Err("你已涉嫌违规社区文化，已被纳入小黑屋，如误封请联系我：xhyQAQ250").Json(ctx)
+		ctx.Abort()
+		return
+	}
+
 	ctx.Set(AUTHORIZATION, claims.ID)
 	ctx.Next()
 }

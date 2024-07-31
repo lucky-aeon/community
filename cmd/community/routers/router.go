@@ -53,5 +53,6 @@ func InitFrontedRouter(r *gin.Engine) {
 	backend.InitCourseRouters(r)
 	backend.InitDashboardRouters(r)
 	backend.InitOrderRouters(r)
+	backend.InitMonitRouters(r)
 
 }

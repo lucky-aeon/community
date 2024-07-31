@@ -17,6 +17,7 @@ type Users struct {
 	InviteCode string `json:"inviteCode,omitempty"`
 	Desc       string `json:"desc"`
 	Avatar     string `json:"avatar"`
+	State      int    `json:"state"`
 	Subscribe  int    `json:"subscribe"` // 1: 未订阅站内消息 2:订阅站内消息 (发送邮箱)
 }
 
@@ -27,6 +28,7 @@ type UserSimple struct {
 	UAvatar   string         `json:"avatar" gorm:"column:avatar"`
 	Role      string         `json:"role" gorm:"column:u_role"`
 	Account   string         `json:"account" gorm:"account"`
+	State     int            `json:"state" gorm:"column:state"`
 	CreatedAt time.LocalTime `json:"createdAt"`
 	Subscribe int            `json:"subscribe"` // 1: 未订阅站内消息 2:订阅站内消息 (发送邮箱)
 }

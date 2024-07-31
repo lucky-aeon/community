@@ -26,6 +26,7 @@ func InitLoginRegisterRouters(ctx *gin.Engine) {
 }
 
 func Login(c *gin.Context) {
+
 	var login model.LoginForm
 	if err := c.ShouldBindJSON(&login); err != nil {
 		result.Err(utils.GetValidateErr(login, err)).Json(c)
@@ -35,7 +36,7 @@ func Login(c *gin.Context) {
 		Account:   login.Account,
 		Browser:   c.Request.UserAgent(),
 		Equipment: c.GetHeader("Sec-Ch-Ua-Platform"),
-		Ip:        utils.GetClientIP(c.Request),
+		Ip:        utils.GetClientIP(c),
 		CreatedAt: xt.Now(),
 	}
 	var logS services.LogServices
@@ -44,6 +45,13 @@ func Login(c *gin.Context) {
 		loginLog.State = err.Error()
 		logS.InsertLoginLog(loginLog)
 		result.Err(err.Error()).Json(c)
+		return
+	}
+
+	// 判断黑名单
+	var userService services.UserService
+	if userService.IsBlack(user.ID) {
+		result.Err("你已涉嫌违规社区文化，已被纳入小黑屋，如误封请联系我：xhyQAQ250").Json(c)
 		return
 	}
 
@@ -69,7 +77,7 @@ func Register(c *gin.Context) {
 		Account:   form.Account,
 		Browser:   c.Request.UserAgent(),
 		Equipment: c.GetHeader("Sec-Ch-Ua-Platform"),
-		Ip:        utils.GetClientIP(c.Request),
+		Ip:        utils.GetClientIP(c),
 		CreatedAt: xt.Now(),
 	}
 	var logS services.LogServices

@@ -175,3 +175,22 @@ func (c *CourseService) ListCourseTitle() []model.Courses {
 	model.Course().Select("id", "title").Find(&courses)
 	return courses
 }
+
+func (c *CourseService) ListSectionByIds(ids []int) (m map[int]string) {
+	rows, err := model.CoursesSection().Where("id in ?", ids).Select("id", "title").Rows()
+	defer rows.Close()
+	if err != nil {
+		// 处理错误
+		return nil
+	}
+	m = make(map[int]string)
+	for rows.Next() {
+		var id int
+		var title string
+		if err := rows.Scan(&id, &title); err != nil {
+			// 处理错误
+		}
+		m[id] = title
+	}
+	return
+}

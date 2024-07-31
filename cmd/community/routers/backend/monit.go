@@ -1,7 +1,10 @@
 package backend
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"regexp"
+	"strconv"
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils/page"
@@ -29,11 +32,13 @@ func listMonitUser(ctx *gin.Context) {
 	tx := mysql.GetInstance().Table("oper_logs").
 		Select("user_id, COUNT(DISTINCT ip) as count").
 		Where("ip <> ?", "127.0.0.1").
+		Where("user_id <> ?", 13).
 		Group("user_id").
 		Having("COUNT(DISTINCT ip) > ?", 5)
 	tx.Count(&count)
 	tx.Offset((p - 1) * limit).
-		Limit(limit)
+		Limit(limit).
+		Order("count DESC")
 	tx.Scan(&results)
 
 	var userIds []int
@@ -75,7 +80,8 @@ func getMonitUserIpDetails(ctx *gin.Context) {
 		Group("ip, platform, user_agent")
 	tx.Count(&count)
 	tx.Limit(limit).
-		Offset((p - 1) * limit)
+		Offset((p - 1) * limit).
+		Order("count DESC")
 	tx.Scan(&ipResult)
 
 	result.Page(ipResult, count, nil).Json(ctx)
@@ -87,9 +93,11 @@ func getMonitUserSectionDetails(ctx *gin.Context) {
 	p, limit := page.GetPage(ctx)
 	// 收集章节观看次数
 	type sectionMonit struct {
-		UserID      int
-		RequestInfo string
-		Count       int
+		UserID       int    `json:"userID"`
+		RequestInfo  string `json:"requestInfo"`
+		Count        int    `json:"count"`
+		SectionTitle string `json:"sectionTitle" gorm:"-"`
+		SectionId    int    `json:"sectionId" gorm:"-"`
 	}
 
 	var sectionResult []sectionMonit
@@ -97,13 +105,43 @@ func getMonitUserSectionDetails(ctx *gin.Context) {
 	tx := mysql.GetInstance().Table("oper_logs").
 		Select("user_id, request_info, COUNT(*) as count").
 		Where("request_info REGEXP ?", `^/community/courses/section/[0-9]+$`).
-		Where("user_id <> ?", 13).
 		Where("user_id = ?", userId).
-		Group("user_id, request_info").
+		Group("user_id, request_info")
+
+	tx.Count(&count).
 		Limit(limit).
-		Offset((p - 1) * limit)
-	tx.Count(&count)
+		Offset((p - 1) * limit).
+		Order("count DESC")
 	tx.Scan(&sectionResult)
 
+	var sectionIds []int
+	for i, item := range sectionResult {
+		id, err := extractIDFromURL(item.RequestInfo)
+		if err != nil {
+			continue
+		}
+		idValue, err := strconv.Atoi(id)
+		if err != nil {
+			continue
+		}
+		sectionIds = append(sectionIds, idValue)
+		sectionResult[i].SectionId = idValue
+	}
+
+	var sectionService services.CourseService
+	selectIdTitleMap := sectionService.ListSectionByIds(sectionIds)
+	for i := range sectionResult {
+		sectionResult[i].SectionTitle = selectIdTitleMap[sectionResult[i].SectionId]
+	}
+
 	result.Page(sectionResult, count, nil).Json(ctx)
+}
+
+func extractIDFromURL(url string) (string, error) {
+	re := regexp.MustCompile(`/community/courses/section/(\d+)`)
+	matches := re.FindStringSubmatch(url)
+	if len(matches) < 2 {
+		return "", fmt.Errorf("no ID found in URL")
+	}
+	return matches[1], nil
 }

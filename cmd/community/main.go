@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"time"
@@ -17,8 +16,6 @@ import (
 
 func main() {
 
-	pwd, _ := GetPwd("123")
-	fmt.Println(string(pwd))
 	log.Init()
 
 	// 设置程序使用中国时区

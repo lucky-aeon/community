@@ -31,6 +31,11 @@ func (*BlacklistService) Add(userId int, token string) {
 	}
 }
 
+func (*BlacklistService) AddBlackByToken(token string) {
+	cache := cache.GetInstance()
+	cache.Set(constant.BLACK_LIST+token, 1, constant.Token_TTl)
+}
+
 func (*BlacklistService) ExistToken(token string) bool {
 	_, b := cache.GetInstance().Get(constant.BLACK_LIST + token)
 	return b

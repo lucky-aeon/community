@@ -193,7 +193,6 @@ func heart(ctx *gin.Context) {
 	userId := middleware.GetUserId(ctx)
 	// 获取ip
 	ip := utils.GetClientIP(ctx)
-	ip = ctx.ClientIP()
 	cache := cache.GetInstance()
 	token := ctx.GetHeader(middleware.AUTHORIZATION)
 	if len(token) == 0 {
@@ -202,7 +201,6 @@ func heart(ctx *gin.Context) {
 	key := constant.HEARTBEAT + strconv.Itoa(userId)
 	valueIp, b := cache.Get(key)
 	// ip 不一致则说明同一时间内多个用户使用一个账号
-
 	if b {
 		if valueIp != ip {
 			// 将 token 设置为无效并且清空用户登陆状态并且加入黑名单中
@@ -211,14 +209,13 @@ func heart(ctx *gin.Context) {
 			// 3.对黑名单进行计数：可能用户不服
 			var blackService = services.BlacklistService{}
 			blackService.Add(userId, token)
+			blackService.AddBlackByToken(token)
 			result.Err("你已涉嫌同一账号多人使用，请注意你的行为").Json(ctx)
 			return
 		}
+	} else {
+		cache.Set(key, ip, constant.HEARTBEAT_TTL)
 	}
-	cache.Set(key, ip, constant.HEARTBEAT_TTL)
 	result.Ok(nil, "").Json(ctx)
 	return
 }
-
-// todo 后台 黑名单界面
-// todo 前端全局心跳

@@ -2,6 +2,7 @@ package routers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/log"
@@ -55,7 +56,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := middleware.GenerateToken(user.ID, user.Name)
+	token, err := middleware.GenerateToken(user.ID, user.Name+uuid.New().String())
 	if err != nil {
 		loginLog.State = err.Error()
 		logS.InsertLoginLog(loginLog)

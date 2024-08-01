@@ -3,6 +3,8 @@ package backend
 import (
 	"fmt"
 	"strconv"
+	"xhyovo.cn/community/pkg/cache"
+	"xhyovo.cn/community/pkg/constant"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -125,5 +127,10 @@ func unBanUser(ctx *gin.Context) {
 	}
 	var u services.UserService
 	u.UnBanByUserId(idInt)
+	cache := cache.GetInstance()
+	cache.Delete(constant.HEARTBEAT + id)
+	cache.Delete(constant.BLACK_LIST + id)
+	cache.Delete(constant.BLACK_LIST_COUNT + id)
+
 	result.OkWithMsg(nil, "已解封用户："+id).Json(ctx)
 }

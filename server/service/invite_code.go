@@ -34,14 +34,11 @@ func (*CodeService) PageCodes(page, limit int, code string) (codes []*model.Invi
 	return codes, count
 }
 func (*CodeService) GenerateCode(m model.GenerateCode) error {
-
 	memberId := m.MemberId
-
 	var mSer MemberInfoService
 	if !mSer.Exist(memberId) {
 		return errors.New("对应vip等级不存在")
 	}
-
 	number := m.Number
 	var flag bool = true
 	var code string

@@ -219,6 +219,3 @@ func heart(ctx *gin.Context) {
 	result.Ok(nil, "").Json(ctx)
 	return
 }
-
-// todo 后台 黑名单界面
-// todo 前端全局心跳

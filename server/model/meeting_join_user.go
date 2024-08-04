@@ -10,7 +10,7 @@ type MeetingJoinUsers struct {
 	Id        int       `gorm:"primarykey" json:"id"`
 	MeetingId int       `json:"meetingId"`
 	UserId    int       `json:"userId"`
-	UserName  string    `json:"userName"`
+	UserName  string    `json:"userName" gorm:"-"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 

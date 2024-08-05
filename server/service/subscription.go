@@ -177,3 +177,47 @@ func send(userIds []int, eventId, eventType, sendId int, b SubscribeData, messag
 	m.SendMessages(sendId, eventType, eventId, b.CurrentBusinessId, ids, msg)
 	email.Send(emails, msg, "技术鸭社区")
 }
+
+/*
+主动触发订阅事件
+userId： 发送者
+eventId：事件
+messageType：消息类型
+subscribeId：业务id
+message：消息
+*/
+func (s *SubscriptionService) SendMsg(userId, eventId, messageType, subscribeId int, message string) {
+	// 查出所有订阅人
+	subscriptions := s.ListSubscriptionUserId(eventId, subscribeId)
+	if len(subscriptions) == 0 {
+		return
+	}
+	var userIds []int
+	for _, subscription := range subscriptions {
+		userIds = append(userIds, subscription.SubscriberId)
+	}
+	var userS UserService
+	userMap := userS.ListByIdsToMap(userIds)
+	var emails []string
+	for _, v := range userMap {
+		emails = append(emails, v.Account)
+	}
+	var m MessageService
+
+	m.SendMessages(userId, messageType, eventId, subscribeId, userIds, message)
+	email.Send(emails, message, "技术鸭社区")
+}
+
+func (s *SubscriptionService) SendMsgByToIds(userId, eventId, messageType, subscribeId int, toUserIds []int, message string) {
+
+	var userS UserService
+	userMap := userS.ListByIdsToMap(toUserIds)
+	var emails []string
+	for _, v := range userMap {
+		emails = append(emails, v.Account)
+	}
+	var m MessageService
+
+	m.SendMessages(userId, messageType, eventId, subscribeId, toUserIds, message)
+	email.Send(emails, message, "技术鸭社区")
+}

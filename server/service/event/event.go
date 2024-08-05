@@ -10,6 +10,7 @@ const (
 	SectionComment                // 章节评论
 	CourseComment                 // 课程回复
 	CourseUpdate                  // 课程更新
+	Meeting                       // 会议
 )
 
 var events []*event
@@ -29,6 +30,7 @@ func init() {
 	events = append(events, &event{Id: SectionComment, Msg: "章节回复"})
 	events = append(events, &event{Id: CourseComment, Msg: "课程回复"})
 	events = append(events, &event{Id: CourseUpdate, Msg: "课程更新"})
+	events = append(events, &event{Id: Meeting, Msg: "分享会"})
 
 	eventMap[CommentUpdateEvent] = "文章评论"
 	eventMap[UserFollowingEvent] = "用户更新"
@@ -39,6 +41,7 @@ func init() {
 	eventMap[SectionComment] = "章节回复"
 	eventMap[CourseComment] = "课程回复"
 	eventMap[CourseUpdate] = "课程更新"
+	eventMap[Meeting] = "分享会"
 
 	eventPage[CommentUpdateEvent] = "articleView"
 	eventPage[UserFollowingEvent] = "articleView"
@@ -49,6 +52,7 @@ func init() {
 	eventPage[SectionComment] = "articleView"
 	eventPage[CourseComment] = ""
 	eventPage[CourseUpdate] = ""
+	eventPage[Meeting] = ""
 
 }
 

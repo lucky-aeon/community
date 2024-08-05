@@ -48,19 +48,28 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 		subscriptionService.Send(event.ReplyComment, constant.NOTICE, comment.FromUserId, comment.ToUserId, b)
 	}
 	userId := 0
+	// 文章评论
 	if comment.TenantId == 0 {
 		var articles ArticleService
 		userId = articles.GetById(comment.BusinessId).UserId
 	}
+	// 课程评论
 	if comment.TenantId == 1 {
 		var courS CourseService
 		userId = courS.GetCourseSectionDetail(comment.BusinessId).UserId
 		eventId = event.SectionComment
 	} else if comment.TenantId == 2 {
+		// 章节评论
 		var courS CourseService
 		userId = courS.GetCourseDetail(comment.BusinessId).UserId
 		eventId = event.CourseComment
+	} else if comment.TenantId == 3 {
+		// 分享会评论
+		var meetingS MeetingService
+		userId = meetingS.GetById(comment.BusinessId).InitiatorId
+		eventId = event.Meeting
 	}
+
 	subscriptionService.ConstantAtSend(event.CommentAt, comment.FromUserId, comment.Content, b)
 	subscriptionService.Do(eventId, b)
 	// 文章发布者收到消息

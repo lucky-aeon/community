@@ -17,7 +17,6 @@ import (
 func main() {
 
 	log.Init()
-
 	// 设置程序使用中国时区
 	chinaLoc, err := time.LoadLocation("Asia/Shanghai")
 	time.Local = chinaLoc
@@ -42,7 +41,6 @@ func main() {
 	if err != nil {
 		log.Errorln(err)
 	}
-
 }
 func GetPwd(pwd string) ([]byte, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)

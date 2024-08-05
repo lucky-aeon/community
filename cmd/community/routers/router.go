@@ -38,6 +38,7 @@ func InitFrontedRouter(r *gin.Engine) {
 	frontend.InitDraftRouters(r)
 	frontend.InitCourseRouters(r)
 	frontend.InitNoteRouters(r)
+	frontend.InitMeetingRouters(r)
 
 	r.Use(middleware.AdminAuth)
 	backend.InitTypeRouters(r)
@@ -54,5 +55,6 @@ func InitFrontedRouter(r *gin.Engine) {
 	backend.InitDashboardRouters(r)
 	backend.InitOrderRouters(r)
 	backend.InitMonitRouters(r)
+	backend.InitMeetingRouters(r)
 
 }

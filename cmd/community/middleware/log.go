@@ -22,7 +22,7 @@ type responseWriter struct {
 func (w responseWriter) Write(b []byte) (int, error) {
 	//向一个bytes.buffer中写一份数据来为获取body使用
 	w.b.Write(b)
-	//完成gin.Context.Writer.Write()原有功能
+	//完成gin.Record.Writer.Write()原有功能
 	return w.ResponseWriter.Write(b)
 }
 

@@ -22,7 +22,7 @@ type responseWriter struct {
 func (w responseWriter) Write(b []byte) (int, error) {
 	//向一个bytes.buffer中写一份数据来为获取body使用
 	w.b.Write(b)
-	//完成gin.Context.Writer.Write()原有功能
+	//完成gin.Record.Writer.Write()原有功能
 	return w.ResponseWriter.Write(b)
 }
 
@@ -60,7 +60,9 @@ func OperLogger() gin.HandlerFunc {
 			RequestInfo:   c.Request.URL.Path,
 			RequestBody:   requestBody,
 			UserId:        GetUserId(c),
-			Ip:            utils.GetClientIP(c.Request),
+			Ip:            utils.GetClientIP(c),
+			Platform:      c.GetHeader("sec-ch-ua-platform"),
+			UserAgent:     c.GetHeader("user-agent"),
 			ResponseData:  body,
 		}
 

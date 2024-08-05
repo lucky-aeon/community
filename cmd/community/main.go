@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"time"
@@ -13,18 +12,18 @@ import (
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/pkg/oss"
 	"xhyovo.cn/community/pkg/utils"
-	"xhyovo.cn/community/server/model"
 )
 
 func main() {
+
+	log.Init()
 	// 设置程序使用中国时区
 	chinaLoc, err := time.LoadLocation("Asia/Shanghai")
+	time.Local = chinaLoc
 	if err != nil {
-		fmt.Println("Error loading China location:", err)
+		log.Errorf("Error loading China location:", err)
 		return
 	}
-	time.Local = chinaLoc
-	log.Init()
 	r := gin.Default()
 	r.SetFuncMap(utils.GlobalFunc())
 	config.Init()
@@ -37,28 +36,11 @@ func main() {
 	email.Init(emailConfig.Address, emailConfig.Username, emailConfig.Password, emailConfig.Host, emailConfig.PollCount)
 	routers.InitFrontedRouter(r)
 	cache.Init()
-
+	log.Info("start web")
 	err = r.Run(":8080")
 	if err != nil {
 		log.Errorln(err)
 	}
-
-	var users = make([]model.Users, 0)
-	model.User().Find(&users)
-	var orders = make([]model.Orders, 0)
-	for i := range users {
-		user := users[i]
-
-		order := model.Orders{
-			InviteCode:      user.InviteCode,
-			Price:           70,
-			Purchaser:       user.ID,
-			AcquisitionType: 2,
-			Creator:         13,
-		}
-		orders = append(orders, order)
-	}
-	model.Order().Save(orders)
 }
 func GetPwd(pwd string) ([]byte, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)

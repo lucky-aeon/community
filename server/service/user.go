@@ -4,6 +4,8 @@ import (
 	"errors"
 	"math/rand"
 	"time"
+	"xhyovo.cn/community/pkg/cache"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/server/dao"
 
 	"golang.org/x/crypto/bcrypt"
@@ -11,8 +13,6 @@ import (
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/server/service/event"
 
-	"xhyovo.cn/community/pkg/cache"
-	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 )
@@ -245,8 +245,9 @@ func (s *UserService) CheckCodeUsed(code int) bool {
 }
 
 func (s *UserService) PageUsers(p, limit int, condition model.UserSimple) (users []model.Users, count int64) {
-	model.User().Where("account like ?", condition.Account).Offset((p - 1) * limit).Limit(limit).Find(&users)
-	model.User().Count(&count)
+	tx := model.User().Where("account like ?", condition.Account)
+	tx.Offset((p - 1) * limit).Limit(limit).Find(&users)
+	tx.Count(&count)
 	return users, count
 }
 
@@ -298,6 +299,8 @@ func Login(login model.LoginForm) (*model.Users, error) {
 	if !cache.CountLimit(key, 5, constant.TTL_LIMIT_lOGIN) {
 		return &model.Users{}, errors.New("操作次数过多,请稍后重试")
 	}
+	var users []model.Users
+	model.User().Find(&users)
 	user := userDao.QueryUser(&model.Users{Account: login.Account})
 	if user.ID == 0 {
 		return &model.Users{}, errors.New("登录失败！账号不存在")
@@ -320,4 +323,40 @@ func ComparePswd(oldPwsd, newPswd string) bool {
 func GetPwd(pwd string) ([]byte, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	return hash, err
+}
+
+func (s *UserService) ListBlackUser(p, limit int) ([]model.Users, int64) {
+	var users []model.Users
+	var count int64
+	tx := model.User().Where("state = 2").Select("id", "name", "account")
+	tx.Offset((p - 1) * limit).Limit(limit).Find(&users)
+	tx.Count(&count)
+	return users, count
+}
+
+// 是否被拉黑
+func (s *UserService) IsBlack(userId int) bool {
+	var count int64
+	model.User().Where("id = ? and state = 2", userId).Count(&count)
+	return count == 1
+}
+
+func (s *UserService) BanByUserId(id int) {
+	model.User().Where("id = ?", id).Update("state", 2)
+}
+
+// ban 用户
+func (s *UserService) BanByUserAccount(account string) {
+	model.User().Where("account = ?", account).Update("state", 2)
+}
+
+func (s *UserService) UnBanByUserId(id int) {
+	model.User().Where("id = ?", id).Update("state", 1)
+}
+
+func (s UserService) ExistUserByAccount(account string) bool {
+	var count int64
+	model.User().Where("account", account).Count(&count)
+	return count > 0
+
 }

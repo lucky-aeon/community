@@ -17,8 +17,7 @@ func GetInstance() *gorm.DB {
 }
 
 func Init(username, password, address, database string) {
-
-	d := "%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local"
+	d := "%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local&timeout=10s"
 	var err error
 	dsn := fmt.Sprintf(d, username, password, address, database)
 	instance, err = gorm.Open(mysql.Open(dsn), &gorm.Config{

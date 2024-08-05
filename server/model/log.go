@@ -14,6 +14,8 @@ type OperLogs struct {
 	ResponseData  string         `json:"responseData"`
 	UserId        int            `json:"userId"`
 	Ip            string         `json:"ip"`
+	UserAgent     string         `json:"userAgent"`
+	Platform      string         `json:"platform"`
 	ExecAt        string         `json:"execAt"`
 	CreatedAt     time.LocalTime `json:"createdAt"`
 	UserName      string         `gorm:"-" json:"userName"`

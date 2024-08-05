@@ -18,10 +18,14 @@ func InitUserRouters(r *gin.Engine) {
 
 	group := r.Group("/community/admin/user")
 	group.GET("", listUser)
+	group.GET("/black", blackListUser)
 	group.Use(middleware.OperLogger())
 	group.POST("", updateUser)
 	group.DELETE("/:id", deleteUser)
 	group.PUT("/reset/pwd", setRangePassword)
+
+	group.DELETE("/black/ban", banUser)
+	group.POST("/black/unBan", unBanUser)
 }
 
 func listUser(ctx *gin.Context) {
@@ -88,4 +92,38 @@ func deleteUser(ctx *gin.Context) {
 	u.DeleteUser(id)
 	log.Infof("用户id: %d,删除用户: %d", userId, id)
 	result.OkWithMsg(nil, "删除成功").Json(ctx)
+}
+
+// 查询黑名单的用户
+func blackListUser(ctx *gin.Context) {
+	p, limit := page.GetPage(ctx)
+	var u services.UserService
+	user, count := u.ListBlackUser(p, limit)
+	result.Page(user, count, nil).Json(ctx)
+}
+
+// 禁掉用户
+func banUser(ctx *gin.Context) {
+	account := ctx.Query("account")
+
+	var u services.UserService
+	if !u.ExistUserByAccount(account) {
+		result.Err("用户不存在").Json(ctx)
+		return
+	}
+	u.BanByUserAccount(account)
+	result.OkWithMsg(nil, "已 ban 掉用户："+account).Json(ctx)
+}
+
+// 解封用户
+func unBanUser(ctx *gin.Context) {
+	id := ctx.Query("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	var u services.UserService
+	u.UnBanByUserId(idInt)
+	result.OkWithMsg(nil, "已解封用户："+id).Json(ctx)
 }

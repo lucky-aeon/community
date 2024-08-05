@@ -19,6 +19,7 @@ func InitMeetingRouters(ctx *gin.Engine) {
 	group.GET("/:id", getMeeting)
 	group.GET("/manager", managerMeeting)
 	group.GET("/inMeetingState/:id", inMeetingState)
+	group.GET("/:id/inMeetingUserAvatar", getJoinMeetingUsers)
 
 	group.Use(middleware.OperLogger())
 	group.DELETE(":id", deleteMeeting)
@@ -139,4 +140,17 @@ func inMeetingState(ctx *gin.Context) {
 	}
 
 	result.Ok(state, "").Json(ctx)
+}
+
+func getJoinMeetingUsers(ctx *gin.Context) {
+	idInt, err := strconv.Atoi(ctx.Param("id"))
+	if err != nil {
+		result.Err(err.Error())
+		return
+	}
+	var meetingService services.MeetingService
+	avatars := meetingService.GetJoinMeetingUserSelectAvatar(idInt)
+
+	result.Ok(avatars, "").Json(ctx)
+	return
 }

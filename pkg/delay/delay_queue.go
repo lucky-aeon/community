@@ -3,7 +3,6 @@ package delay
 import (
 	"github.com/RussellLuo/timingwheel"
 	"time"
-	"xhyovo.cn/community/pkg/log"
 )
 
 var taskMap = make(map[int]*task)
@@ -35,7 +34,6 @@ func GetInstant() *DelayQueue {
 }
 
 func (delay *DelayQueue) Add(id int, expireTIme time.Time, taskFunction func()) {
-	log.Infof("延迟队列加入任务：%v,触发时间为：%v", taskFunction, expireTIme.Format("2006-01-02 15:04:05"))
 	// 过期时间 - 当前时间
 	delay.tw.AfterFunc(expireTIme.Sub(time.Now()), taskFunction)
 }

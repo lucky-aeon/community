@@ -4,6 +4,8 @@ import (
 	"errors"
 	"math/rand"
 	"time"
+	"xhyovo.cn/community/pkg/cache"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/server/dao"
 
 	"golang.org/x/crypto/bcrypt"
@@ -293,10 +295,12 @@ func (s *UserService) SearchNameSelectId(name string) (ids []int) {
 }
 
 func Login(login model.LoginForm) (*model.Users, error) {
-	//key := constant.LIMIT_LOGIN + login.Account
-	//if !cache.CountLimit(key, 5, constant.TTL_LIMIT_lOGIN) {
-	//	return &model.Users{}, errors.New("操作次数过多,请稍后重试")
-	//}
+	key := constant.LIMIT_LOGIN + login.Account
+	if !cache.CountLimit(key, 5, constant.TTL_LIMIT_lOGIN) {
+		return &model.Users{}, errors.New("操作次数过多,请稍后重试")
+	}
+	var users []model.Users
+	model.User().Find(&users)
 	user := userDao.QueryUser(&model.Users{Account: login.Account})
 	if user.ID == 0 {
 		return &model.Users{}, errors.New("登录失败！账号不存在")

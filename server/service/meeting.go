@@ -25,7 +25,21 @@ type MeetingService struct {
 }
 
 func init() {
-	initMeetingTasks()
+	// 等待 db 初始化
+	go func() {
+		time.Sleep(3 * time.Second)
+		initMeetingTasks()
+	}()
+
+}
+
+func (m *MeetingService) GetJoinMeetingUserSelectAvatar(meetingId int) []string {
+
+	userIds := m.GetJoinUsers(meetingId)
+	var avatar []string
+	model.User().Where("id in ?", userIds).Select("avatar").Find(&avatar)
+
+	return avatar
 }
 
 // 保存
@@ -127,6 +141,7 @@ func (*MeetingService) Page(page, limit, userId int) ([]model.Meetings, int64) {
 	nameMap := userS.ListByIdsToMap(userIds)
 	for i := range meetings {
 		meetings[i].InitiatorName = nameMap[meetings[i].InitiatorId].Name
+		meetings[i].InitiatorAvatar = nameMap[meetings[i].InitiatorId].Avatar
 	}
 
 	return meetings, count
@@ -160,6 +175,11 @@ func (m *MeetingService) JoinMeeting(id, userId int) error {
 		return errors.New("会议发起者不可申请加入，你已在里面")
 	}
 
+	// 必须是报名中才可加入
+	if meeting.State != constant.Registering {
+		return errors.New("参与会议必须是报名中")
+	}
+
 	var joinUsers model.MeetingJoinUsers
 	joinUsers.UserId = userId
 	joinUsers.MeetingId = id
@@ -175,27 +195,13 @@ func (m *MeetingService) QuitJoinMeeting(id, userId int) error {
 	if meeting.Id == 0 {
 		return errors.New("会议不存在")
 	}
+
+	// 必须是报名中或者筹备中可以退出
+	if meeting.State != constant.Registering && meeting.State != constant.Preparing {
+		return errors.New("退出会议只能是报名中或者筹备中状态")
+	}
 	model.MeetingJoinUser().Where("meeting_id = ? and user_id = ?", id, userId).Delete(&model.MeetingJoinUsers{})
 	return nil
-}
-
-// 订阅会议,会议相关的变更记录都会触发订阅时间：发起会议，会议信息变更
-func (m *MeetingService) SubscribeMeeting(userId int) {
-	subscribeDo(userId)
-}
-
-func (m *MeetingService) CancelSubscribeMeeting(userId int) {
-	subscribeDo(userId)
-}
-
-func subscribeDo(userId int) {
-	var subscribeService SubscriptionService
-	var subscription *model.Subscriptions
-	subscription.SubscriberId = userId
-	subscription.EventId = event.Meeting
-	subscription.SendId = 13
-	subscription.BusinessId = constant.MeetingId
-	subscribeService.Subscribe(subscription)
 }
 
 func (*MeetingService) GeyByIdSample(id int) model.Meetings {
@@ -312,16 +318,73 @@ func (m *MeetingService) InMeetingState(meetingId, userId int) (bool, error) {
 	return count == 1, nil
 }
 
-// 初始化会议
+/*
+*
+初始化定时任务
+查出 报名中，筹备中，会议中 的会议状态
+
+报名中状态：添加 报名截止，会议开始，会议结束定时任务
+筹备中：添加会议开始，会议结束定时任务
+会议中：添加会议结束定时任务
+*/
 func initMeetingTasks() {
 	// 查出在 当前时间 < 报名时间的 数据
 	var meetings []model.Meetings
-	model.Meeting().Where("signup_end_time < ?", time.Now()).Find(&meetings)
+	model.Meeting().Where("signup_end_time > ?", time.Now()).Find(&meetings)
 	// 存入队列中
 	for _, meeting := range meetings {
 		var meetingService MeetingService
-		approveAddTask(meeting, meetingService.GetJoinUsers(meeting.Id))
+		userIds := meetingService.GetJoinUsers(meeting.Id)
+		if meeting.State == constant.Registering {
+			approveAddTask(meeting, userIds)
+		} else if meeting.State == constant.Preparing {
+			preparingAddTask(meeting, userIds)
+		} else if meeting.State == constant.InMeeting {
+			inMeetingAddTask(meeting)
+		}
+
 	}
+}
+
+func inMeetingAddTask(meeting model.Meetings) {
+	endTime := time.Time(*meeting.MeetingEndTime)
+	// 加入延迟队列
+	delayQueue := delay.GetInstant()
+
+	log.Infof("延迟队列加入任务：%s", meeting.PrintLog())
+	// 会议结束后状态改为会议完成
+	delayQueue.Add(meeting.Id, endTime, func() {
+		log.Infof("会议id:%d,会议标题:%s,会议状态:%s,修改会议状态:%s", meeting.Id, meeting.Title, meeting.State, constant.Completed)
+		meeting.State = constant.Completed
+		model.Meeting().Where("id = ?", meeting.Id).Save(&meeting)
+	})
+}
+
+func preparingAddTask(meeting model.Meetings, userIds []int) {
+	startTime := time.Time(*meeting.MeetingStartTime)
+	endTime := time.Time(*meeting.MeetingEndTime)
+
+	var subS SubscriptionService
+	startMessage := fmt.Sprintf(startTimeTemp, meeting.Title, meeting.MeetingLink)
+	// 加入延迟队列
+	delayQueue := delay.GetInstant()
+
+	// 会议开始后状态改为会议中
+	log.Infof("延迟队列加入任务：%s", meeting.PrintLog())
+	delayQueue.Add(meeting.Id, startTime, func() {
+		log.Infof("会议id:%d,会议标题:%s,会议状态:%s,修改会议状态:%s", meeting.Id, meeting.Title, meeting.State, constant.InMeeting)
+		meeting.State = constant.InMeeting
+		model.Meeting().Where("id = ?", meeting.Id).Save(&meeting)
+		subS.SendMsgByToIds(13, event.Meeting, constant.NOTICE, constant.MeetingId, userIds, startMessage)
+	})
+
+	// 会议结束后状态改为会议完成
+	log.Infof("延迟队列加入任务：%s", meeting.PrintLog())
+	delayQueue.Add(meeting.Id, endTime, func() {
+		log.Infof("会议id:%d,会议标题:%s,会议状态:%s,修改会议状态:%s", meeting.Id, meeting.Title, meeting.State, constant.Completed)
+		meeting.State = constant.Completed
+		model.Meeting().Where("id = ?", meeting.Id).Save(&meeting)
+	})
 }
 
 func approveAddTask(meeting model.Meetings, userIds []int) {
@@ -335,23 +398,29 @@ func approveAddTask(meeting model.Meetings, userIds []int) {
 	delayQueue := delay.GetInstant()
 	expireTime := signupEndTime
 
+	log.Infof("延迟队列加入任务：%s", meeting.PrintLog())
 	delayQueue.Add(meeting.Id, expireTime, func() {
+		log.Infof("会议id:%d,会议标题:%s,会议状态:%s,修改会议状态:%s", meeting.Id, meeting.Title, meeting.State, constant.Preparing)
+		meeting.State = constant.Preparing
+		model.Meeting().Where("id = ?", meeting.Id).Save(&meeting)
 		// 发送报名信息
 		message := fmt.Sprintf(signupEndTimeTemp, meeting.Title, meeting.MeetingLink)
 		subS.SendMsgByToIds(13, event.Meeting, constant.NOTICE, constant.MeetingId, userIds, message)
 	})
 
 	// 会议开始后状态改为会议中
+	log.Infof("延迟队列加入任务：%s", meeting.PrintLog())
 	delayQueue.Add(meeting.Id, startTime, func() {
-		log.Info("会议中")
+		log.Infof("会议id:%d,会议标题:%s,会议状态:%s,修改会议状态:%s", meeting.Id, meeting.Title, meeting.State, constant.InMeeting)
 		meeting.State = constant.InMeeting
 		model.Meeting().Where("id = ?", meeting.Id).Save(&meeting)
 		subS.SendMsgByToIds(13, event.Meeting, constant.NOTICE, constant.MeetingId, userIds, startMessage)
 	})
 
 	// 会议结束后状态改为会议完成
+	log.Infof("延迟队列加入任务：%s", meeting.PrintLog())
 	delayQueue.Add(meeting.Id, endTime, func() {
-		log.Info("已完成")
+		log.Infof("会议id:%d,会议标题:%s,会议状态:%s,修改会议状态:%s", meeting.Id, meeting.Title, meeting.State, constant.Completed)
 		meeting.State = constant.Completed
 		model.Meeting().Where("id = ?", meeting.Id).Save(&meeting)
 	})

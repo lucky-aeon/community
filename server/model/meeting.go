@@ -1,7 +1,9 @@
 package model
 
 import (
+	"fmt"
 	"gorm.io/gorm"
+	sysTime "time"
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/pkg/time"
 )
@@ -25,8 +27,17 @@ type Meetings struct {
 	InitiatorName    string             `json:"initiatorName" gorm:"-"` // 发起者昵称
 	JoinUsers        []MeetingJoinUsers `json:"joinUsers" gorm:"-"`     // 参与人
 	JoinUserCount    int                `json:"joinUserCount" gorm:"-"`
+	InitiatorAvatar  string             `json:"initiatorAvatar" gorm:"-"`
 }
 
 func Meeting() *gorm.DB {
 	return mysql.GetInstance().Model(&Meetings{})
+}
+
+func (m *Meetings) PrintLog() string {
+
+	return fmt.Sprintf("会议id:%d,会议标题:%s,会议状态:%s,会议报名截止时间:%v,会议开始时间:%v,会议结束时间:%v",
+		m.Id, m.Title, m.State, sysTime.Time(*m.SignupEndTime).Format("2006-01-02 15:04:05"),
+		sysTime.Time(*m.MeetingStartTime).Format("2006-01-02 15:04:05"),
+		sysTime.Time(*m.MeetingEndTime).Format("2006-01-02 15:04:05"))
 }

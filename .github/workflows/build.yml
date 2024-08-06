@@ -49,42 +49,8 @@ jobs:
           with:
             name: back-files
             path: dist
-
-    build-front:
-        needs: get-latest-sources
-        runs-on: ubuntu-latest
-        steps:
-        - name: Checkout repository
-          uses: actions/checkout@v2
-          with:
-            ref: ${{ needs.get-latest-sources.outputs.latest-tag }}
-
-        - name: Set up Node.js
-          uses: actions/setup-node@v2
-          with:
-            node-version: 18
-
-        - name: Install dependencies
-          run: cd ./web && yarn install
-
-        - name: Build Vue project
-          run: |
-            echo $(git branch --show-current)
-            cd ./web
-            echo "web project root: $(pwd)"
-            yarn build
-            echo "web project root: $(pwd)"
-            mkdir -p ../dist/web
-            mv -v ./dist/* ../dist/web
-            cd ..
-        - name: Upload front files
-          uses: actions/upload-artifact@v4
-          with:
-            name: front-files
-            path: dist
-
     push-tag:
-      needs: [get-latest-sources, build-front, build-back]
+      needs: [get-latest-sources, build-back]
       runs-on: ubuntu-latest
       outputs:
         build-file-name: ${{steps.package-build.outputs.build-file-name}}
@@ -93,17 +59,12 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             name: back-files
-        - name: Download front-files
-          uses: actions/download-artifact@v4
-          with:
-            name: front-files
         - name: Package build
           id: package-build
           run: |
            file_name=$(echo "community-${{ needs.get-latest-sources.outputs.latest-tag }}-linux.tar.gz")
            echo "build-file-name=$file_name" >> "$GITHUB_OUTPUT"
            tar -czvf "$file_name" ./*
-
         - name: Release
           uses: softprops/action-gh-release@v2
           with:

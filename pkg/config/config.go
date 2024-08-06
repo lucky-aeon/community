@@ -8,7 +8,7 @@ import (
 )
 
 type AppConfig struct {
-	ServerBind  string      `yaml:"server-bind" default:":8080"`
+	ServerBind  string      `yaml:"serverBind" default:":8080"`
 	DbConfig    DbConfig    `yaml:"db"`
 	OssConfig   OssConfig   `yaml:"oss"`
 	EmailConfig EmailConfig `yaml:"email"`
@@ -50,6 +50,7 @@ func Init() {
 		pollCount = 10
 	}
 	appConfig := &AppConfig{
+		ServerBind: os.Getenv("SERVER_BIND"),
 		DbConfig: DbConfig{
 			Address:  os.Getenv("DB_HOST"),
 			Database: os.Getenv("DB_DATABASE"),

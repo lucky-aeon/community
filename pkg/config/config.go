@@ -8,6 +8,7 @@ import (
 )
 
 type AppConfig struct {
+	ServerBind  string      `yaml:"server-bind" default:":8080"`
 	DbConfig    DbConfig    `yaml:"db"`
 	OssConfig   OssConfig   `yaml:"oss"`
 	EmailConfig EmailConfig `yaml:"email"`

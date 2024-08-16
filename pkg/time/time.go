@@ -19,6 +19,9 @@ func (t LocalTime) MarshalJSON() ([]byte, error) {
 func (t *LocalTime) UnmarshalJSON(data []byte) error {
 	// 去掉 JSON 字符串中的引号
 	str := string(data)
+	if str == "null" || str == "undefined" || str == "" {
+		return nil
+	}
 	if len(str) >= 2 && str[0] == '"' && str[len(str)-1] == '"' {
 		str = str[1 : len(str)-1]
 	}

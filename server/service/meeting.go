@@ -33,6 +33,7 @@ func init() {
 
 }
 
+// 获取加入的用户
 func (m *MeetingService) GetJoinMeetingUserSelectAvatar(meetingId int) []string {
 
 	userIds := m.GetJoinUsers(meetingId)
@@ -259,9 +260,7 @@ func (m *MeetingService) Approve(reqApproveMeeting request.ReqApproveMeeting) er
 	var subS SubscriptionService
 	subS.SendMsg(13, event.Meeting, constant.NOTICE, constant.MeetingId, signupMessage)
 
-	userIds := m.GetJoinUsers(meeting.Id)
-
-	approveAddTask(meeting, userIds)
+	approveAddTask(meeting)
 
 	// 修改状态
 	meeting.State = constant.Registering
@@ -336,7 +335,7 @@ func initMeetingTasks() {
 		var meetingService MeetingService
 		userIds := meetingService.GetJoinUsers(meeting.Id)
 		if meeting.State == constant.Registering {
-			approveAddTask(meeting, userIds)
+			approveAddTask(meeting)
 		} else if meeting.State == constant.Preparing {
 			preparingAddTask(meeting, userIds)
 		} else if meeting.State == constant.InMeeting {
@@ -387,7 +386,7 @@ func preparingAddTask(meeting model.Meetings, userIds []int) {
 	})
 }
 
-func approveAddTask(meeting model.Meetings, userIds []int) {
+func approveAddTask(meeting model.Meetings) {
 	signupEndTime := time.Time(*meeting.SignupEndTime)
 	startTime := time.Time(*meeting.MeetingStartTime)
 	endTime := time.Time(*meeting.MeetingEndTime)
@@ -401,10 +400,15 @@ func approveAddTask(meeting model.Meetings, userIds []int) {
 	log.Infof("延迟队列加入任务：%s", meeting.PrintLog())
 	delayQueue.Add(meeting.Id, expireTime, func() {
 		log.Infof("会议id:%d,会议标题:%s,会议状态:%s,修改会议状态:%s", meeting.Id, meeting.Title, meeting.State, constant.Preparing)
+		// 再查一次，避免使用之前的状态
+		var meetingService MeetingService
+		meeting = meetingService.GetById(meeting.Id)
 		meeting.State = constant.Preparing
 		model.Meeting().Where("id = ?", meeting.Id).Save(&meeting)
 		// 发送报名信息
 		message := fmt.Sprintf(signupEndTimeTemp, meeting.Title, meeting.MeetingLink)
+		// 查出参与人
+		userIds := meetingService.GetJoinUsers(meeting.Id)
 		subS.SendMsgByToIds(13, event.Meeting, constant.NOTICE, constant.MeetingId, userIds, message)
 	})
 
@@ -412,8 +416,12 @@ func approveAddTask(meeting model.Meetings, userIds []int) {
 	log.Infof("延迟队列加入任务：%s", meeting.PrintLog())
 	delayQueue.Add(meeting.Id, startTime, func() {
 		log.Infof("会议id:%d,会议标题:%s,会议状态:%s,修改会议状态:%s", meeting.Id, meeting.Title, meeting.State, constant.InMeeting)
+		var meetingService MeetingService
+		meeting = meetingService.GetById(meeting.Id)
 		meeting.State = constant.InMeeting
 		model.Meeting().Where("id = ?", meeting.Id).Save(&meeting)
+		// 查出参与人
+		userIds := meetingService.GetJoinUsers(meeting.Id)
 		subS.SendMsgByToIds(13, event.Meeting, constant.NOTICE, constant.MeetingId, userIds, startMessage)
 	})
 

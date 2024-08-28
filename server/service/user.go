@@ -164,6 +164,13 @@ func Register(account, pswd, name, inviteCode string) (int, error) {
 	var su SubscriptionService
 	su.Subscribe(&subscription)
 
+	// 自动订阅会议
+	var subscription2 model.Subscriptions
+	subscription2.SubscriberId = id
+	subscription2.EventId = event.Meeting
+	subscription2.BusinessId = constant.MeetingId
+	su.Subscribe(&subscription2)
+
 	// 生成账单
 	var mS = MemberInfoService{}
 

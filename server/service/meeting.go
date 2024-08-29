@@ -317,6 +317,13 @@ func (m *MeetingService) InMeetingState(meetingId, userId int) (bool, error) {
 	return count == 1, nil
 }
 
+func (m *MeetingService) SendMsgToJoinMeeting(id int, content string) {
+	// 查出参会人
+	userIds := m.GetJoinUsers(id)
+	var subS SubscriptionService
+	subS.SendMsgByToIds(13, event.Meeting, constant.NOTICE, constant.MeetingId, userIds, content)
+}
+
 /*
 *
 初始化定时任务
@@ -332,12 +339,10 @@ func initMeetingTasks() {
 	model.Meeting().Where("signup_end_time > ?", time.Now()).Find(&meetings)
 	// 存入队列中
 	for _, meeting := range meetings {
-		var meetingService MeetingService
-		userIds := meetingService.GetJoinUsers(meeting.Id)
 		if meeting.State == constant.Registering {
 			approveAddTask(meeting)
 		} else if meeting.State == constant.Preparing {
-			preparingAddTask(meeting, userIds)
+			preparingAddTask(meeting)
 		} else if meeting.State == constant.InMeeting {
 			inMeetingAddTask(meeting)
 		}
@@ -359,7 +364,7 @@ func inMeetingAddTask(meeting model.Meetings) {
 	})
 }
 
-func preparingAddTask(meeting model.Meetings, userIds []int) {
+func preparingAddTask(meeting model.Meetings) {
 	startTime := time.Time(*meeting.MeetingStartTime)
 	endTime := time.Time(*meeting.MeetingEndTime)
 
@@ -374,6 +379,9 @@ func preparingAddTask(meeting model.Meetings, userIds []int) {
 		log.Infof("会议id:%d,会议标题:%s,会议状态:%s,修改会议状态:%s", meeting.Id, meeting.Title, meeting.State, constant.InMeeting)
 		meeting.State = constant.InMeeting
 		model.Meeting().Where("id = ?", meeting.Id).Save(&meeting)
+		// 查出参与人
+		var meetingService MeetingService
+		userIds := meetingService.GetJoinUsers(meeting.Id)
 		subS.SendMsgByToIds(13, event.Meeting, constant.NOTICE, constant.MeetingId, userIds, startMessage)
 	})
 

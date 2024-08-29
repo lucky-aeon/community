@@ -17,6 +17,7 @@ func InitMeetingRouters(r *gin.Engine) {
 	group.POST("/pass", pass)
 	group.POST("/record", record)
 	group.DELETE("/:id", deleteMeeting)
+	group.POST("/sendMsgToJoinMeeting", sendMsg)
 }
 
 func approve(ctx *gin.Context) {
@@ -77,4 +78,22 @@ func deleteMeeting(ctx *gin.Context) {
 		return
 	}
 	result.OkWithMsg(nil, "删除成功").Json(ctx)
+}
+
+// 发送消息给参会人
+func sendMsg(ctx *gin.Context) {
+
+	type meetingMsg struct {
+		Id         int
+		MsgContent string
+	}
+	meetingMsgObject := meetingMsg{}
+	if err := ctx.ShouldBindJSON(&meetingMsgObject); err != nil {
+		msg := utils.GetValidateErr(&meetingMsgObject, err)
+		result.Err(msg).Json(ctx)
+		return
+	}
+	var meetingService services.MeetingService
+	meetingService.SendMsgToJoinMeeting(meetingMsgObject.Id, meetingMsgObject.MsgContent)
+	result.OkWithMsg(nil, "发送成功").Json(ctx)
 }

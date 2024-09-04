@@ -113,6 +113,7 @@ func Register(c *gin.Context) {
 		result.Err(err.Error()).Json(c)
 		return
 	}
-	c.SetCookie(middleware.AUTHORIZATION, token, 3600, "/", c.Request.Host, true, true)
+	c.SetCookie(middleware.AUTHORIZATION, token, int(constant.Token_TTl.Seconds()), "/", c.Request.Host, false, true)
+
 	result.OkWithMsg(map[string]string{"token": token}, "注册成功").Json(c)
 }

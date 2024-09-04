@@ -253,8 +253,8 @@ func (s *UserService) CheckCodeUsed(code int) bool {
 
 func (s *UserService) PageUsers(p, limit int, condition model.UserSimple) (users []model.Users, count int64) {
 	tx := model.User().Where("account like ?", condition.Account)
-	tx.Offset((p - 1) * limit).Limit(limit).Find(&users)
 	tx.Count(&count)
+	tx.Offset((p - 1) * limit).Limit(limit).Find(&users)
 	return users, count
 }
 

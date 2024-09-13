@@ -36,8 +36,8 @@ func main() {
 	email.Init(emailConfig.Address, emailConfig.Username, emailConfig.Password, emailConfig.Host, emailConfig.PollCount)
 	routers.InitFrontedRouter(r)
 	cache.Init()
-	log.Info("start web")
-	err = r.Run(appConfig.ServerBind)
+	log.Info("start web :8080")
+	err = r.Run(":8080")
 	if err != nil {
 		log.Errorln(err)
 	}

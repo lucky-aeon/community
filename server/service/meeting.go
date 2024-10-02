@@ -27,7 +27,7 @@ type MeetingService struct {
 func init() {
 	// 等待 db 初始化
 	go func() {
-		time.Sleep(3 * time.Second)
+		time.Sleep(5 * time.Second)
 		initMeetingTasks()
 	}()
 

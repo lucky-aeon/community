@@ -39,6 +39,7 @@ func InitFrontedRouter(r *gin.Engine) {
 	frontend.InitCourseRouters(r)
 	frontend.InitNoteRouters(r)
 	frontend.InitMeetingRouters(r)
+	frontend.InitKnowledgeRouters(r)
 
 	r.Use(middleware.AdminAuth)
 	backend.InitTypeRouters(r)

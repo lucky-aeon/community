@@ -1,8 +1,8 @@
-package mysql
+package postgre
 
 import (
 	"fmt"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
@@ -17,17 +17,18 @@ func GetInstance() *gorm.DB {
 }
 
 func Init(username, password, address, database string) {
-	d := "%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=true&loc=Local&timeout=10s"
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=5432 sslmode=disable TimeZone=Asia/Shanghai",
+		address, username, password, database)
 	var err error
-	dsn := fmt.Sprintf(d, username, password, address, database)
-	instance, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
+	instance, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
 		NamingStrategy: schema.NamingStrategy{SingularTable: true},
 		Logger:         logger.Default.LogMode(logger.Info),
 	})
 	if err != nil {
-		log.Errorf("连接 mysql 数据库失败！,err: %s", err.Error())
-		panic("连接 mysql 数据库失败！")
+		log.Errorf("连接 postgres 数据库失败！,err: %s", err.Error())
+		panic("连接 postgres 数据库失败！")
 	}
+
 	db, err := instance.DB()
 	db.SetMaxIdleConns(10)  //空闲连接数
 	db.SetMaxOpenConns(100) //最大连接数

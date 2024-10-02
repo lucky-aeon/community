@@ -39,6 +39,7 @@ func main() {
 	routers.InitFrontedRouter(r)
 	cache.Init()
 	log.Info("start web :8080")
+
 	err = r.Run(":8080")
 	if err != nil {
 		log.Errorln(err)

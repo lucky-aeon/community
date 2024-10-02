@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"github.com/gin-gonic/gin"
+	"strconv"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/pkg/utils"
@@ -12,17 +13,32 @@ import (
 func InitKnowledgeRouters(ctx *gin.Engine) {
 
 	group := ctx.Group("/community/knowledge")
+	group.GET("/like", QueryLikeQuestion)
 	group.Use(middleware.OperLogger())
 	group.GET("/query", QueryKnowledgies)
 	group.GET("/	", queryKnowledge)
 
 }
 
+func QueryLikeQuestion(ctx *gin.Context) {
+	question := ctx.Query("question")
+	var questionCaches service.QuestionCacheService
+	queryQuestion := questionCaches.QueryQuestion(question)
+	result.Ok(queryQuestion, "").Json(ctx)
+}
+
 func QueryKnowledgies(ctx *gin.Context) {
 
 	question := ctx.Query("question")
+	refreshCache := ctx.Query("refreshCache")
+
+	parseBool, err := strconv.ParseBool(refreshCache)
+	if err != nil {
+		parseBool = false
+	}
+
 	var knowS service.KnowledgeBaseService
-	documents, err := knowS.QueryKnowledgies(question)
+	documents, err := knowS.QueryKnowledgies(question, parseBool)
 	if err != nil {
 		result.Err(err.Error()).Json(ctx)
 		return

@@ -11,11 +11,11 @@ import (
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/pkg/oss"
+	"xhyovo.cn/community/pkg/postgre"
 	"xhyovo.cn/community/pkg/utils"
 )
 
 func main() {
-
 	log.Init()
 	// 设置程序使用中国时区
 	chinaLoc, err := time.LoadLocation("Asia/Shanghai")
@@ -30,6 +30,8 @@ func main() {
 	appConfig := config.GetInstance()
 	db := appConfig.DbConfig
 	mysql.Init(db.Username, db.Password, db.Address, db.Database)
+	pgDbConfig := appConfig.PGDbConfig
+	postgre.Init(pgDbConfig.Username, pgDbConfig.Password, pgDbConfig.Address, pgDbConfig.Database)
 	ossConfig := appConfig.OssConfig
 	oss.Init(ossConfig.Endpoint, ossConfig.AccessKey, ossConfig.SecretKey, ossConfig.Bucket)
 	emailConfig := appConfig.EmailConfig

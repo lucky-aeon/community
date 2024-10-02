@@ -141,7 +141,27 @@ func textToArray(texts string) ([]string, error) {
 	return jsonArray, nil
 }
 
-func (k *KnowledgeBaseService) QueryKnowledgies(question string) ([]model.Documents, error) {
+func (k *KnowledgeBaseService) QueryKnowledgies(question string, refreshCache bool) ([]model.Documents, error) {
+
+	var questionCache QuestionCacheService
+	answers := questionCache.GetAnswer(question)
+	if !refreshCache {
+		if len(answers) > 0 {
+			var documents []model.Documents
+			for i := range answers {
+				answer := answers[i]
+				documents = append(documents, model.Documents{
+					Content: answer.Content,
+					Type:    answer.Type,
+					Link:    answer.Link,
+					ID:      answer.DocumentId,
+					Remark:  answer.Remark,
+					Answer:  answer.Answer,
+				})
+			}
+			return documents, nil
+		}
+	}
 
 	// 向量化
 	var embeddingService EmbeddingService
@@ -230,6 +250,26 @@ func (k *KnowledgeBaseService) QueryKnowledgies(question string) ([]model.Docume
 	}
 
 	close(resultCh) // 关闭 channel
+
+	// 添加缓存
+	if len(results) > 0 {
+		go func() {
+			var answers []model.AnswerCaches
+			for i := range results {
+				r := results[i]
+				answers = append(answers, model.AnswerCaches{
+					Answer:     r.Answer,
+					Type:       r.Type,
+					Link:       r.Link,
+					Content:    r.Content,
+					Remark:     r.Remark,
+					DocumentId: r.ID,
+				})
+			}
+			questionCache.Put(question, answers)
+		}()
+
+	}
 
 	return results, nil
 }

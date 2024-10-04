@@ -23,6 +23,7 @@ func InitUserRouters(r *gin.Engine) {
 	group.GET("/black", blackListUser)
 	group.Use(middleware.OperLogger())
 	group.POST("", updateUser)
+	group.POST("/renewal", renewal)
 	group.DELETE("/:id", deleteUser)
 	group.PUT("/reset/pwd", setRangePassword)
 
@@ -36,10 +37,14 @@ func listUser(ctx *gin.Context) {
 	conditionUser := model.UserSimple{
 		Account: fmt.Sprintf("%%%s%%", ctx.Query("account")),
 	}
-
+	userState, err := strconv.Atoi(ctx.Query("userState"))
+	if err != nil {
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
 	var u services.UserService
 
-	users, count := u.PageUsers(p, limit, conditionUser)
+	users, count := u.PageUsers(p, limit, conditionUser, userState)
 	result.Page(users, count, nil).Json(ctx)
 }
 
@@ -133,4 +138,31 @@ func unBanUser(ctx *gin.Context) {
 	cache.Delete(constant.BLACK_LIST_COUNT + id)
 
 	result.OkWithMsg(nil, "已解封用户："+id).Json(ctx)
+}
+
+// 续费
+func renewal(ctx *gin.Context) {
+	renewalValue := ctx.Query("renewalValue")
+	userId := ctx.Query("userId")
+
+	year, err := strconv.Atoi(renewalValue)
+	if err != nil {
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+
+	userIdInt, err := strconv.Atoi(userId)
+
+	if err != nil {
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+
+	var u services.UserService
+	if err = u.Renewal(userIdInt, year); err != nil {
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	result.OkWithMsg(nil, "续费成功").Json(ctx)
+
 }

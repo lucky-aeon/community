@@ -14,11 +14,12 @@ type Users struct {
 	Name       string         `json:"name"`
 	Account    string         `json:"account,omitempty"`
 	Password   string
-	InviteCode string `json:"inviteCode,omitempty"`
-	Desc       string `json:"desc"`
-	Avatar     string `json:"avatar"`
-	State      int    `json:"state"`
-	Subscribe  int    `json:"subscribe"` // 1: 未订阅站内消息 2:订阅站内消息 (发送邮箱)
+	InviteCode string         `json:"inviteCode,omitempty"`
+	Desc       string         `json:"desc"`
+	Avatar     string         `json:"avatar"`
+	State      int            `json:"state"`
+	Subscribe  int            `json:"subscribe"` // 1: 未订阅站内消息 2:订阅站内消息 (发送邮箱)
+	ExpireTime time.LocalTime `json:"expireTime"`
 }
 
 type UserSimple struct {

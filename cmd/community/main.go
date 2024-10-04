@@ -12,6 +12,7 @@ import (
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/pkg/oss"
 	"xhyovo.cn/community/pkg/utils"
+	"xhyovo.cn/community/server/model"
 )
 
 func main() {
@@ -41,6 +42,22 @@ func main() {
 	if err != nil {
 		log.Errorln(err)
 	}
+}
+
+// 给所有用户的 expire_time 当前时间 + 1年
+func initUserExpireTime() {
+
+	// 计算一年后的时间
+	oneYearLater := time.Now().AddDate(1, 0, 0)
+
+	// 使用 Gorm 的 Update 方法更新所有记录
+	result := model.User().Where("id > ?", 0).Update("expire_time", oneYearLater)
+	if result.Error != nil {
+		log.Infof("Failed to update expire_time: %v", result.Error)
+	} else {
+		log.Infof("Successfully updated %v user(s)", result.RowsAffected)
+	}
+
 }
 func GetPwd(pwd string) ([]byte, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)

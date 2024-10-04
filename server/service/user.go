@@ -251,10 +251,20 @@ func (s *UserService) CheckCodeUsed(code int) bool {
 	return count == 1
 }
 
-func (s *UserService) PageUsers(p, limit int, condition model.UserSimple) (users []model.Users, count int64) {
+func (s *UserService) PageUsers(p, limit int, condition model.UserSimple, activeOpen int) (users []model.Users, count int64) {
 	tx := model.User().Where("account like ?", condition.Account)
 	tx.Count(&count)
-	tx.Offset((p - 1) * limit).Limit(limit).Find(&users)
+	db := tx.Offset((p - 1) * limit)
+
+	// 查询活跃用户
+	if activeOpen == 1 {
+		db.Where("expire_time > ?", time.Now())
+	} else if activeOpen == 2 {
+		// 查询过期用户
+		db.Where("expire_time < ?", time.Now())
+	}
+
+	db.Limit(limit).Find(&users)
 	return users, count
 }
 
@@ -314,8 +324,13 @@ func Login(login model.LoginForm) (*model.Users, error) {
 	}
 	if !ComparePswd(user.Password, login.Password) {
 		return &model.Users{}, errors.New("登录失败！密码错误")
-
 	}
+
+	var userService UserService
+	if !userService.IsActive(user.ID) {
+		return nil, errors.New("您的账号已到期，如需续费，请联系：xhyQAQ250")
+	}
+
 	return user, nil
 }
 
@@ -366,4 +381,38 @@ func (s UserService) ExistUserByAccount(account string) bool {
 	model.User().Where("account", account).Count(&count)
 	return count > 0
 
+}
+
+func (s UserService) Renewal(userId, year int) error {
+
+	if year < 0 {
+		return errors.New("续费年限不可小于 0")
+
+	}
+
+	var user model.Users
+	var count int64
+	model.User().Where("id = ?", userId).Count(&count)
+	if count == 0 {
+		return errors.New("用户不存在")
+	}
+
+	model.User().Where("id = ?", userId).First(&user)
+
+	nowTime := time.Now()
+	expireTime := time.Time(user.ExpireTime)
+	var renewalTime time.Time
+	// 如果是活跃用户则过期时间 + year
+	if expireTime.After(nowTime) {
+		renewalTime = expireTime.AddDate(year, 0, 0)
+	} else {
+		// 如果是过期用户则当前时间 + year
+		renewalTime = time.Now().AddDate(year, 0, 0)
+	}
+	model.User().Where("id = ?", userId).Update("expire_time", renewalTime)
+	return nil
+}
+func (s UserService) IsActive(userId int) bool {
+	user := s.GetUserById(userId)
+	return time.Time(user.ExpireTime).After(time.Now())
 }

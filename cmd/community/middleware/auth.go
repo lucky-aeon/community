@@ -61,6 +61,12 @@ func Auth(ctx *gin.Context) {
 		return
 	}
 
+	// 是否是活跃用户
+	if !userService.IsActive(claims.ID) {
+		result.Err("您的账号已到期，如需续费，请联系：xhyQAQ250").Json(ctx)
+		ctx.Abort()
+		return
+	}
 	ctx.Set(AUTHORIZATION, claims.ID)
 	ctx.Next()
 }

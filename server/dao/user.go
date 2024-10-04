@@ -1,6 +1,8 @@
 package dao
 
 import (
+	sysTime "time"
+	"xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -48,8 +50,13 @@ func (*UserDao) QueryUserSimple(user *model.Users) (result model.UserSimple, err
 }
 
 func (*UserDao) CreateUser(account, name, pswd, ininviteCode string) int {
-
-	user := model.Users{Account: account, Name: name, Password: pswd, InviteCode: ininviteCode, Subscribe: 1}
+	user := model.Users{Account: account,
+		Name:       name,
+		Password:   pswd,
+		InviteCode: ininviteCode,
+		Subscribe:  2,
+		ExpireTime: time.LocalTime(sysTime.Time(time.Now()).AddDate(1, 0, 0)),
+	}
 	model.User().Create(&user)
 	return user.ID
 }

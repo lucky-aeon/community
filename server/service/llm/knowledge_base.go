@@ -32,7 +32,7 @@ func (k *KnowledgeBaseService) AddKnowledge(content, link, remake string, typee 
 
 	// 分片知识
 	var llm LLMService
-	texts, err := llm.Chat("", constant.KnowledgeSplitPrompt+"用户输入如下："+content)
+	texts, err := llm.Chat(constant.KnowledgeSplitPrompt, content)
 	if err != nil {
 		return err
 	}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"xhyovo.cn/community/pkg/config"
 )
 
@@ -31,7 +32,8 @@ type ChatResponse struct {
 }
 
 func (llm *LLMService) Chat(systemMessage, userMessage string) (string, error) {
-
+	userMessage = strings.Trim(userMessage, "\r\n")
+	userMessage = strings.TrimSpace(userMessage)
 	llmConfig := config.GetInstance().LLMConfig
 
 	url := llmConfig.Url

@@ -2,6 +2,7 @@ package services
 
 import (
 	mapset "github.com/deckarep/golang-set/v2"
+	"xhyovo.cn/community/pkg/time"
 	"xhyovo.cn/community/server/model"
 )
 
@@ -78,4 +79,35 @@ func (s *LogServices) GetPageLoginPage(page, limit int, logSearch model.LogSearc
 	}
 	db.Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
 	return
+}
+
+func (s *LogServices) GetPageQuestionLogs(page int, limit int) ([]struct {
+	ID        int            `json:"id"`
+	Question  string         `json:"question"`
+	UserName  string         `json:"userName"`
+	CreatedAt time.LocalTime `json:"createdAt"`
+}, int64) {
+	var count int64
+	var logs []struct {
+		ID        int            `json:"id"`
+		Question  string         `json:"question"`
+		UserName  string         `json:"userName"`
+		CreatedAt time.LocalTime `json:"createdAt"`
+	}
+
+	db := model.OperLog()
+
+	// 查找 request_info 以 "/community/knowledge/query" 开头的记录，并提取 question 参数、关联的 user name 和提问时间
+	db.Select("oper_logs.id, SUBSTRING_INDEX(SUBSTRING(oper_logs.request_info, LOCATE('?question=', oper_logs.request_info) + 10), '&', 1) AS question, users.name AS user_name, oper_logs.created_at").
+		Joins("JOIN users ON oper_logs.user_id = users.id").
+		Where("oper_logs.request_info LIKE ?", "/community/knowledge/query%").
+		Count(&count)
+
+	if count == 0 {
+		return nil, 0
+	}
+
+	db.Limit(limit).Offset((page - 1) * limit).Order("created_at desc").Find(&logs)
+
+	return logs, count
 }

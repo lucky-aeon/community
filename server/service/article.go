@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
+	"strconv"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/request"
+	service "xhyovo.cn/community/server/service/llm"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -306,6 +308,17 @@ func (a *ArticleService) Delete(articleId int) (err error) {
 	}
 	// 删除文章标签表
 	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
+
+	// 添加到知识库
+	var knowledgeService service.KnowledgeBaseService
+	go func() {
+		err := knowledgeService.DeleteKnowledge(articleId, constant.InternalArticle)
+		if err != nil {
+			log.Errorf("删除知识失败，id：%d,err: %v", articleId, err)
+			return
+		}
+	}()
+
 	return
 }
 
@@ -496,7 +509,7 @@ func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.A
 	}
 	// 分开写，避免更新 0 值
 	if reqArticle.ID == 0 {
-		mysql.GetInstance().Save(&articleObject)
+		mysql.GetInstance().Create(&articleObject)
 	} else {
 		model.Article().Where("user_id = ? and id = ?", articleObject.UserId, articleObject.ID).Updates(&articleObject)
 	}
@@ -523,6 +536,17 @@ func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.A
 		subscriptionService.NoticeUsers(event.ArticleAt, id, reqArticle.NoticeUser, b)
 	}
 	go d.DelDraft(reqArticle.UserId)
+
+	// 添加到知识库
+	var knowledgeService service.KnowledgeBaseService
+	go func() {
+		err := knowledgeService.AddKnowledge(reqArticle.Content, "https://code.xhyovo.cn/article/view?articleId="+strconv.Itoa(articleObject.ID), "", constant.InternalArticle, articleObject.ID)
+		if err != nil {
+			log.Errorf("添加知识至知识库失败，id：%d,err: %v", articleObject.ID, err)
+			return
+		}
+	}()
+
 	return articleObject, nil
 }
 

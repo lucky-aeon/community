@@ -15,6 +15,7 @@ func InitLogRouters(r *gin.Engine) {
 	group.GET("/oper/log", listOperLogs)
 	group.GET("/login/log", listLoginLogs)
 	group.GET("/file/log", listFileLogs)
+	group.GET("/question/log", listQuestionLOgs)
 }
 
 func listOperLogs(ctx *gin.Context) {
@@ -61,6 +62,13 @@ func listFileLogs(ctx *gin.Context) {
 		return
 	}
 	logs, count := logsS.GetPageOperLog(p, limit, logSearch, false)
+	result.Page(logs, count, nil).Json(ctx)
+	return
+}
+
+func listQuestionLOgs(ctx *gin.Context) {
+	p, limit := page.GetPage(ctx)
+	logs, count := logsS.GetPageQuestionLogs(p, limit)
 	result.Page(logs, count, nil).Json(ctx)
 	return
 }

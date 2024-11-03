@@ -4,8 +4,11 @@ import (
 	"errors"
 	"sort"
 	"strings"
+	"xhyovo.cn/community/pkg/constant"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
+	service "xhyovo.cn/community/server/service/llm"
 )
 
 type CourseService struct {
@@ -15,7 +18,7 @@ type CourseService struct {
 func (*CourseService) Publish(course model.Courses) {
 	course.Technology = strings.Join(course.TechnologyS, ",")
 	if course.ID == 0 {
-		model.Course().Save(&course)
+		model.Course().Create(&course)
 		var subscriptionService SubscriptionService
 		var b SubscribeData
 		b.UserId = course.UserId
@@ -27,6 +30,17 @@ func (*CourseService) Publish(course model.Courses) {
 	} else {
 		model.Course().Where("id = ?", course.ID).Updates(&course)
 	}
+
+	// 添加到知识库
+	var knowledgeService service.KnowledgeBaseService
+	go func() {
+		err := knowledgeService.AddKnowledge(course.Desc, "", "该知识来源于课程,不支持跳转到原文", constant.InternalCourse, course.ID)
+		if err != nil {
+			log.Errorf("添加知识至知识库失败，id：%d,err: %v", course.ID, err)
+			return
+		}
+	}()
+
 }
 
 // 获取课程详细信息
@@ -48,6 +62,17 @@ func (*CourseService) PageCourse(page, limit int) (courses []model.Courses, coun
 func (*CourseService) DeleteCourse(id int) {
 	model.Course().Delete("id = ?", id)
 	model.CoursesSection().Where("course_id = ?", id).Delete(&model.CoursesSections{})
+
+	// 添加到知识库
+	var knowledgeService service.KnowledgeBaseService
+	go func() {
+		err := knowledgeService.DeleteKnowledge(id, constant.InternalCourse)
+		if err != nil {
+			log.Errorf("删除知识失败，id：%d,err: %v", id, err)
+			return
+		}
+	}()
+
 }
 
 // 发布章节
@@ -57,7 +82,7 @@ func (c *CourseService) PublishSection(section model.CoursesSections) error {
 	}
 	if section.ID == 0 {
 
-		model.CoursesSection().Save(&section)
+		model.CoursesSection().Create(&section)
 		var b SubscribeData
 		var subscriptionService SubscriptionService
 		b.UserId = section.UserId
@@ -78,6 +103,17 @@ func (c *CourseService) PublishSection(section model.CoursesSections) error {
 	} else {
 		model.CoursesSection().Where("id = ?", section.ID).Updates(&section)
 	}
+
+	// 添加到知识库
+	var knowledgeService service.KnowledgeBaseService
+	go func() {
+		err := knowledgeService.AddKnowledge(section.Content, "", "该知识来源于课程,不支持跳转到原文", constant.InternalCourse, section.ID)
+		if err != nil {
+			log.Errorf("添加知识至知识库失败，id：%d,err: %v", section.ID, err)
+			return
+		}
+	}()
+
 	return nil
 }
 
@@ -115,10 +151,20 @@ func (*CourseService) PageCourseSection(page, limit, courseId int) (courses []mo
 	return
 }
 
-// 删除课程
+// 删除课程章节
 func (*CourseService) DeleteCourseSection(id int) {
 	model.CoursesSection().Delete("id = ?", id)
 	// 对应评论一并删除 todo
+
+	var knowledgeService service.KnowledgeBaseService
+	go func() {
+		err := knowledgeService.DeleteKnowledge(id, constant.InternalCourse)
+		if err != nil {
+			log.Errorf("删除知识至知识库失败，id：%d,err: %v", id, err)
+			return
+		}
+	}()
+
 }
 
 func (c *CourseService) ListByIdsSelectIdTitleMap(ids []int) (m map[int]string) {

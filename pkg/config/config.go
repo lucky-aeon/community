@@ -8,10 +8,31 @@ import (
 )
 
 type AppConfig struct {
-	ServerBind  string      `yaml:"serverBind" default:":8080"`
-	DbConfig    DbConfig    `yaml:"db"`
-	OssConfig   OssConfig   `yaml:"oss"`
-	EmailConfig EmailConfig `yaml:"email"`
+	ServerBind      string      `yaml:"serverBind" default:":8080"`
+	DbConfig        DbConfig    `yaml:"db"`
+	PGDbConfig      PGDbConfig  `yaml:"pgdb"`
+	OssConfig       OssConfig   `yaml:"oss"`
+	EmailConfig     EmailConfig `yaml:"email"`
+	LLMConfig       LLMConfig
+	EmbeddingConfig EmbeddingConfig
+}
+
+type EmbeddingConfig struct {
+	ApiKey string `yaml:"apikey"`
+	Model  string `yaml:"model"`
+	Url    string `yaml:"url"`
+}
+
+type LLMConfig struct {
+	ApiKey string `yaml:"apikey"`
+	Model  string `yaml:"model"`
+	Url    string `yaml:"url"`
+}
+type PGDbConfig struct {
+	Address  string `yaml:"address"`
+	Database string `yaml:"database"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }
 
 type DbConfig struct {
@@ -57,6 +78,12 @@ func Init() {
 			Username: os.Getenv("DB_USER"),
 			Password: os.Getenv("DB_PASS"),
 		},
+		PGDbConfig: PGDbConfig{
+			Address:  os.Getenv("PG_DB_HOST"),
+			Database: os.Getenv("PG_DB_DATABASE"),
+			Username: os.Getenv("PG_DB_USER"),
+			Password: os.Getenv("PG_DB_PASS"),
+		},
 		OssConfig: OssConfig{
 			AccessKey: os.Getenv("OSS_ACCESS_KEY"),
 			Bucket:    os.Getenv("OSS_BUCKET"),
@@ -71,6 +98,16 @@ func Init() {
 			Password:  os.Getenv("PASSWORD"),
 			Host:      os.Getenv("HOST"),
 			PollCount: pollCount,
+		},
+		LLMConfig: LLMConfig{
+			ApiKey: os.Getenv("LLM_API_KEY"),
+			Model:  os.Getenv("LLM_MODEL"),
+			Url:    os.Getenv("LLM_URL"),
+		},
+		EmbeddingConfig: EmbeddingConfig{
+			ApiKey: os.Getenv("EMBEDDING_API_KEY"),
+			Model:  os.Getenv("EMBEDDING_LLM_MODEL"),
+			Url:    os.Getenv("EMBEDDING_LLM_URL"),
 		},
 	}
 	instance = appConfig

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/gin-gonic/gin"
 	"io"
+	"net/url"
 	"time"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
@@ -53,11 +54,12 @@ func OperLogger() gin.HandlerFunc {
 		if len(body) > 100 {
 			body = body[:100]
 		}
+		unescape, _ := url.QueryUnescape(c.Request.RequestURI)
 
 		logs := model.OperLogs{
 			ExecAt:        execTime.String(),
 			RequestMethod: c.Request.Method,
-			RequestInfo:   c.Request.URL.Path,
+			RequestInfo:   unescape,
 			RequestBody:   requestBody,
 			UserId:        GetUserId(c),
 			Ip:            utils.GetClientIP(c),

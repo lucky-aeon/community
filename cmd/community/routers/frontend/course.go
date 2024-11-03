@@ -16,6 +16,7 @@ func InitCourseRouters(r *gin.Engine) {
 	group := r.Group("/community/courses")
 	group.GET("", ListCourse)
 	group.GET("/section", ListCourseSection)
+	group.GET("/section/newest", ListNewest)
 	group.Use(middleware.OperLogger())
 	group.GET("/:id", GetCourseDetail)
 	group.GET("/section/:id", GetCourseSectionDetail)
@@ -68,4 +69,12 @@ func ListCourseSection(ctx *gin.Context) {
 	courses, count := courseService.PageCourseSection(p, limit, courseId)
 	result.Page(courses, count, nil).Json(ctx)
 	return
+}
+
+// 获取最新课程章节，只获取8个
+func ListNewest(ctx *gin.Context) {
+
+	courses := courseService.GetNewestCourseSection()
+
+	result.Ok(courses, "").Json(ctx)
 }

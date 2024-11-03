@@ -18,6 +18,7 @@ type CoursesSections struct {
 	DeletedAt   gorm.DeletedAt `json:"deletedAt,omitempty" gorm:"index,omitempty"`
 	PreId       int            `json:"preId" gorm:"-"`
 	NextId      int            `json:"nextId" gorm:"-"`
+	CourseTitle string         `json:"courseTitle" gorm:"column:courseTitle"`
 }
 
 func CoursesSection() *gorm.DB {

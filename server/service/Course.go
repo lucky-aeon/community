@@ -194,3 +194,17 @@ func (c *CourseService) ListSectionByIds(ids []int) (m map[int]string) {
 	}
 	return
 }
+
+func (c *CourseService) GetNewestCourseSection() []model.CoursesSections {
+
+	var sections []model.CoursesSections
+
+	// 使用联表查询，确保可以获取课程的名称
+	model.CoursesSection().Select("courses_sections.title, courses_sections.id,courses.title AS courseTitle").
+		Joins("LEFT JOIN courses ON courses.id = courses_sections.course_id").
+		Order("courses_sections.created_at desc").
+		Limit(8).
+		Find(&sections)
+
+	return sections
+}

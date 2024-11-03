@@ -49,7 +49,8 @@ func (*UserDao) QueryUserSimple(user *model.Users) (result model.UserSimple, err
 
 func (*UserDao) CreateUser(account, name, pswd, ininviteCode string) int {
 
-	user := model.Users{Account: account, Name: name, Password: pswd, InviteCode: ininviteCode, Subscribe: 1}
+	// 自动接收邮箱
+	user := model.Users{Account: account, Name: name, Password: pswd, InviteCode: ininviteCode, Subscribe: 2}
 	model.User().Create(&user)
 	return user.ID
 }

@@ -16,7 +16,6 @@ func InitKnowledgeRouters(ctx *gin.Engine) {
 	group.GET("/like", QueryLikeQuestion)
 	group.Use(middleware.OperLogger())
 	group.GET("/query", QueryKnowledgies)
-	group.GET("/	", queryKnowledge)
 
 }
 
@@ -38,7 +37,8 @@ func QueryKnowledgies(ctx *gin.Context) {
 	}
 
 	var knowS service.KnowledgeBaseService
-	documents, err := knowS.QueryKnowledgies(question, parseBool)
+	userId := middleware.GetUserId(ctx)
+	documents, err := knowS.QueryKnowledgies(question, parseBool, userId)
 	if err != nil {
 		result.Err(err.Error()).Json(ctx)
 		return

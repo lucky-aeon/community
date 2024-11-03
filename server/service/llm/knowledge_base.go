@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/pgvector/pgvector-go"
 	"strconv"
@@ -141,7 +142,12 @@ func textToArray(texts string) ([]string, error) {
 	return jsonArray, nil
 }
 
-func (k *KnowledgeBaseService) QueryKnowledgies(question string, refreshCache bool) ([]model.Documents, error) {
+func (k *KnowledgeBaseService) QueryKnowledgies(question string, refreshCache bool, userId int) ([]model.Documents, error) {
+
+	// 限制用户问题不可超过50个字
+	if len(question) > 50 || question == "" {
+		return nil, errors.New("问题不合规")
+	}
 
 	var questionCache QuestionCacheService
 	answers := questionCache.GetAnswer(question)

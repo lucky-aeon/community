@@ -42,6 +42,7 @@ func InitArticleRouter(r *gin.Engine) {
 	group.GET("/like/state/:articleId", articleLikeState)
 	group.GET("/list", articlesByTypeId)
 	group.GET("/latest", articleLatest)
+	group.GET("/hot/qa", getHotQA)
 	group.Use(middleware.OperLogger())
 	group.GET("/:id", articleGet)
 	group.POST("/update", articleSave)
@@ -230,4 +231,11 @@ func publish(c *gin.Context) {
 		return
 	}
 	result.OkWithMsg(nil, constant.GetArticleMsg(article.State)).Json(c)
+}
+
+func getHotQA(ctx *gin.Context) {
+	var a services.ArticleService
+	userId := middleware.GetUserId(ctx)
+	count, qa := a.GetHotQA(userId, 1, 10)
+	result.Page(qa, count, nil).Json(ctx)
 }

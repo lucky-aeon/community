@@ -26,7 +26,7 @@ func Init(username, password, address, database string) {
 	})
 	if err != nil {
 		log.Errorf("连接 postgres 数据库失败！,err: %s", err.Error())
-		panic("连接 postgres 数据库失败！")
+		//panic("连接 postgres 数据库失败！")
 	}
 
 	db, err := instance.DB()

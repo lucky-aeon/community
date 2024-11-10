@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
+	"math"
 	"strconv"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/request"
@@ -565,4 +566,50 @@ func (a *ArticleService) LatestArticle() (result []*model.ArticleData) {
 
 func (a *ArticleService) UpdateTopNumber(article request.TopArticle) {
 	model.Article().Where("id = ?", article.Id).Updates(&article)
+}
+
+type ArticleViews struct {
+	ArticleID int `gorm:"column:article_id"`
+	Views     int `gorm:"column:views"`
+}
+
+// 获取高频问答
+// 获取所有文章的访问量，获取所有的 qa，做交集即可
+func (a *ArticleService) GetHotQA(currentUserId, page, limit int) (int64, []*model.ArticleData) {
+	// 获取所有的 QA 文章
+	qaArticles, _ := a.ListByTypeId(1, 0, 0, page, math.MaxInt64, "")
+
+	// 创建一个 map 来存储 QA 文章的访问量
+	qaArticleMap := make(map[int]*model.ArticleData)
+	for _, article := range qaArticles {
+		qaArticleMap[article.ID] = article
+	}
+
+	var results []ArticleViews
+
+	// 使用 GORM 构建查询，获取所有文章的访问量并按访问量排序
+	db := mysql.GetInstance()
+	err := db.Table("oper_logs").
+		Select("CAST(SUBSTRING_INDEX(request_info, '/', -1) AS UNSIGNED) AS article_id, COUNT(*) AS views").
+		Where("request_info LIKE ?", "/community/articles/%").
+		Group("article_id").
+		Order("views DESC").
+		Scan(&results).Error
+	if err != nil {
+		// 错误处理
+		return 0, nil
+	}
+
+	// 找出访问量排序的文章中属于 QA 的文章
+	var hotQAs []*model.ArticleData
+	for _, articleView := range results {
+		if qaArticle, exists := qaArticleMap[articleView.ArticleID]; exists {
+			hotQAs = append(hotQAs, qaArticle)
+			if len(hotQAs) >= 10 {
+				break
+			}
+		}
+	}
+
+	return int64(len(hotQAs)), hotQAs
 }

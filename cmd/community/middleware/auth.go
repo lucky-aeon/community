@@ -30,6 +30,10 @@ func Auth(ctx *gin.Context) {
 	token := ctx.GetHeader(AUTHORIZATION)
 	if len(token) == 0 {
 		token, _ = ctx.Cookie(AUTHORIZATION)
+		// 增加 query 鉴权
+		if len(token) == 0 {
+			token = ctx.Query(AUTHORIZATION)
+		}
 	}
 	claims, err := ParseToken(token)
 	if err != nil {

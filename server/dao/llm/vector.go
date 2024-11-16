@@ -9,6 +9,11 @@ import (
 
 type VectorDao struct{}
 
+type SimilarityQA struct {
+	Id      int
+	QaTitle string
+}
+
 // 获取向量
 func (v *VectorDao) Get(id int) (*model.Vectors, error) {
 	var vector model.Vectors
@@ -43,22 +48,22 @@ func (v *VectorDao) DeleteByDocumentId(documentId int) error {
 	return model.Vector().Where("document_id", documentId).Delete(model.Documents{}).Error
 }
 
-func (v *VectorDao) Query(embedding []float32, limit int, threshold float64) ([]model.Vectors, error) {
+func (v *VectorDao) Query(embedding []float32, limit int, threshold float64, typee int) ([]model.Vectors, error) {
 	var vectors []model.Vectors
 	vector := pgvector.NewVector(embedding)
 
 	// 构建查询，使用子查询计算余弦相似度，并在外层设置阈值筛选
 	query := model.Vector().Raw(`
-		SELECT content, document_id
+		SELECT *
 		FROM (
-			SELECT content, document_id, embedding <=> ? AS similarity
+			SELECT content, document_id,type, embedding <=> ? AS similarity
 			FROM vectors
 			ORDER BY similarity
 			LIMIT ?
 		) AS subquery
-		WHERE similarity > ?
+		where type = ?
 		ORDER BY similarity
-		LIMIT ?`, vector, limit, threshold, limit)
+		LIMIT ?`, vector, limit, typee, limit)
 
 	// 执行查询
 	err := query.Scan(&vectors).Error
@@ -68,4 +73,9 @@ func (v *VectorDao) Query(embedding []float32, limit int, threshold float64) ([]
 	}
 
 	return vectors, nil
+}
+
+func (v *VectorDao) Delete2(content string, documentId int) error {
+	return model.Vector().Where("document_id", documentId).Where("content", content).Where("type", 2).Delete(model.Documents{}).Error
+
 }

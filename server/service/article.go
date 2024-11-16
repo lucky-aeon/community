@@ -8,6 +8,8 @@ import (
 	"math"
 	"strconv"
 	"xhyovo.cn/community/pkg/log"
+	dao "xhyovo.cn/community/server/dao/llm"
+	model2 "xhyovo.cn/community/server/model/knowledge"
 	"xhyovo.cn/community/server/request"
 	service "xhyovo.cn/community/server/service/llm"
 
@@ -546,6 +548,14 @@ func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.A
 			log.Errorf("添加知识至知识库失败，id：%d,err: %v", articleObject.ID, err)
 			return
 		}
+
+		// 加入向量数据库
+		if types.Title == "QA" {
+			if err := knowledgeService.AddQA(articleObject.Title, articleObject.ID); err != nil {
+				log.Warn("%s 添加到向量库失败", articleObject.Title)
+			}
+		}
+
 	}()
 
 	return articleObject, nil
@@ -612,4 +622,31 @@ func (a *ArticleService) GetHotQA(currentUserId, page, limit int) (int64, []*mod
 	}
 
 	return int64(len(hotQAs)), hotQAs
+}
+
+func (a *ArticleService) GetSimilarityQA(title string, id int) (error, []model2.Vectors) {
+
+	var embeddingService service.EmbeddingService
+	// 向量化
+	embeddings, err := embeddingService.GetTextEmbeddings([]string{title})
+
+	if err != nil {
+		return nil, nil
+	}
+
+	item := embeddings.Output.Embeddings[0]
+	var vectorDao dao.VectorDao
+	articles, err := vectorDao.Query(item.Embedding, 20, 0.2, 2)
+	if err != nil {
+		return err, nil
+	}
+
+	var filteredArticles []model2.Vectors
+	for _, article := range articles {
+		if article.DocumentId != id {
+			filteredArticles = append(filteredArticles, article)
+		}
+	}
+
+	return nil, filteredArticles
 }

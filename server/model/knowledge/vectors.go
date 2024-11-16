@@ -13,6 +13,7 @@ type Vectors struct {
 	CreatedAt  time.LocalTime  `json:"createdAt"`
 	Content    string          `json:"content" binding:"required"`
 	DocumentId int             `json:"documentId" binding:"required"`
+	Type       int             `json:"type" binding:"required"`
 	Embedding  pgvector.Vector `gorm:"type:float8[]" json:"embedding"` // 使用 PostgreSQL 数组
 }
 

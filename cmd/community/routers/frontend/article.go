@@ -42,7 +42,10 @@ func InitArticleRouter(r *gin.Engine) {
 	group.GET("/like/state/:articleId", articleLikeState)
 	group.GET("/list", articlesByTypeId)
 	group.GET("/latest", articleLatest)
+	group.GET("/hot/qa", getHotQA)
+	group.GET("/by-userId", getArticleByUserId)
 	group.Use(middleware.OperLogger())
+	group.GET("/similarity-qa", getSimilarityQA)
 	group.GET("/:id", articleGet)
 	group.POST("/update", articleSave)
 	group.POST("/publish", publish)
@@ -230,4 +233,45 @@ func publish(c *gin.Context) {
 		return
 	}
 	result.OkWithMsg(nil, constant.GetArticleMsg(article.State)).Json(c)
+}
+
+func getHotQA(ctx *gin.Context) {
+	var a services.ArticleService
+	userId := middleware.GetUserId(ctx)
+	count, qa := a.GetHotQA(userId, 1, 10)
+	result.Page(qa, count, nil).Json(ctx)
+}
+
+// 显示某个用户的文章
+func getArticleByUserId(ctx *gin.Context) {
+	var a services.ArticleService
+	userId := ctx.Query("userId")
+	userIdInt, err := strconv.Atoi(userId)
+	if err != nil {
+		log.Warnf("用户id: %d 解析失败 ,err: %s", middleware.GetUserId(ctx), err.Error())
+		result.Err(err.Error()).Json(ctx)
+	}
+	articles, count := a.ListByTypeId(1, userIdInt, userIdInt, 1, 10, "")
+
+	result.Page(articles, count, nil).Json(ctx)
+}
+
+// 找到相似问答
+func getSimilarityQA(ctx *gin.Context) {
+
+	title := ctx.Query("title")
+	id := ctx.Query("id")
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		result.Err(err.Error()).Json(ctx)
+	}
+	var a services.ArticleService
+	err, articleData := a.GetSimilarityQA(title, idInt)
+	if err != nil {
+		result.Err(err.Error()).Json(ctx)
+		return
+	}
+	result.Ok(articleData, "").Json(ctx)
+	return
+
 }

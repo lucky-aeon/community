@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
+	"math"
 	"strconv"
 	"xhyovo.cn/community/pkg/log"
+	dao "xhyovo.cn/community/server/dao/llm"
+	model2 "xhyovo.cn/community/server/model/knowledge"
 	"xhyovo.cn/community/server/request"
 	service "xhyovo.cn/community/server/service/llm"
 
@@ -545,6 +548,14 @@ func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.A
 			log.Errorf("添加知识至知识库失败，id：%d,err: %v", articleObject.ID, err)
 			return
 		}
+
+		// 加入向量数据库
+		if types.Title == "QA" {
+			if err := knowledgeService.AddQA(articleObject.Title, articleObject.ID); err != nil {
+				log.Warn("%s 添加到向量库失败", articleObject.Title)
+			}
+		}
+
 	}()
 
 	return articleObject, nil
@@ -565,4 +576,77 @@ func (a *ArticleService) LatestArticle() (result []*model.ArticleData) {
 
 func (a *ArticleService) UpdateTopNumber(article request.TopArticle) {
 	model.Article().Where("id = ?", article.Id).Updates(&article)
+}
+
+type ArticleViews struct {
+	ArticleID int `gorm:"column:article_id"`
+	Views     int `gorm:"column:views"`
+}
+
+// 获取高频问答
+// 获取所有文章的访问量，获取所有的 qa，做交集即可
+func (a *ArticleService) GetHotQA(currentUserId, page, limit int) (int64, []*model.ArticleData) {
+	// 获取所有的 QA 文章
+	qaArticles, _ := a.ListByTypeId(1, 0, 0, page, math.MaxInt64, "")
+
+	// 创建一个 map 来存储 QA 文章的访问量
+	qaArticleMap := make(map[int]*model.ArticleData)
+	for _, article := range qaArticles {
+		qaArticleMap[article.ID] = article
+	}
+
+	var results []ArticleViews
+
+	// 使用 GORM 构建查询，获取所有文章的访问量并按访问量排序
+	db := mysql.GetInstance()
+	err := db.Table("oper_logs").
+		Select("CAST(SUBSTRING_INDEX(request_info, '/', -1) AS UNSIGNED) AS article_id, COUNT(*) AS views").
+		Where("request_info LIKE ?", "/community/articles/%").
+		Group("article_id").
+		Order("views DESC").
+		Scan(&results).Error
+	if err != nil {
+		// 错误处理
+		return 0, nil
+	}
+
+	// 找出访问量排序的文章中属于 QA 的文章
+	var hotQAs []*model.ArticleData
+	for _, articleView := range results {
+		if qaArticle, exists := qaArticleMap[articleView.ArticleID]; exists {
+			hotQAs = append(hotQAs, qaArticle)
+			if len(hotQAs) >= 10 {
+				break
+			}
+		}
+	}
+
+	return int64(len(hotQAs)), hotQAs
+}
+
+func (a *ArticleService) GetSimilarityQA(title string, id int) (error, []model2.Vectors) {
+
+	var embeddingService service.EmbeddingService
+	// 向量化
+	embeddings, err := embeddingService.GetTextEmbeddings([]string{title})
+
+	if err != nil {
+		return nil, nil
+	}
+
+	item := embeddings.Output.Embeddings[0]
+	var vectorDao dao.VectorDao
+	articles, err := vectorDao.Query(item.Embedding, 20, 0.2, 2)
+	if err != nil {
+		return err, nil
+	}
+
+	var filteredArticles []model2.Vectors
+	for _, article := range articles {
+		if article.DocumentId != id {
+			filteredArticles = append(filteredArticles, article)
+		}
+	}
+
+	return nil, filteredArticles
 }

@@ -76,6 +76,7 @@ func (k *KnowledgeBaseService) AddKnowledge(content, link, remake string, typee 
 				Content:    array[j],
 				DocumentId: documentId,
 				Embedding:  pgvector.NewVector(item.Embedding),
+				Type:       1,
 			})
 
 		}
@@ -180,7 +181,7 @@ func (k *KnowledgeBaseService) QueryKnowledgies(question string, refreshCache bo
 
 	item := embeddings.Output.Embeddings[0]
 	var vectorDao dao.VectorDao
-	query, err := vectorDao.Query(item.Embedding, 20, 0.2)
+	query, err := vectorDao.Query(item.Embedding, 20, 0.2, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -297,4 +298,36 @@ func (k *KnowledgeBaseService) QueryKnowledge(question, content string) (string,
 		return "", err
 	}
 	return chat, nil
+}
+
+// 加载相似 qa 的函数
+func (k *KnowledgeBaseService) AddQA(title string, id int) error {
+
+	var embeddingService EmbeddingService
+
+	embeddings, err := embeddingService.GetTextEmbeddings([]string{title})
+	if err != nil {
+		return err
+	}
+
+	var vectors []model.Vectors
+	items := embeddings.Output.Embeddings
+	for i := range items {
+		item := items[i]
+		vectors = append(vectors, model.Vectors{
+			Content:    title,
+			DocumentId: id,
+			Embedding:  pgvector.NewVector(item.Embedding),
+			Type:       2,
+		})
+
+	}
+	var vectorDao dao.VectorDao
+	// 先删除
+	if err = vectorDao.Delete2(title, id); err != nil {
+		return err
+	}
+
+	err = vectorDao.Inserts(vectors)
+	return err
 }

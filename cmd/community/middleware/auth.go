@@ -30,10 +30,6 @@ func Auth(ctx *gin.Context) {
 	token := ctx.GetHeader(AUTHORIZATION)
 	if len(token) == 0 {
 		token, _ = ctx.Cookie(AUTHORIZATION)
-		// 增加 query 鉴权
-		if len(token) == 0 {
-			token = ctx.Query(AUTHORIZATION)
-		}
 	}
 	claims, err := ParseToken(token)
 	if err != nil {
@@ -66,6 +62,19 @@ func Auth(ctx *gin.Context) {
 	}
 
 	ctx.Set(AUTHORIZATION, claims.ID)
+
+	// 新增代码：检查 token 的剩余有效期
+	now := time.Now()
+	exp := claims.ExpiresAt.Time
+	if exp.Sub(now) < 30*time.Minute {
+		// 生成新的 token
+		newToken, err := GenerateToken(claims.ID, claims.Name)
+		if err == nil {
+			// 在响应头中设置新的 token
+			ctx.Header(AUTHORIZATION, newToken)
+		}
+	}
+
 	ctx.Next()
 }
 func GenerateToken(id int, name string) (string, error) {
@@ -74,7 +83,7 @@ func GenerateToken(id int, name string) (string, error) {
 		ID:   id,
 		Name: name,
 		RegisteredClaims: jwt.RegisteredClaims{
-			// 设置过期时间 在当前基础上 添加一个小时后 过期
+			// 设置过期时间 在当前基础上 添加两个小时后 过期
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(constant.Token_TTl)),
 			// 颁发时间 也就是生成时间
 			IssuedAt: jwt.NewNumericDate(time.Now()),

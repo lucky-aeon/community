@@ -118,7 +118,7 @@ func (a *Article) GetQueryArticleSql() *gorm.DB {
 	query := mysql.GetInstance().Table("articles").
 		Select("articles.id, articles.title, articles.abstract,articles.cover," +
 			"articles.state,articles.`like`,articles.created_at,articles.updated_at,types.id as type_id,types.title as type_title," +
-			"types.flag_name as type_flag,users.`name` as u_name,users.id as u_id,users.avatar as u_avatar, ( SELECT COUNT(*) FROM comments WHERE comments.business_id = articles.id and tenant_id = 0) AS comments, GROUP_CONCAT(at.tag_name SEPARATOR ', ') AS tags").
+			"types.flag_name as type_flag,users.`name` as u_name,users.id as u_id,users.avatar as u_avatar, ( SELECT COUNT(*) FROM comments WHERE comments.business_id = articles.id and tenant_id = 0 and deleted_at is null) AS comments, GROUP_CONCAT(at.tag_name SEPARATOR ', ') AS tags").
 		Joins("LEFT JOIN article_tag_relations atr ON articles.id = atr.article_id").
 		Joins("LEFT JOIN article_tags at ON atr.tag_id = at.id").
 		Joins("join users on users.id = articles.user_id").

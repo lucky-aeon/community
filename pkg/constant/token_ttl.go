@@ -2,4 +2,4 @@ package constant
 
 import "time"
 
-var Token_TTl time.Duration = 30 * 24 * time.Hour
+var Token_TTl time.Duration = 2 * time.Hour

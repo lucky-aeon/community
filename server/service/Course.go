@@ -34,7 +34,7 @@ func (*CourseService) Publish(course model.Courses) {
 	// 添加到知识库
 	var knowledgeService service.KnowledgeBaseService
 	go func() {
-		err := knowledgeService.AddKnowledge(course.Desc, "", "该知识来源于课程,不支持跳转到原文", constant.InternalCourse, course.ID)
+		err := knowledgeService.AddKnowledge(course.Desc, "", "该知识来源于课程,支持跳转到原文", constant.InternalCourse, course.ID)
 		if err != nil {
 			log.Errorf("添加知识至知识库失败，id：%d,err: %v", course.ID, err)
 			return
@@ -55,6 +55,21 @@ func (*CourseService) GetCourseDetail(id int) *model.Courses {
 func (*CourseService) PageCourse(page, limit int) (courses []model.Courses, count int64) {
 	model.Course().Offset((page - 1) * limit).Limit(limit).Order("created_at desc").Find(&courses)
 	model.Course().Count(&count)
+
+	if count == 0 {
+		return
+	}
+
+	// 获取所有章节的访问量
+	//var logService LogServices
+	//viewsMap := logService.GetCoursesLearnCount()
+	//
+	//// 将访问量添加到章节信息中
+	//for i := range courses {
+	//	if views, exists := viewsMap[courses[i].ID]; exists {
+	//		courses[i].Views = views
+	//	}
+	//}
 	return
 }
 
@@ -146,7 +161,12 @@ func (*CourseService) GetCourseSectionDetail(id int) *model.CoursesSections {
 
 // 获取课程列表
 func (*CourseService) PageCourseSection(page, limit, courseId int) (courses []model.CoursesSections, count int64) {
-	model.CoursesSection().Where("course_id = ? ", courseId).Order("sort").Select("id", "title").Find(&courses)
+	// 获取章节列表
+	model.CoursesSection().
+		Where("course_id = ? ", courseId).
+		Order("sort").
+		Select("id", "title").
+		Find(&courses)
 	count = int64(len(courses))
 	return
 }

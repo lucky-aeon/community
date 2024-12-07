@@ -43,7 +43,7 @@ func ListCourse(ctx *gin.Context) {
 	result.Page(courses, count, nil).Json(ctx)
 }
 
-// 获取课程详细信息
+// 获取课程章节详细信息
 func GetCourseSectionDetail(ctx *gin.Context) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	userId := middleware.GetUserId(ctx)
@@ -56,7 +56,7 @@ func GetCourseSectionDetail(ctx *gin.Context) {
 	result.Ok(detail, "").Json(ctx)
 }
 
-// 获取课程列表
+// 获取课程章节列表
 func ListCourseSection(ctx *gin.Context) {
 	p, limit := page.GetPage(ctx)
 	courseId, err := strconv.Atoi(ctx.Query("courseId"))

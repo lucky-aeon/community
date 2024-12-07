@@ -41,6 +41,7 @@ type ArticleData struct {
 	UpdatedAt  time.LocalTime `json:"updatedAt"`
 	StateName  string         `json:"stateName"`
 	TopNumber  int            `json:"topNumber"`
+	Views      int64          `json:"views"`
 }
 
 func Article() *gorm.DB {

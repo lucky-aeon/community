@@ -112,6 +112,10 @@ func (a *ArticleService) PageByClassfily(typeFlag string, tagId []string, articl
 
 func buildResultArticles(rows *sql.Rows) []*model.ArticleData {
 	var result []*model.ArticleData
+	var logService LogServices
+	var articleIds []int
+
+	// 第一次遍历，收集所有文章ID
 	for rows.Next() {
 		item := model.ArticleData{}
 		itemType := model.TypeSimple{}
@@ -128,8 +132,18 @@ func buildResultArticles(rows *sql.Rows) []*model.ArticleData {
 		item.Tags = tags
 		item.StateName = constant.GetArticleName(item.State)
 
+		articleIds = append(articleIds, item.ID)
 		result = append(result, &item)
 	}
+
+	// 批量获取阅读数量
+	readCounts := logService.GetArticleReadCountBatch(articleIds)
+
+	// 将阅读数量填充到结果中
+	for _, article := range result {
+		article.Views = readCounts[article.ID]
+	}
+
 	return result
 }
 
@@ -475,7 +489,7 @@ func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.A
 	state := reqArticle.State
 
 	if (types.Title == "文章") && state != constant.Published && state != constant.Draft {
-		return nil, errors.New("发布普通文章状态只能选择 草稿 / 发布")
+		return nil, errors.New("发布普通文章状态只能选�� 草稿 / 发布")
 	} else if (types.Title == "QA") && state != constant.Draft && state != constant.Resolved && state != constant.Pending && state != constant.Published {
 		return nil, errors.New("发布QA文章状态只能选择 草稿 / 待解决 / 已解决")
 	} else if (types.Title == "QA") && state == constant.Published {
@@ -540,7 +554,7 @@ func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.A
 	}
 	go d.DelDraft(reqArticle.UserId)
 
-	// 添加到知识库
+	// ��加到知识库
 	var knowledgeService service.KnowledgeBaseService
 	go func() {
 		err := knowledgeService.AddKnowledge(reqArticle.Content, "https://code.xhyovo.cn/article/view?articleId="+strconv.Itoa(articleObject.ID), "", constant.InternalArticle, articleObject.ID)

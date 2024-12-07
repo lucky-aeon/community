@@ -22,6 +22,7 @@ type Courses struct {
 	UpdatedAt   time.LocalTime    `json:"updatedAt"`
 	DeletedAt   gorm.DeletedAt    `json:"deletedAt,omitempty" gorm:"index,omitempty"`
 	Sections    []CoursesSections `json:"sections" gorm:"-;"`
+	Views       int64             `json:"views" gorm:"-;"`
 }
 
 func Course() *gorm.DB {

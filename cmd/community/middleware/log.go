@@ -51,9 +51,15 @@ func OperLogger() gin.HandlerFunc {
 		latency := time.Since(t)
 		execTime := latency
 		body := writer.b.String()
+
+		// 改进响应数据处理
 		if len(body) > 100 {
-			body = body[:100]
+			runes := []rune(body)
+			if len(runes) > 100 {
+				body = string(runes[:100])
+			}
 		}
+
 		unescape, _ := url.QueryUnescape(c.Request.RequestURI)
 
 		logs := model.OperLogs{

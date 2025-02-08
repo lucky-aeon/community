@@ -76,53 +76,53 @@ func knowledgeScript() {
 		}
 	}
 
-	//var comments []model.Comments
-	//model.Comment().Find(&comments)
-	//
-	//for i := range comments {
-	//	comment := comments[i]
-	//	var link = ""
-	//	var remake = ""
-	//	if comment.TenantId == 0 {
-	//		link = "https://code.xhyovo.cn/article/view?articleId=" + strconv.Itoa(comment.BusinessUserId)
-	//	} else if comment.TenantId == 1 {
-	//		link = ""
-	//		remake = "该知识来源于课程评论,不支持跳转到原文"
-	//	} else if comment.TenantId == 2 {
-	//		link = "https://code.xhyovo.cn/article/view?sectionId=" + strconv.Itoa(comment.BusinessUserId)
-	//	} else if comment.TenantId == 3 {
-	//		link = ""
-	//		remake = "该知识来源于会议评论,不支持跳转到原文"
-	//	}
-	//	err := kService.AddKnowledge(comment.Content, link, remake, constant.InternalComment, comment.BusinessId)
-	//	if err != nil {
-	//		failedCommentIDs = append(failedCommentIDs, comment.ID)
-	//		log.Warnf("评论添加知识库失败:id: %d,err: %v", comment.BusinessId, err)
-	//	}
-	//}
-	//
-	//var courses []model.Courses
-	//model.Course().Find(&courses)
-	//
-	//for i := range courses {
-	//	course := courses[i]
-	//	err := kService.AddKnowledge(course.Desc, "", "该知识来源于课程,不支持跳转到原文", constant.InternalCourse, course.ID)
-	//	if err != nil {
-	//		log.Warnf("课程添加知识库失败:id: %d,err: %v", course.ID, err)
-	//	}
-	//}
-	//
-	//var courseSections []model.CoursesSections
-	//model.CoursesSection().Find(&courseSections)
-	//
-	//for i := range courseSections {
-	//	sections := courseSections[i]
-	//	err := kService.AddKnowledge(sections.Content, "https://code.xhyovo.cn/article/view?sectionId="+strconv.Itoa(sections.ID), "", constant.InternalChapter, sections.ID)
-	//	if err != nil {
-	//		failedSectionIDs = append(failedSectionIDs, sections.ID)
-	//		log.Warnf("章节添加知识库失败:id: %d,err: %v", sections.ID, err)
-	//	}
-	//}
+	var comments []model.Comments
+	model.Comment().Find(&comments)
+
+	for i := range comments {
+		comment := comments[i]
+		var link = ""
+		var remake = ""
+		if comment.TenantId == 0 {
+			link = "https://code.xhyovo.cn/article/view?articleId=" + strconv.Itoa(comment.BusinessUserId)
+		} else if comment.TenantId == 1 {
+			link = ""
+			remake = "该知识来源于课程评论,不支持跳转到原文"
+		} else if comment.TenantId == 2 {
+			link = "https://code.xhyovo.cn/article/view?sectionId=" + strconv.Itoa(comment.BusinessUserId)
+		} else if comment.TenantId == 3 {
+			link = ""
+			remake = "该知识来源于会议评论,不支持跳转到原文"
+		}
+		err := kService.AddKnowledge(comment.Content, link, remake, constant.InternalComment, comment.BusinessId)
+		if err != nil {
+			failedCommentIDs = append(failedCommentIDs, comment.ID)
+			log.Warnf("评论添加知识库失败:id: %d,err: %v", comment.BusinessId, err)
+		}
+	}
+
+	var courses []model.Courses
+	model.Course().Find(&courses)
+
+	for i := range courses {
+		course := courses[i]
+		err := kService.AddKnowledge(course.Desc, "", "该知识来源于课程,不支持跳转到原文", constant.InternalCourse, course.ID)
+		if err != nil {
+			log.Warnf("课程添加知识库失败:id: %d,err: %v", course.ID, err)
+		}
+	}
+
+	var courseSections []model.CoursesSections
+	model.CoursesSection().Find(&courseSections)
+
+	for i := range courseSections {
+		sections := courseSections[i]
+		err := kService.AddKnowledge(sections.Content, "https://code.xhyovo.cn/article/view?sectionId="+strconv.Itoa(sections.ID), "", constant.InternalChapter, sections.ID)
+		if err != nil {
+			failedSectionIDs = append(failedSectionIDs, sections.ID)
+			log.Warnf("章节添加知识库失败:id: %d,err: %v", sections.ID, err)
+		}
+	}
 	// 打印所有执行失败的ID
 	fmt.Println("执行完成")
 	if len(failedArticleIDs) > 0 {

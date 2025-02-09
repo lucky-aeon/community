@@ -22,6 +22,7 @@ type KnowledgeBaseService struct {
 content:原文
 typee:类型
 linke:链接
+businessId:不同的业务模块：文章、评论、课程
 */
 func (k *KnowledgeBaseService) AddKnowledge(content, link, remake string, typee constant.ContentType, businessId int) error {
 
@@ -92,7 +93,7 @@ func (k *KnowledgeBaseService) AddKnowledge(content, link, remake string, typee 
 
 }
 
-// 删除知识，link 是唯一性的
+// 删除知识
 func (k *KnowledgeBaseService) DeleteKnowledge(businessId int, typee constant.ContentType) error {
 	// 查出文档 id
 	var documentdao dao.DocumentDao

@@ -1,7 +1,6 @@
 package frontend
 
 import (
-	"mime/multipart"
 	"strconv"
 
 	"xhyovo.cn/community/cmd/community/middleware"
@@ -191,16 +190,13 @@ func deleteChatGroup(c *gin.Context) {
 // sendMessage godoc
 // @Summary 发送消息到对话分组
 // @Tags Chat
-// @Accept multipart/form-data
-// @Produce text/event-stream
+// @Accept json
+// @Produce json
 // @Param id path int true "对话分组ID"
-// @Param modelId formData int true "AI模型ID"
-// @Param content formData string true "消息内容"
-// @Param file formData file false "上传文件"
+// @Param request body model.SendMessageRequest true "发送消息请求"
 // @Success 200 {object} model.ChatCompletionChunk
 // @Router /community/chat/groups/{id}/messages [post]
 func sendMessage(c *gin.Context) {
-
 	groupID, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
 		log.Warnf("用户id: %d 发送消息参数解析失败: %s", middleware.GetUserId(c), err.Error())
@@ -208,37 +204,15 @@ func sendMessage(c *gin.Context) {
 		return
 	}
 
-	modelID, err := strconv.ParseInt(c.PostForm("modelId"), 10, 64)
-	if err != nil {
-		log.Warnf("用户id: %d 发送消息模型ID参数解析失败: %s", middleware.GetUserId(c), err.Error())
-		result.Err("无效的模型ID").Json(c)
+	var req model.SendMessageRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Warnf("用户id: %d 发送消息请求参数解析失败: %s", middleware.GetUserId(c), err.Error())
+		result.Err(err.Error()).Json(c)
 		return
-	}
-
-	content := c.PostForm("content")
-	if content == "" {
-		log.Warnf("用户id: %d 发送消息内容为空", middleware.GetUserId(c))
-		result.Err("消息内容不能为空").Json(c)
-		return
-	}
-
-	var file *multipart.FileHeader
-	uploadedFile, err := c.FormFile("file")
-	if err == nil {
-		file = uploadedFile
-	}
-
-	req := &model.SendMessageRequest{
-		ModelID: modelID,
-		Content: content,
-		File:    file,
 	}
 
 	userID := middleware.GetUserId(c)
-	// TODO: 从配置或环境变量获取token
-	token := "sk-gdfpoouhufulfqrxetonlzzfobqdnwedeefaxdxvgvqidpzu"
-
-	userMessage, aiMessage, err := chatService.SendMessage(groupID, strconv.FormatInt(int64(userID), 10), req, token)
+	userMessage, aiMessage, err := chatService.SendMessage(groupID, strconv.FormatInt(int64(userID), 10), &req)
 	if err != nil {
 		log.Warnf("用户id: %d 发送消息失败,分组id: %d, err: %s", userID, groupID, err.Error())
 		result.Err(err.Error()).Json(c)

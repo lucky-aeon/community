@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
-	"path/filepath"
 	"strconv"
+	"strings"
 
-	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/dao"
 	"xhyovo.cn/community/server/model"
 )
@@ -19,8 +19,6 @@ type ChatService struct {
 }
 
 var chatDao = &dao.Chat{}
-
-const aiModelAPIURL = "https://api.siliconflow.cn/v1/chat/completions"
 
 // GetAIModels 获取所有可用的AI模型
 func (s *ChatService) GetAIModels() ([]model.AIModels, error) {
@@ -81,11 +79,10 @@ func (s *ChatService) DeleteChatGroup(id int64, userID int64) error {
 }
 
 // callAIModel 调用AI模型API
-func (s *ChatService) callAIModel(modelName string, messages []model.ChatMessage, token string) (*model.ChatCompletionResponse, error) {
+func (s *ChatService) callAIModel(aiModel *model.AIModels, messages []model.ChatMessage) (*model.ChatCompletionResponse, error) {
 	reqBody := model.ChatCompletionRequest{
-		Model:    modelName,
+		Model:    aiModel.Name,
 		Messages: messages,
-		Stream:   false,
 	}
 
 	jsonData, err := json.Marshal(reqBody)
@@ -93,13 +90,13 @@ func (s *ChatService) callAIModel(modelName string, messages []model.ChatMessage
 		return nil, fmt.Errorf("序列化请求失败: %v", err)
 	}
 
-	req, err := http.NewRequest("POST", aiModelAPIURL, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", aiModel.BaseURL, bytes.NewBuffer(jsonData))
 	if err != nil {
 		return nil, fmt.Errorf("创建请求失败: %v", err)
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", aiModel.APIKey))
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -122,7 +119,7 @@ func (s *ChatService) callAIModel(modelName string, messages []model.ChatMessage
 }
 
 // SendMessage 发送消息并获取AI回复
-func (s *ChatService) SendMessage(groupID int64, userID string, req *model.SendMessageRequest, token string) (*model.ChatMessages, *model.ChatMessages, error) {
+func (s *ChatService) SendMessage(groupID int64, userID string, req *model.SendMessageRequest) (*model.ChatMessages, *model.ChatMessages, error) {
 	// 验证分组是否存在
 	if !chatDao.ExistsByID(groupID) {
 		return nil, nil, errors.New("对话分组不存在")
@@ -134,30 +131,20 @@ func (s *ChatService) SendMessage(groupID int64, userID string, req *model.SendM
 		return nil, nil, fmt.Errorf("获取AI模型信息失败: %v", err)
 	}
 
-	// 处理文件上传
-	if req.File != nil {
-		if !aiModel.SupportFile {
-			return nil, nil, errors.New("该AI模型不支持文件上传")
-		}
-		// 获取文件扩展名
-		ext := filepath.Ext(req.File.Filename)
-		// TODO: 实现文件上传逻辑
-		log.Infof("文件上传待实现，文件名: %s, 扩展名: %s", req.File.Filename, ext)
-	}
-
 	// 保存用户消息
 	userMessage := &model.ChatMessages{
 		GroupID: groupID,
 		Role:    "user",
 		UserID:  userID,
 		Content: req.Content,
+		FileURL: strings.Join(req.Files, ","), // 多个文件URL用逗号分隔
 	}
 	if err := chatDao.CreateChatMessage(userMessage); err != nil {
 		return nil, nil, fmt.Errorf("保存用户消息失败: %v", err)
 	}
 
 	// 获取历史消息作为上下文
-	messages, err := chatDao.GetRecentMessages(groupID, 10)
+	messages, err := chatDao.GetRecentMessages(groupID, math.MaxInt32)
 	if err != nil {
 		return nil, nil, fmt.Errorf("获取历史消息失败: %v", err)
 	}
@@ -165,18 +152,67 @@ func (s *ChatService) SendMessage(groupID int64, userID string, req *model.SendM
 	// 构建AI请求消息
 	var contextMessages []model.ChatMessage
 	for _, msg := range messages {
-		contextMessages = append(contextMessages, model.ChatMessage{
-			Role:    msg.Role,
-			Content: msg.Content,
-		})
+		if aiModel.SupportFile && msg.FileURL != "" {
+			// 如果AI模型支持文件且消息包含文件，使用多模态格式
+			var contentParts []model.ContentPart
+			fileURLs := strings.Split(msg.FileURL, ",")
+			for _, fileURL := range fileURLs {
+				if fileURL != "" {
+					contentParts = append(contentParts, model.ContentPart{
+						Type: "image_url",
+						ImageURL: &model.ImageURL{
+							URL:    fileURL,
+							Detail: "high",
+						},
+					})
+				}
+			}
+			contentParts = append(contentParts, model.ContentPart{
+				Type: "text",
+				Text: msg.Content,
+			})
+			contextMessages = append(contextMessages, model.ChatMessage{
+				Role:    msg.Role,
+				Content: contentParts,
+			})
+		} else {
+			// 如果AI模型不支持文件或消息不包含文件，使用纯文本格式
+			contextMessages = append(contextMessages, model.ChatMessage{
+				Role:    msg.Role,
+				Content: msg.Content,
+			})
+		}
 	}
+
+	// 添加当前用户消息
+	var currentContent interface{}
+	if aiModel.SupportFile && len(req.Files) > 0 {
+		var contentParts []model.ContentPart
+		for _, fileURL := range req.Files {
+			contentParts = append(contentParts, model.ContentPart{
+				Type: "image_url",
+				ImageURL: &model.ImageURL{
+					URL:    fileURL,
+					Detail: "high",
+				},
+			})
+		}
+		contentParts = append(contentParts, model.ContentPart{
+			Type: "text",
+			Text: req.Content,
+		})
+		currentContent = contentParts
+	} else {
+		currentContent = req.Content
+	}
+
 	contextMessages = append(contextMessages, model.ChatMessage{
 		Role:    "user",
-		Content: req.Content,
+		Content: currentContent,
 	})
 
 	// 调用AI模型
-	aiResp, err := s.callAIModel(aiModel.Name, contextMessages, token)
+	aiResp, err := s.callAIModel(aiModel, contextMessages)
 	if err != nil {
 		return userMessage, nil, fmt.Errorf("调用AI模型失败: %v", err)
 	}

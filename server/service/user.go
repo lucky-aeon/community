@@ -105,7 +105,7 @@ func (*UserService) ResetPwd(account string) bool {
 	if tx.RowsAffected == 0 {
 		return false
 	}
-	email.Send([]string{account}, "您的密码已重置为: "+newPwd, "重置密码")
+	email.Send([]string{account}, "您的密码已重置为: "+newPwd, "敲鸭社区:重置密码")
 	return true
 }
 

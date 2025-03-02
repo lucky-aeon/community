@@ -175,7 +175,7 @@ func send(userIds []int, eventId, eventType, sendId int, b SubscribeData, messag
 	}
 	msg := m.GetMsg(messageTemp, b)
 	m.SendMessages(sendId, eventType, eventId, b.CurrentBusinessId, ids, msg)
-	email.Send(emails, msg, "技术鸭社区")
+	email.Send(emails, msg, "敲鸭社区")
 }
 
 /*
@@ -205,7 +205,7 @@ func (s *SubscriptionService) SendMsg(userId, eventId, messageType, subscribeId 
 	var m MessageService
 
 	m.SendMessages(userId, messageType, eventId, subscribeId, userIds, message)
-	email.Send(emails, message, "技术鸭社区")
+	email.Send(emails, message, "敲鸭社区")
 }
 
 func (s *SubscriptionService) SendMsgByToIds(userId, eventId, messageType, subscribeId int, toUserIds []int, message string) {
@@ -219,5 +219,5 @@ func (s *SubscriptionService) SendMsgByToIds(userId, eventId, messageType, subsc
 	var m MessageService
 
 	m.SendMessages(userId, messageType, eventId, subscribeId, toUserIds, message)
-	email.Send(emails, message, "技术鸭社区")
+	email.Send(emails, message, "敲鸭社区")
 }

@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
-	"strconv"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
-	service "xhyovo.cn/community/server/service/llm"
 )
 
 type CommentsService struct {
@@ -78,32 +76,6 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 	subscriptionService.Send(eventId, constant.NOTICE, comment.FromUserId, userId, b)
 	jsonBody, _ := json.Marshal(comment)
 	log.Infof("用户id: %d,发布评论: %s", comment.FromUserId, jsonBody)
-
-	// 添加到知识库
-	var knowledgeService service.KnowledgeBaseService
-	go func() {
-		var link = ""
-		var remake = ""
-		if comment.TenantId == 0 {
-			link = "https://code.xhyovo.cn/article/view?articleId=" + strconv.Itoa(comment.BusinessUserId)
-			remake = "该知识来源于文章评论"
-		} else if comment.TenantId == 1 {
-			link = ""
-			remake = "该知识来源于课程评论,不支持跳转到原文"
-		} else if comment.TenantId == 2 {
-			link = "https://code.xhyovo.cn/article/view?sectionId=" + strconv.Itoa(comment.BusinessUserId)
-			remake = "该知识来源于章节评论"
-		} else if comment.TenantId == 3 {
-			link = ""
-			remake = "该知识来源于会议评论,不支持跳转到原文"
-		}
-		err := knowledgeService.AddKnowledge(comment.Content, link, remake, constant.InternalArticle, comment.BusinessId)
-		if err != nil {
-			log.Errorf("添加知识至知识库失败，id：%d,err: %v", comment.BusinessId, err)
-			return
-		}
-	}()
-
 	return nil
 }
 

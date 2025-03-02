@@ -6,7 +6,6 @@ import (
 	"errors"
 	mapset "github.com/deckarep/golang-set/v2"
 	"math"
-	"strconv"
 	"xhyovo.cn/community/pkg/log"
 	dao "xhyovo.cn/community/server/dao/llm"
 	model2 "xhyovo.cn/community/server/model/knowledge"
@@ -325,17 +324,6 @@ func (a *ArticleService) Delete(articleId int) (err error) {
 	}
 	// 删除文章标签表
 	err = db.Where("article_id = ?", articleId).Delete(&model.ArticleTagRelations{}).Error
-
-	// 添加到知识库
-	var knowledgeService service.KnowledgeBaseService
-	go func() {
-		err := knowledgeService.DeleteKnowledge(articleId, constant.InternalArticle)
-		if err != nil {
-			log.Errorf("删除知识失败，id：%d,err: %v", articleId, err)
-			return
-		}
-	}()
-
 	return
 }
 
@@ -553,25 +541,6 @@ func (a *ArticleService) PublishArticle(reqArticle request.ReqArticle) (*model.A
 		subscriptionService.NoticeUsers(event.ArticleAt, id, reqArticle.NoticeUser, b)
 	}
 	go d.DelDraft(reqArticle.UserId)
-
-	// ��加到知识库
-	var knowledgeService service.KnowledgeBaseService
-	go func() {
-		err := knowledgeService.AddKnowledge(reqArticle.Content, "https://code.xhyovo.cn/article/view?articleId="+strconv.Itoa(articleObject.ID), "", constant.InternalArticle, articleObject.ID)
-		if err != nil {
-			log.Errorf("添加知识至知识库失败，id：%d,err: %v", articleObject.ID, err)
-			return
-		}
-
-		// 加入向量数据库
-		if types.Title == "QA" {
-			if err := knowledgeService.AddQA(articleObject.Title, articleObject.ID); err != nil {
-				log.Warn("%s 添加到向量库失败", articleObject.Title)
-			}
-		}
-
-	}()
-
 	return articleObject, nil
 }
 

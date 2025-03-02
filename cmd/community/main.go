@@ -40,7 +40,8 @@ func main() {
 	ossConfig := appConfig.OssConfig
 	oss.Init(ossConfig.Endpoint, ossConfig.AccessKey, ossConfig.SecretKey, ossConfig.Bucket)
 	emailConfig := appConfig.EmailConfig
-	email.Init(emailConfig.Address, emailConfig.Username, emailConfig.Password, emailConfig.Host, emailConfig.PollCount)
+	email.Init(emailConfig.Username, emailConfig.Password, emailConfig.Host)
+
 	routers.InitFrontedRouter(r)
 	cache.Init()
 	log.Info("start web :8080")

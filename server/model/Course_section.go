@@ -12,6 +12,7 @@ type CoursesSections struct {
 	Content     string `json:"content" binding:"required" msg:"内容不能未空"`
 	UserId      int    `json:"userId,omitempty"`
 	Sort        int    `json:"sort"`
+	ReadingTime int    `json:"readingTime"` // 阅读时间（分钟）
 	*UserSimple `json:"user" gorm:"-"`
 	CourseId    int            `json:"courseId" binding:"required" msg:"对应课程不能未空"`
 	CreatedAt   time.LocalTime `json:"createdAt"`

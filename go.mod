@@ -11,7 +11,6 @@ require (
 	github.com/go-playground/validator/v10 v10.17.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/google/uuid v1.6.0
-	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/natefinch/lumberjack v2.0.0+incompatible
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pgvector/pgvector-go v0.2.2

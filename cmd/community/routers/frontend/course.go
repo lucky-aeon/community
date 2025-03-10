@@ -1,8 +1,9 @@
 package frontend
 
 import (
-	"github.com/gin-gonic/gin"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
@@ -20,7 +21,6 @@ func InitCourseRouters(r *gin.Engine) {
 	group.Use(middleware.OperLogger())
 	group.GET("/:id", GetCourseDetail)
 	group.GET("/section/:id", GetCourseSectionDetail)
-
 }
 
 // 获取课程详细信息

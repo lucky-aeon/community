@@ -24,14 +24,14 @@ const startTimeTemp = "你参与的 %s 会议已开始，请及时参会，会�
 type MeetingService struct {
 }
 
-func init() {
-	// 等待 db 初始化
-	go func() {
-		time.Sleep(5 * time.Second)
-		initMeetingTasks()
-	}()
-
-}
+//func init() {
+//	// 等待 db 初始化
+//	go func() {
+//		time.Sleep(5 * time.Second)
+//		initMeetingTasks()
+//	}()
+//
+//}
 
 // 获取加入的用户
 func (m *MeetingService) GetJoinMeetingUserSelectAvatar(meetingId int) []string {

@@ -21,6 +21,7 @@ import (
 )
 
 func main() {
+
 	log.Init()
 	// 设置程序使用中国时区
 	chinaLoc, err := time.LoadLocation("Asia/Shanghai")

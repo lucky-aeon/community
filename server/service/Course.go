@@ -3,9 +3,15 @@ package services
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
+	"net/url"
+	"regexp"
 	"sort"
 	"strings"
 
+	alioss "github.com/aliyun/aliyun-oss-go-sdk/oss"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/server/model"
 	"xhyovo.cn/community/server/service/event"
 )
@@ -135,8 +141,11 @@ func (c *CourseService) PublishSection(section model.CoursesSections) error {
 	if c.GetCourseDetail(section.CourseId).ID == 0 {
 		return errors.New("对应课程不存在")
 	}
-	if section.ID == 0 {
 
+	// 计算章节内容的阅读时间
+	section.ReadingTime = c.calculateReadingTime(section.Content)
+
+	if section.ID == 0 {
 		model.CoursesSection().Create(&section)
 		var b SubscribeData
 		var subscriptionService SubscriptionService
@@ -159,6 +168,171 @@ func (c *CourseService) PublishSection(section model.CoursesSections) error {
 		model.CoursesSection().Where("id = ?", section.ID).Updates(&section)
 	}
 	return nil
+}
+
+// calculateReadingTime 计算章节的阅读时间（分钟）
+func (c *CourseService) calculateReadingTime(content string) int {
+	if content == "" {
+		return 0
+	}
+
+	// 统计计数
+	var textWordCount int     // 文本字数
+	var imageCount int        // 图片数量
+	var totalVideoSeconds int // 视频总时长（秒）
+
+	// 1. 计算视频时间
+	// 匹配视频标记 !video[视频](/api/community/file/singUrl?fileKey=13/1741427148178)
+	videoRegex := regexp.MustCompile(`!video\[.*?\]\(/api/community/file/singUrl\?fileKey=([^)]+)\)`)
+	videoMatches := videoRegex.FindAllStringSubmatch(content, -1)
+
+	for _, match := range videoMatches {
+		if len(match) >= 2 {
+			fileKey := match[1]
+			// 对fileKey进行URL解码
+			decodedFileKey, err := url.QueryUnescape(fileKey)
+			if err != nil {
+				log.Error("解码视频fileKey失败: " + err.Error() + ", 原始fileKey: " + fileKey)
+				// 解码失败时继续使用原始fileKey
+				videoSeconds := c.getVideoSeconds(fileKey)
+				totalVideoSeconds += videoSeconds
+			} else {
+				// 解码成功，使用解码后的fileKey
+				videoSeconds := c.getVideoSeconds(decodedFileKey)
+				totalVideoSeconds += videoSeconds
+			}
+		}
+	}
+
+	// 2. 计算图片数量
+	// 匹配图片标记 ![image#S #R #100% #100%](/api/community/file/singUrl?fileKey=13%2F1741427453119)
+	imageRegex := regexp.MustCompile(`!\[image.*?\]\(/api/community/file/singUrl\?fileKey=([^)]+)\)`)
+	imageMatches := imageRegex.FindAllString(content, -1)
+	imageCount = len(imageMatches)
+
+	// 3. 去除标记后计算文本字数
+	// 去除视频和图片标记
+	cleanedContent := videoRegex.ReplaceAllString(content, "")
+	cleanedContent = imageRegex.ReplaceAllString(cleanedContent, "")
+
+	// 去除Markdown标记
+	markdownRegex := regexp.MustCompile(`[#*_~\[\](){}|>]+`)
+	cleanedContent = markdownRegex.ReplaceAllString(cleanedContent, "")
+
+	// 统计字数（每个中文字符或单词作为一个字）
+	textWordCount = len([]rune(cleanedContent))
+
+	// 计算阅读时间
+	// 1. 文本阅读速度：平均每分钟阅读300字
+	textMinutes := textWordCount / 300
+	if textWordCount%300 > 0 {
+		textMinutes++
+	}
+
+	// 2. 图片观看时间：每张图片平均10秒
+	imageSeconds := imageCount * 10
+
+	// 3. 视频观看时间：已经计算了总秒数
+
+	// 总阅读时间(分钟) = 文本阅读时间 + 图片时间 + 视频时间
+	totalMinutes := textMinutes + (imageSeconds+totalVideoSeconds)/60
+
+	// 确保至少为1分钟
+	if totalMinutes < 1 {
+		totalMinutes = 1
+	}
+
+	return totalMinutes
+}
+
+// getVideoSeconds 获取视频时长（秒）
+func (c *CourseService) getVideoSeconds(fileKey string) int {
+	// 对fileKey进行URL解码，处理%2F等转义字符
+	decodedFileKey, err := url.QueryUnescape(fileKey)
+	if err != nil {
+		log.Error("解码fileKey失败: " + err.Error() + ", 原始fileKey: " + fileKey)
+		// 解码失败时继续使用原始fileKey
+	} else {
+		// 解码成功，使用解码后的fileKey
+		fileKey = decodedFileKey
+	}
+
+	// 调用阿里云OSS获取视频信息
+	provider, err := alioss.NewEnvironmentVariableCredentialsProvider()
+	if err != nil {
+		log.Error("获取阿里云凭证失败: " + err.Error())
+		return 60 // 默认1分钟
+	}
+
+	client, err := alioss.New("https://oss-cn-beijing.aliyuncs.com", "", "",
+		alioss.SetCredentialsProvider(&provider),
+		alioss.AuthVersion(alioss.AuthV4),
+		alioss.Region("cn-beijing"))
+	if err != nil {
+		log.Error("创建阿里云客户端失败: " + err.Error())
+		return 60
+	}
+
+	bucketName := "luckly-community"
+	bucket, err := client.Bucket(bucketName)
+	if err != nil {
+		log.Error("获取Bucket失败: " + err.Error())
+		return 60
+	}
+
+	// 获取视频信息
+	body, err := bucket.GetObject(fileKey, alioss.Process("video/info"))
+	if err != nil {
+		log.Error("获取视频信息失败: " + err.Error() + ", fileKey: " + fileKey)
+		return 60
+	}
+	defer body.Close()
+
+	// 读取响应
+	data, err := io.ReadAll(body)
+	if err != nil {
+		log.Error("读取视频信息失败: " + err.Error())
+		return 60
+	}
+
+	// 解析JSON
+	// 根据提供的实际JSON结构定义
+	type OSSVideoInfo struct {
+		Duration     float64 `json:"Duration"`   // 视频时长（秒）
+		Bitrate      int     `json:"Bitrate"`    // 比特率
+		FormatName   string  `json:"FormatName"` // 格式名称
+		Size         int64   `json:"Size"`       // 大小
+		VideoStreams []struct {
+			Duration float64 `json:"Duration"` // 视频流时长
+		} `json:"VideoStreams"`
+		AudioStreams []struct {
+			Duration float64 `json:"Duration"` // 音频流时长
+		} `json:"AudioStreams"`
+	}
+
+	var videoInfo OSSVideoInfo
+	if err := json.Unmarshal(data, &videoInfo); err != nil {
+		log.Error("解析视频信息失败: " + err.Error())
+		return 60
+	}
+
+	// 使用Duration字段
+	if videoInfo.Duration > 0 {
+		return int(videoInfo.Duration)
+	}
+
+	// 如果顶层Duration为0，尝试使用视频流的Duration
+	if len(videoInfo.VideoStreams) > 0 && videoInfo.VideoStreams[0].Duration > 0 {
+		return int(videoInfo.VideoStreams[0].Duration)
+	}
+
+	// 如果视频流Duration也为0，尝试使用音频流的Duration
+	if len(videoInfo.AudioStreams) > 0 && videoInfo.AudioStreams[0].Duration > 0 {
+		return int(videoInfo.AudioStreams[0].Duration)
+	}
+
+	log.Error("视频信息中未找到有效的Duration字段")
+	return 60
 }
 
 // 获取章节详细信息
@@ -398,7 +572,7 @@ func (c *CourseService) GetAllCoursesWithDetails() ([]model.Courses, error) {
 	var allSections []model.CoursesSections
 	model.CoursesSection().
 		Where("course_id IN ?", courseIds).
-		Select("id", "title", "course_id", "sort").
+		Select("id", "title", "course_id", "sort", "reading_time").
 		Order("sort asc").
 		Find(&allSections)
 
@@ -406,10 +580,11 @@ func (c *CourseService) GetAllCoursesWithDetails() ([]model.Courses, error) {
 	for _, section := range allSections {
 		// 清除章节中的详细内容
 		simplifiedSection := model.CoursesSections{
-			ID:       section.ID,
-			Title:    section.Title,
-			CourseId: section.CourseId,
-			Sort:     section.Sort,
+			ID:          section.ID,
+			Title:       section.Title,
+			CourseId:    section.CourseId,
+			Sort:        section.Sort,
+			ReadingTime: section.ReadingTime,
 		}
 
 		if course, ok := courseMap[section.CourseId]; ok {
@@ -418,4 +593,91 @@ func (c *CourseService) GetAllCoursesWithDetails() ([]model.Courses, error) {
 	}
 
 	return courses, nil
+}
+
+// UpdateAllSectionsReadingTime 更新所有课程章节的阅读时间
+func (c *CourseService) UpdateAllSectionsReadingTime() (int, error) {
+	// 获取所有课程章节
+	var sections []model.CoursesSections
+	result := model.CoursesSection().Find(&sections)
+	if result.Error != nil {
+		log.Error("获取课程章节失败: " + result.Error.Error())
+		return 0, result.Error
+	}
+
+	// 记录更新数量
+	updatedCount := 0
+
+	// 遍历所有章节并计算阅读时间
+	for i := range sections {
+		// 跳过已有阅读时间的章节（可选，取消注释以跳过）
+		// if sections[i].ReadingTime > 0 {
+		//     continue
+		// }
+
+		// 计算阅读时间
+		readingTime := c.calculateReadingTime(sections[i].Content)
+
+		// 如果阅读时间有变化，更新数据库
+		if sections[i].ReadingTime != readingTime {
+			sections[i].ReadingTime = readingTime
+			result := model.CoursesSection().Where("id = ?", sections[i].ID).
+				Update("reading_time", readingTime)
+
+			if result.Error != nil {
+				log.Error(fmt.Sprintf("更新章节ID=%d的阅读时间失败: %s",
+					sections[i].ID, result.Error.Error()))
+				continue
+			}
+
+			if result.RowsAffected > 0 {
+				updatedCount++
+			}
+		}
+	}
+
+	log.Info(fmt.Sprintf("成功更新了%d个章节的阅读时间", updatedCount))
+	return updatedCount, nil
+}
+
+// UpdateCourseSectionsReadingTime 更新指定课程的所有章节阅读时间
+func (c *CourseService) UpdateCourseSectionsReadingTime(courseId int) (int, error) {
+	// 获取指定课程的所有章节
+	var sections []model.CoursesSections
+	result := model.CoursesSection().Where("course_id = ?", courseId).Find(&sections)
+	if result.Error != nil {
+		log.Error(fmt.Sprintf("获取课程ID=%d的章节失败: %s",
+			courseId, result.Error.Error()))
+		return 0, result.Error
+	}
+
+	// 记录更新数量
+	updatedCount := 0
+
+	// 遍历所有章节并计算阅读时间
+	for i := range sections {
+		// 计算阅读时间
+		readingTime := c.calculateReadingTime(sections[i].Content)
+
+		// 如果阅读时间有变化，更新数据库
+		if sections[i].ReadingTime != readingTime {
+			sections[i].ReadingTime = readingTime
+			result := model.CoursesSection().Where("id = ?", sections[i].ID).
+				Update("reading_time", readingTime)
+
+			if result.Error != nil {
+				log.Error(fmt.Sprintf("更新章节ID=%d的阅读时间失败: %s",
+					sections[i].ID, result.Error.Error()))
+				continue
+			}
+
+			if result.RowsAffected > 0 {
+				updatedCount++
+			}
+		}
+	}
+
+	log.Info(fmt.Sprintf("成功更新了课程ID=%d的%d个章节的阅读时间",
+		courseId, updatedCount))
+	return updatedCount, nil
 }

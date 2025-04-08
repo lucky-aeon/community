@@ -13,6 +13,7 @@ type Courses struct {
 	Technology    string            `json:"technology"`
 	TechnologyS   []string          `json:"technologys" gorm:"-"`
 	Url           string            `json:"url"`
+	CustomPageUrl string            `json:"customPageUrl" gorm:"default:''"` // 自定义页面URL，若存在则跳转到对应页面
 	UserId        int               `json:"userId,omitempty"`
 	Money         int               `json:"money"`
 	Cover         string            `json:"cover"`

@@ -78,7 +78,7 @@ func (*CourseService) Publish(course model.Courses) {
 		var messageTemp = "你关注的用户 ${user.name} 发布了最新课程: ${course.title}"
 		subscriptionService.DoWithMessageTempl(event.UserFollowingEvent, b, messageTemp)
 	} else {
-		model.Course().Where("id = ?", course.ID).Updates(&course)
+		model.Course().Where("id = ?", course.ID).Select("*").Updates(&course)
 	}
 }
 

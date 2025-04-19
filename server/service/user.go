@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/rand"
 	"time"
+
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/server/dao"
@@ -251,8 +252,21 @@ func (s *UserService) CheckCodeUsed(code int) bool {
 	return count == 1
 }
 
-func (s *UserService) PageUsers(p, limit int, condition model.UserSimple) (users []model.Users, count int64) {
+func (s *UserService) PageUsers(p, limit int, condition model.UserSimple, email, inviteCode string) (users []model.Users, count int64) {
 	tx := model.User().Where("account like ?", condition.Account)
+
+	if condition.UName != "%%" {
+		tx = tx.Where("name like ?", condition.UName)
+	}
+
+	if email != "" {
+		tx = tx.Where("account like ?", "%"+email+"%")
+	}
+
+	if inviteCode != "" {
+		tx = tx.Where("invite_code like ?", "%"+inviteCode+"%")
+	}
+
 	tx.Count(&count)
 	tx.Offset((p - 1) * limit).Limit(limit).Find(&users)
 	return users, count

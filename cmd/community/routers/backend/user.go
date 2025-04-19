@@ -3,6 +3,7 @@ package backend
 import (
 	"fmt"
 	"strconv"
+
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/constant"
 
@@ -35,11 +36,15 @@ func listUser(ctx *gin.Context) {
 
 	conditionUser := model.UserSimple{
 		Account: fmt.Sprintf("%%%s%%", ctx.Query("account")),
+		UName:   fmt.Sprintf("%%%s%%", ctx.Query("name")),
 	}
+
+	email := ctx.Query("email")
+	inviteCode := ctx.Query("inviteCode")
 
 	var u services.UserService
 
-	users, count := u.PageUsers(p, limit, conditionUser)
+	users, count := u.PageUsers(p, limit, conditionUser, email, inviteCode)
 	result.Page(users, count, nil).Json(ctx)
 }
 

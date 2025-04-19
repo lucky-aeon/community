@@ -24,7 +24,7 @@ func (*LogServices) GetPageOperLog(page, limit int, logSearch model.LogSearch, f
 		db.Where("ip like ?", "%"+logSearch.Ip+"%")
 	}
 	if logSearch.StartTime != "" {
-		db.Where("created_at <= ? and ? >= created_at", logSearch.StartTime, logSearch.EndTime)
+		db.Where("created_at >= ? and created_at <= ?", logSearch.StartTime, logSearch.EndTime)
 	}
 	if logSearch.UserName != "" {
 		var userS UserService
@@ -74,6 +74,9 @@ func (s *LogServices) GetPageLoginPage(page, limit int, logSearch model.LogSearc
 	}
 	if logSearch.Ip != "" {
 		db.Where("ip like ?", "%"+logSearch.Ip+"%")
+	}
+	if logSearch.StartTime != "" {
+		db.Where("created_at >= ? and created_at <= ?", logSearch.StartTime, logSearch.EndTime)
 	}
 
 	db.Count(&count)

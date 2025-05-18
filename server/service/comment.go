@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/constant"
@@ -43,7 +44,7 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 	b.CourseId = comment.BusinessId
 	b.CommentId = comment.ID
 	eventId := event.CommentUpdateEvent
-	// 延迟发送评论事件
+	// 发送回复评论事件
 	if parentId != 0 {
 		subscriptionService.Send(event.ReplyComment, constant.NOTICE, comment.FromUserId, comment.ToUserId, b)
 	}
@@ -53,13 +54,13 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 		var articles ArticleService
 		userId = articles.GetById(comment.BusinessId).UserId
 	}
-	// 课程评论
+	// 章节评论
 	if comment.TenantId == 1 {
 		var courS CourseService
 		userId = courS.GetCourseSectionDetail(comment.BusinessId).UserId
 		eventId = event.SectionComment
 	} else if comment.TenantId == 2 {
-		// 章节评论
+		// 课程评论
 		var courS CourseService
 		userId = courS.GetCourseDetail(comment.BusinessId).UserId
 		eventId = event.CourseComment

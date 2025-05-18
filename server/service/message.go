@@ -141,7 +141,14 @@ func (m *MessageService) GetMsg(template string, b SubscribeData) string {
 				varTemlp := fmt.Sprintf("${%s}", s2)
 				if strings.Contains(template, varTemlp) {
 					i := objet[v[s2]]
-					template = strings.ReplaceAll(template, varTemlp, fmt.Sprintf("%s", i))
+					// 检查值是否为nil
+					var valueStr string
+					if i != nil {
+						valueStr = fmt.Sprintf("%s", i)
+					} else {
+						valueStr = "" // 如果是nil，替换为空字符串
+					}
+					template = strings.ReplaceAll(template, varTemlp, valueStr)
 				}
 			}
 		}

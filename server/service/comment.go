@@ -220,3 +220,109 @@ func (a *CommentsService) ListCommentsByArticleIdNoTree(businessId, tenantId int
 	setCommentUserInfoAndArticleTitle(comments)
 	return comments
 }
+
+// ListLatestComments 获取最新的10条评论
+func (a *CommentsService) ListLatestComments() ([]*model.Comments, int64) {
+	var comments []*model.Comments
+	var count int64
+
+	// 查询最新的10条评论
+	db := model.Comment().Order("created_at desc").Limit(20)
+	db.Count(&count)
+	if count == 0 {
+		return comments, 0
+	}
+	db.Find(&comments)
+
+	// 设置评论信息
+	setLatestCommentsInfo(comments)
+
+	return comments, count
+}
+
+// setLatestCommentsInfo 设置最新评论的相关信息，包括业务标题和用户信息
+func setLatestCommentsInfo(comments []*model.Comments) {
+	// 收集用户ID和各类业务ID
+	userIds := mapset.NewSetWithSize[int](len(comments) * 2) // 评论者和回复者
+	articleIds := mapset.NewSetWithSize[int](len(comments))
+	sectionIds := mapset.NewSetWithSize[int](len(comments))
+	courseIds := mapset.NewSetWithSize[int](len(comments))
+	meetingIds := mapset.NewSetWithSize[int](len(comments))
+
+	for i := range comments {
+		comment := comments[i]
+		userIds.Add(comment.FromUserId)
+		userIds.Add(comment.ToUserId)
+
+		// 根据TenantId分类收集业务ID
+		switch comment.TenantId {
+		case 0: // 文章评论
+			articleIds.Add(comment.BusinessId)
+		case 1: // 章节评论
+			sectionIds.Add(comment.BusinessId)
+		case 2: // 课程评论
+			courseIds.Add(comment.BusinessId)
+		case 3: // 分享会评论
+			meetingIds.Add(comment.BusinessId)
+		}
+	}
+
+	// 获取用户信息
+	var userService UserService
+	userNameMap := userService.ListByIdsToMap(userIds.ToSlice())
+
+	// 获取各类业务标题
+	var articleTitleMap map[int]string
+	var sectionTitleMap map[int]string
+	var courseTitleMap map[int]string
+	var meetingTitleMap map[int]string
+
+	if !articleIds.IsEmpty() {
+		var articleService ArticleService
+		articleTitleMap = articleService.ListByIdsSelectIdTitleMap(articleIds.ToSlice())
+	}
+
+	if !sectionIds.IsEmpty() {
+		var courseService CourseService
+		sectionTitleMap = courseService.ListSectionByIds(sectionIds.ToSlice())
+	}
+
+	if !courseIds.IsEmpty() {
+		var courseService CourseService
+		courseTitleMap = courseService.ListByIdsSelectIdTitleMap(courseIds.ToSlice())
+	}
+
+	if !meetingIds.IsEmpty() {
+		// 分享会标题需要单独处理
+		meetingTitleMap = make(map[int]string)
+		var meetings []model.Meetings
+		model.Meeting().Where("id in ?", meetingIds.ToSlice()).Select("id, title").Find(&meetings)
+		for _, meeting := range meetings {
+			meetingTitleMap[meeting.Id] = meeting.Title
+		}
+	}
+
+	// 设置评论相关信息
+	for i := range comments {
+		comment := comments[i]
+		// 设置用户信息
+		comment.FromUserName = userNameMap[comment.FromUserId].Name
+		comment.FromUserAvatar = userNameMap[comment.FromUserId].Avatar
+		if comment.ParentId != 0 && comment.ToUserId > 0 {
+			comment.ToUserName = userNameMap[comment.ToUserId].Name
+			comment.ToUserAvatar = userNameMap[comment.ToUserId].Avatar
+		}
+
+		// 设置业务标题
+		switch comment.TenantId {
+		case 0: // 文章评论
+			comment.ArticleTitle = articleTitleMap[comment.BusinessId]
+		case 1: // 章节评论
+			comment.ArticleTitle = sectionTitleMap[comment.BusinessId]
+		case 2: // 课程评论
+			comment.ArticleTitle = courseTitleMap[comment.BusinessId]
+		case 3: // 分享会评论
+			comment.ArticleTitle = meetingTitleMap[comment.BusinessId]
+		}
+	}
+}

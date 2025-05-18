@@ -25,6 +25,7 @@ func InitCommentRouters(g *gin.Engine) {
 	group.GET("/allCommentsByArticleId/:articleId", listAllCommentsByArticleId)
 	group.GET("/adaptions", adaptions)
 	group.GET("/byArticleId", listCommentsByArticleIdNoTree)
+	group.GET("/latest", listLatestComments)
 	group.Use(middleware.OperLogger())
 	group.POST("/comment", comment)
 	group.DELETE("/:id", deleteComment)
@@ -219,4 +220,11 @@ func listCommentsByArticleIdNoTree(ctx *gin.Context) {
 	var adS services.QAAdoption
 	adS.SetAdoptionComment(comments)
 	result.Ok(comments, "").Json(ctx)
+}
+
+// listLatestComments 获取最新10条评论
+func listLatestComments(ctx *gin.Context) {
+	var c services.CommentsService
+	comments, count := c.ListLatestComments()
+	result.Page(comments, count, nil).Json(ctx)
 }

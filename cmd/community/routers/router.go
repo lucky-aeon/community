@@ -27,6 +27,7 @@ func InitFrontedRouter(r *gin.Engine) {
 	InitLoginRegisterRouters(r)
 	InitIndexRouters(r)
 	frontend.InitFileRouters(r)
+	frontend.InitAiNewsRouter(r)
 	r.Use(middleware.Auth)
 	frontend.InitUserRouters(r)
 	frontend.InitChatRouter(r)

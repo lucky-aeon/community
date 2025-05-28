@@ -69,6 +69,10 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 		var meetingS MeetingService
 		userId = meetingS.GetById(comment.BusinessId).InitiatorId
 		eventId = event.Meeting
+	} else if comment.TenantId == 4 {
+		// AI日报没有具体的用户所有者，设置userId为0
+		userId = 0
+		eventId = event.CommentUpdateEvent
 	}
 
 	subscriptionService.ConstantAtSend(event.CommentAt, comment.FromUserId, comment.Content, b)
@@ -248,6 +252,7 @@ func setLatestCommentsInfo(comments []*model.Comments) {
 	sectionIds := mapset.NewSetWithSize[int](len(comments))
 	courseIds := mapset.NewSetWithSize[int](len(comments))
 	meetingIds := mapset.NewSetWithSize[int](len(comments))
+	aiNewsIds := mapset.NewSetWithSize[int](len(comments))
 
 	for i := range comments {
 		comment := comments[i]
@@ -264,6 +269,8 @@ func setLatestCommentsInfo(comments []*model.Comments) {
 			courseIds.Add(comment.BusinessId)
 		case 3: // 分享会评论
 			meetingIds.Add(comment.BusinessId)
+		case 4: // AI日报评论
+			aiNewsIds.Add(comment.BusinessId)
 		}
 	}
 
@@ -276,6 +283,7 @@ func setLatestCommentsInfo(comments []*model.Comments) {
 	var sectionTitleMap map[int]string
 	var courseTitleMap map[int]string
 	var meetingTitleMap map[int]string
+	var aiNewsTitleMap map[int]string
 
 	if !articleIds.IsEmpty() {
 		var articleService ArticleService
@@ -302,6 +310,18 @@ func setLatestCommentsInfo(comments []*model.Comments) {
 		}
 	}
 
+	if !aiNewsIds.IsEmpty() {
+		// AI日报标题处理
+		aiNewsTitleMap = make(map[int]string)
+		var aiNewsService AiNewsService
+		for _, id := range aiNewsIds.ToSlice() {
+			article, err := aiNewsService.GetNewsById(id)
+			if err == nil {
+				aiNewsTitleMap[id] = article.Title
+			}
+		}
+	}
+
 	// 设置评论相关信息
 	for i := range comments {
 		comment := comments[i]
@@ -323,6 +343,8 @@ func setLatestCommentsInfo(comments []*model.Comments) {
 			comment.ArticleTitle = courseTitleMap[comment.BusinessId]
 		case 3: // 分享会评论
 			comment.ArticleTitle = meetingTitleMap[comment.BusinessId]
+		case 4: // AI日报评论
+			comment.ArticleTitle = aiNewsTitleMap[comment.BusinessId]
 		}
 	}
 }

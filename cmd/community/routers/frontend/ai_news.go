@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
+	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service"
 )
 
@@ -68,12 +69,13 @@ func getHistoryDates(c *gin.Context) {
 
 // DailyNewsItem 日报文章项 - 移除了SourceURL和Category字段
 type DailyNewsItem struct {
-	ID          int    `json:"id"`
-	Title       string `json:"title"`
-	Summary     string `json:"summary"`
-	Tags        string `json:"tags"`
-	PublishDate string `json:"publishDate"`
-	Content     string `json:"content,omitempty"` // 可选，用于详情页
+	ID           int    `json:"id"`
+	Title        string `json:"title"`
+	Summary      string `json:"summary"`
+	Tags         string `json:"tags"`
+	PublishDate  string `json:"publishDate"`
+	Content      string `json:"content,omitempty"` // 可选，用于详情页
+	CommentCount int64  `json:"commentCount"`
 }
 
 // DailyNewsResponse 日报响应结构
@@ -121,15 +123,40 @@ func getDailyNews(c *gin.Context) {
 		return
 	}
 
+	// 批量查询所有文章的评论数量，避免N+1查询问题
+	var commentCounts []struct {
+		BusinessId int   `json:"business_id"`
+		Count      int64 `json:"count"`
+	}
+	if len(articles) > 0 {
+		articleIds := make([]int, len(articles))
+		for i, article := range articles {
+			articleIds[i] = article.ID
+		}
+
+		model.Comment().
+			Select("business_id, COUNT(*) as count").
+			Where("business_id IN ? AND tenant_id = ? AND deleted_at IS NULL", articleIds, 4).
+			Group("business_id").
+			Scan(&commentCounts)
+	}
+
+	// 建立评论数量映射
+	commentCountMap := make(map[int]int64)
+	for _, cc := range commentCounts {
+		commentCountMap[cc.BusinessId] = cc.Count
+	}
+
 	// 转换为前端需要的格式 - 移除了SourceURL和Category字段
 	var dailyItems []DailyNewsItem
 	for _, article := range articles {
 		item := DailyNewsItem{
-			ID:          article.ID,
-			Title:       article.Title,
-			Summary:     article.Summary,
-			Tags:        article.Tags,
-			PublishDate: article.PublishDate.String(),
+			ID:           article.ID,
+			Title:        article.Title,
+			Summary:      article.Summary,
+			Tags:         article.Tags,
+			PublishDate:  article.PublishDate.String(),
+			CommentCount: commentCountMap[article.ID], // 从映射中获取评论数量
 		}
 
 		// 如果需要内容，则包含
@@ -151,14 +178,15 @@ func getDailyNews(c *gin.Context) {
 
 // NewsDetailResponse AI新闻详情响应结构
 type NewsDetailResponse struct {
-	ID          int    `json:"id"`
-	Title       string `json:"title"`
-	Content     string `json:"content"`
-	Summary     string `json:"summary"`
-	Category    string `json:"category"`
-	Tags        string `json:"tags"`
-	PublishDate string `json:"publishDate"`
-	CreatedAt   string `json:"createdAt"`
+	ID           int    `json:"id"`
+	Title        string `json:"title"`
+	Content      string `json:"content"`
+	Summary      string `json:"summary"`
+	Category     string `json:"category"`
+	Tags         string `json:"tags"`
+	PublishDate  string `json:"publishDate"`
+	CreatedAt    string `json:"createdAt"`
+	CommentCount int64  `json:"commentCount"` // 评论数量
 }
 
 // getNewsDetail godoc
@@ -183,15 +211,20 @@ func getNewsDetail(c *gin.Context) {
 		return
 	}
 
+	// 查询评论数量
+	var commentCount int64
+	model.Comment().Where("business_id = ? AND tenant_id = ? AND deleted_at IS NULL", article.ID, 4).Count(&commentCount)
+
 	response := NewsDetailResponse{
-		ID:          article.ID,
-		Title:       article.Title,
-		Content:     article.Content,
-		Summary:     article.Summary,
-		Category:    article.Category,
-		Tags:        article.Tags,
-		PublishDate: article.PublishDate.String(),
-		CreatedAt:   article.CreatedAt.String(),
+		ID:           article.ID,
+		Title:        article.Title,
+		Content:      article.Content,
+		Summary:      article.Summary,
+		Category:     article.Category,
+		Tags:         article.Tags,
+		PublishDate:  article.PublishDate.String(),
+		CreatedAt:    article.CreatedAt.String(),
+		CommentCount: commentCount,
 	}
 
 	result.Ok(response, "").Json(c)

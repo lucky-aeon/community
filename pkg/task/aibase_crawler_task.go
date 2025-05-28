@@ -171,21 +171,13 @@ func (t *AIBaseCrawlerTask) performIncrementalCrawl(ctx context.Context, startID
 			// 重置404计数
 			consecutive404Count = 0
 
-			// 检查文章是否已存在
-			if exists, err := t.checkArticleExists(db, url); err != nil {
-				log.Errorf("检查文章存在性失败: %v", err)
+			// 保存文章（FirstOrCreate会自动处理重复）
+			if err := t.saveArticle(db, article, currentID); err != nil {
+				log.Errorf("保存文章失败 (ID: %d): %v", currentID, err)
 				result.FailedCount++
-			} else if exists {
-				log.Infof("文章已存在，跳过 (URL: %s)", url)
 			} else {
-				// 保存文章
-				if err := t.saveArticle(db, article, currentID); err != nil {
-					log.Errorf("保存文章失败 (ID: %d): %v", currentID, err)
-					result.FailedCount++
-				} else {
-					result.SuccessCount++
-					log.Infof("成功爬取并保存文章: %s (ID: %d)", article.Title, currentID)
-				}
+				result.SuccessCount++
+				log.Infof("处理文章成功: %s (ID: %d)", article.Title, currentID)
 			}
 		}
 
@@ -224,13 +216,6 @@ func (t *AIBaseCrawlerTask) crawlSingleArticle(crawler *crawler.AIBaseCrawler, u
 	return nil, lastErr
 }
 
-// checkArticleExists 检查文章是否已存在
-func (t *AIBaseCrawlerTask) checkArticleExists(db *gorm.DB, sourceURL string) (bool, error) {
-	var count int64
-	err := db.Model(&model.AiNews{}).Where("source_url = ?", sourceURL).Count(&count).Error
-	return count > 0, err
-}
-
 // saveArticle 保存文章到数据库
 func (t *AIBaseCrawlerTask) saveArticle(db *gorm.DB, article *model.AiNews, originalID int) error {
 	// 清空主键ID，让数据库自动分配
@@ -238,7 +223,22 @@ func (t *AIBaseCrawlerTask) saveArticle(db *gorm.DB, article *model.AiNews, orig
 	// 将原始ID存储在hash字段中
 	article.Hash = fmt.Sprintf("%d", originalID)
 
-	return db.Create(article).Error
+	// 使用FirstOrCreate避免重复插入
+	var existingArticle model.AiNews
+	result := db.Where("source_url = ?", article.SourceURL).FirstOrCreate(&existingArticle, article)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	// 如果是新创建的记录，记录日志
+	if result.RowsAffected > 0 {
+		log.Infof("新文章已保存: %s", article.Title)
+	} else {
+		log.Infof("文章已存在，跳过: %s", article.Title)
+	}
+
+	return nil
 }
 
 // SetEnabled 设置启用状态

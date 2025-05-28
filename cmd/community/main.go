@@ -1,11 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"strconv"
+	"syscall"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"strconv"
-	"time"
 	"xhyovo.cn/community/cmd/community/routers"
 	"xhyovo.cn/community/pkg/cache"
 	"xhyovo.cn/community/pkg/config"
@@ -15,13 +21,13 @@ import (
 	"xhyovo.cn/community/pkg/mysql"
 	"xhyovo.cn/community/pkg/oss"
 	"xhyovo.cn/community/pkg/postgre"
+	"xhyovo.cn/community/pkg/task"
 	"xhyovo.cn/community/pkg/utils"
 	"xhyovo.cn/community/server/model"
 	services "xhyovo.cn/community/server/service/llm"
 )
 
 func main() {
-
 	log.Init()
 	// 设置程序使用中国时区
 	chinaLoc, err := time.LoadLocation("Asia/Shanghai")
@@ -30,6 +36,7 @@ func main() {
 		log.Errorf("Error loading China location:", err)
 		return
 	}
+
 	r := gin.Default()
 	r.SetFuncMap(utils.GlobalFunc())
 	config.Init()
@@ -43,15 +50,57 @@ func main() {
 	emailConfig := appConfig.EmailConfig
 	email.Init(emailConfig.Username, emailConfig.Password, emailConfig.Host)
 
-	routers.InitFrontedRouter(r)
-	cache.Init()
-	log.Info("start web :8080")
-	err = r.Run(":8080")
-	if err != nil {
-		log.Errorln(err)
+	// 初始化定时任务管理器
+	taskManager := task.GetInstance()
+	if err := taskManager.Initialize(); err != nil {
+		log.Errorf("初始化定时任务管理器失败: %v", err)
+		return
 	}
 
+	// 启动定时任务管理器
+	if err := taskManager.Start(); err != nil {
+		log.Errorf("启动定时任务管理器失败: %v", err)
+		return
+	}
+
+	routers.InitFrontedRouter(r)
+	cache.Init()
+
+	// 创建HTTP服务器
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
+
+	// 在goroutine中启动服务器
+	go func() {
+		log.Info("start web :8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Errorf("HTTP服务器启动失败: %v", err)
+		}
+	}()
+
+	// 等待中断信号以优雅关闭服务器
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	log.Info("正在关闭服务器...")
+
+	// 停止定时任务管理器
+	taskManager.Stop()
+
+	// 设置关闭超时时间
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	// 优雅关闭HTTP服务器
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Errorf("HTTP服务器强制关闭: %v", err)
+	}
+
+	log.Info("服务器已关闭")
 }
+
 func GetPwd(pwd string) ([]byte, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(pwd), bcrypt.DefaultCost)
 	return hash, err

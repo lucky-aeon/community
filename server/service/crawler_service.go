@@ -84,16 +84,15 @@ func (s *CrawlerService) ScheduledCrawl() error {
 		}
 
 		url := fmt.Sprintf("https://www.aibase.com/zh/daily/%d", currentID)
-		log.Printf("正在爬取: %s", url)
 
 		article, err := s.aibaseCrawler.FetchSingleArticle(url, currentID)
 		if err != nil {
 			if err.Error() == "文章不存在 (404)" {
 				consecutive404Count++
-				log.Printf("遇到404 (ID: %d)，连续404次数: %d", currentID, consecutive404Count)
 			} else {
 				log.Printf("爬取失败 (ID: %d): %v", currentID, err)
 			}
+			log.Printf("爬取成功: %s", url)
 			currentID++ // 向后递增
 			continue
 		}

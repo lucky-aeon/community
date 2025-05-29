@@ -36,8 +36,8 @@ func NewAIBaseCrawlerTask(cronExpr string) *AIBaseCrawlerTask {
 		cronExpr: cronExpr,
 		enabled:  true,
 		config: AIBaseCrawlerConfig{
-			MaxConsecutive404: 3,
-			RequestInterval:   2 * time.Second,
+			MaxConsecutive404: 50,
+			RequestInterval:   1 * time.Second,
 			BatchSize:         10,
 			MaxRetries:        3,
 		},

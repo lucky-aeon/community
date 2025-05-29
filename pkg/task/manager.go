@@ -46,7 +46,7 @@ func (m *Manager) Initialize() error {
 // registerDefaultTasks 注册默认任务
 func (m *Manager) registerDefaultTasks() error {
 	// 注册AIBase爬虫任务 - 每1小时执行一次
-	aibaseTask := NewAIBaseCrawlerTask("0 0 * * * *")
+	aibaseTask := NewAIBaseCrawlerTask("0 0 */1 * * ?")
 	if err := m.scheduler.RegisterTask(aibaseTask); err != nil {
 		return err
 	}

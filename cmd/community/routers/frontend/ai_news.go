@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/server/model"
@@ -12,13 +13,15 @@ import (
 )
 
 var (
-	aiNewsService = new(services.AiNewsService)
+	aiNewsService      = new(services.AiNewsService)
+	aiNewsShareService = new(services.ShareService)
 )
 
 // InitAiNewsRouter 初始化AI新闻路由
 func InitAiNewsRouter(r *gin.Engine) {
 	group := r.Group("/community/ai-news")
 	{
+		group.Use(middleware.OperLogger())
 		group.GET("/dates", getHistoryDates)    // 获取有AI日报的历史日期
 		group.GET("/daily", getDailyNews)       // 获取指定日期的AI日报
 		group.GET("/detail/:id", getNewsDetail) // 获取AI日报详情
@@ -30,6 +33,12 @@ type HistoryDate struct {
 	Date      string `json:"date"`      // 日期 YYYY-MM-DD
 	DateLabel string `json:"dateLabel"` // 显示标签，如"1月15日"
 	Count     int    `json:"count"`     // 当天文章数量
+}
+
+// ShareStats 分享统计结构
+type ShareStats struct {
+	ShareCount int `json:"shareCount"` // 分享次数
+	ShareViews int `json:"shareViews"` // 分享浏览量
 }
 
 // getHistoryDates godoc
@@ -69,13 +78,14 @@ func getHistoryDates(c *gin.Context) {
 
 // DailyNewsItem 日报文章项 - 移除了SourceURL和Category字段
 type DailyNewsItem struct {
-	ID           int    `json:"id"`
-	Title        string `json:"title"`
-	Summary      string `json:"summary"`
-	Tags         string `json:"tags"`
-	PublishDate  string `json:"publishDate"`
-	Content      string `json:"content,omitempty"` // 可选，用于详情页
-	CommentCount int64  `json:"commentCount"`
+	ID           int        `json:"id"`
+	Title        string     `json:"title"`
+	Summary      string     `json:"summary"`
+	Tags         string     `json:"tags"`
+	PublishDate  string     `json:"publishDate"`
+	Content      string     `json:"content,omitempty"` // 可选，用于详情页
+	CommentCount int64      `json:"commentCount"`
+	ShareStats   ShareStats `json:"shareStats"` // 分享统计
 }
 
 // DailyNewsResponse 日报响应结构
@@ -147,9 +157,28 @@ func getDailyNews(c *gin.Context) {
 		commentCountMap[cc.BusinessId] = cc.Count
 	}
 
+	// 批量查询分享统计
+	var shareStatsMap map[int]services.ShareStatistics
+	if len(articles) > 0 {
+		articleIds := make([]int, len(articles))
+		for i, article := range articles {
+			articleIds[i] = article.ID
+		}
+
+		shareStatsMap, err = aiNewsShareService.GetStatisticsByBusinessIDs(services.BusinessTypeAiNews, articleIds)
+		if err != nil {
+			log.Warnf("获取分享统计失败: %s", err.Error())
+			// 分享统计失败不影响主要功能，继续执行
+			shareStatsMap = make(map[int]services.ShareStatistics)
+		}
+	}
+
 	// 转换为前端需要的格式 - 移除了SourceURL和Category字段
 	var dailyItems []DailyNewsItem
 	for _, article := range articles {
+		// 获取分享统计
+		shareStats := shareStatsMap[article.ID]
+
 		item := DailyNewsItem{
 			ID:           article.ID,
 			Title:        article.Title,
@@ -157,6 +186,10 @@ func getDailyNews(c *gin.Context) {
 			Tags:         article.Tags,
 			PublishDate:  article.PublishDate.String(),
 			CommentCount: commentCountMap[article.ID], // 从映射中获取评论数量
+			ShareStats: ShareStats{
+				ShareCount: shareStats.ShareCount,
+				ShareViews: shareStats.TotalViews,
+			},
 		}
 
 		// 如果需要内容，则包含
@@ -178,15 +211,16 @@ func getDailyNews(c *gin.Context) {
 
 // NewsDetailResponse AI新闻详情响应结构
 type NewsDetailResponse struct {
-	ID           int    `json:"id"`
-	Title        string `json:"title"`
-	Content      string `json:"content"`
-	Summary      string `json:"summary"`
-	Category     string `json:"category"`
-	Tags         string `json:"tags"`
-	PublishDate  string `json:"publishDate"`
-	CreatedAt    string `json:"createdAt"`
-	CommentCount int64  `json:"commentCount"` // 评论数量
+	ID           int        `json:"id"`
+	Title        string     `json:"title"`
+	Content      string     `json:"content"`
+	Summary      string     `json:"summary"`
+	Category     string     `json:"category"`
+	Tags         string     `json:"tags"`
+	PublishDate  string     `json:"publishDate"`
+	CreatedAt    string     `json:"createdAt"`
+	CommentCount int64      `json:"commentCount"` // 评论数量
+	ShareStats   ShareStats `json:"shareStats"`   // 分享统计
 }
 
 // getNewsDetail godoc
@@ -215,6 +249,14 @@ func getNewsDetail(c *gin.Context) {
 	var commentCount int64
 	model.Comment().Where("business_id = ? AND tenant_id = ? AND deleted_at IS NULL", article.ID, 4).Count(&commentCount)
 
+	// 查询分享统计
+	shareStatsMap, err := aiNewsShareService.GetStatisticsByBusinessIDs(services.BusinessTypeAiNews, []int{article.ID})
+	if err != nil {
+		log.Warnf("获取分享统计失败: %s", err.Error())
+		shareStatsMap = make(map[int]services.ShareStatistics)
+	}
+	shareStats := shareStatsMap[article.ID]
+
 	response := NewsDetailResponse{
 		ID:           article.ID,
 		Title:        article.Title,
@@ -225,6 +267,10 @@ func getNewsDetail(c *gin.Context) {
 		PublishDate:  article.PublishDate.String(),
 		CreatedAt:    article.CreatedAt.String(),
 		CommentCount: commentCount,
+		ShareStats: ShareStats{
+			ShareCount: shareStats.ShareCount,
+			ShareViews: shareStats.TotalViews,
+		},
 	}
 
 	result.Ok(response, "").Json(c)

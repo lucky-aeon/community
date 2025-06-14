@@ -9,6 +9,11 @@ import (
 // LocalTime 是自定义的时间类型，基于 time.Time
 type LocalTime time.Time
 
+// String 实现了 fmt.Stringer 接口，用于格式化输出
+func (t LocalTime) String() string {
+	return time.Time(t).Format("2006-01-02 15:04:05")
+}
+
 // MarshalJSON 实现了 JSON 序列化接口
 func (t LocalTime) MarshalJSON() ([]byte, error) {
 	tTime := time.Time(t)

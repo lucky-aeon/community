@@ -317,19 +317,34 @@ func (s *UserService) SearchNameSelectId(name string) (ids []int) {
 
 func Login(login model.LoginForm) (*model.Users, error) {
 	key := constant.LIMIT_LOGIN + login.Account
-	if !cache.CountLimit(key, 5, constant.TTL_LIMIT_lOGIN) {
-		return &model.Users{}, errors.New("操作次数过多,请稍后重试")
-	}
-	var users []model.Users
-	model.User().Find(&users)
-	user := userDao.QueryUser(&model.Users{Account: login.Account})
-	if user.ID == 0 {
-		return &model.Users{}, errors.New("登录失败！账号不存在")
-	}
-	if !ComparePswd(user.Password, login.Password) {
-		return &model.Users{}, errors.New("登录失败！密码错误")
 
+	// 先检查是否已经达到限流上限
+	v, exists := cache.GetInstance().Get(key)
+	if exists {
+		count := v.(int)
+		if count >= 5 {
+			return &model.Users{}, errors.New("操作次数过多,请稍后重试")
+		}
 	}
+
+	user := userDao.QueryUser(&model.Users{Account: login.Account})
+
+	// 合并登录失败的判断
+	if user.ID == 0 || !ComparePswd(user.Password, login.Password) {
+		// 登录失败，增加限流计数
+		if !cache.CountLimit(key, 5, constant.TTL_LIMIT_lOGIN) {
+			return &model.Users{}, errors.New("操作次数过多,请稍后重试")
+		}
+
+		// 根据失败原因返回不同的错误信息
+		if user.ID == 0 {
+			return &model.Users{}, errors.New("登录失败！账号不存在")
+		}
+		return &model.Users{}, errors.New("登录失败！密码错误")
+	}
+
+	// 登录成功，清除限流计数
+	cache.GetInstance().Delete(key)
 	return user, nil
 }
 

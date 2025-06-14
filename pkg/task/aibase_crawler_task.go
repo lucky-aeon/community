@@ -61,7 +61,6 @@ func (t *AIBaseCrawlerTask) IsEnabled() bool {
 
 // Execute 执行任务
 func (t *AIBaseCrawlerTask) Execute(ctx context.Context) error {
-	log.Infof("开始执行AIBase增量爬取任务")
 
 	// 获取最新文章ID
 	latestID, err := t.getLatestArticleID()
@@ -71,16 +70,12 @@ func (t *AIBaseCrawlerTask) Execute(ctx context.Context) error {
 
 	// 从下一个ID开始爬取
 	startID := latestID + 1
-	log.Infof("从ID %d 开始增量爬取", startID)
 
 	// 执行增量爬取
-	result, err := t.performIncrementalCrawl(ctx, startID)
+	_, err = t.performIncrementalCrawl(ctx, startID)
 	if err != nil {
 		return fmt.Errorf("增量爬取失败: %v", err)
 	}
-
-	log.Infof("AIBase增量爬取完成，成功: %d 篇，失败: %d 篇，最后ID: %d",
-		result.SuccessCount, result.FailedCount, result.LastProcessedID)
 
 	return nil
 }
@@ -106,12 +101,9 @@ func (t *AIBaseCrawlerTask) getLatestArticleID() (int, error) {
 	`).Scan(&result).Error
 
 	if err != nil {
-		// 如果没有找到记录，从默认ID开始
-		log.Warnf("未找到AIBase文章记录，使用默认起始ID: %v", err)
 		return 18330, nil // 默认起始ID
 	}
 
-	log.Infof("找到最新AIBase文章ID: %d", result.ArticleID)
 	return result.ArticleID, nil
 }
 
@@ -146,12 +138,10 @@ func (t *AIBaseCrawlerTask) performIncrementalCrawl(ctx context.Context, startID
 
 		// 检查是否达到最大连续404次数
 		if consecutive404Count >= t.config.MaxConsecutive404 {
-			log.Infof("连续遇到 %d 个404，停止爬取", t.config.MaxConsecutive404)
 			break
 		}
 
 		url := fmt.Sprintf("https://www.aibase.com/zh/daily/%d", currentID)
-		log.Infof("正在爬取: %s", url)
 
 		// 添加到处理列表
 		result.ProcessedIDs = append(result.ProcessedIDs, currentID)
@@ -162,9 +152,6 @@ func (t *AIBaseCrawlerTask) performIncrementalCrawl(ctx context.Context, startID
 		if err != nil {
 			if strings.Contains(err.Error(), "404") {
 				consecutive404Count++
-				log.Infof("遇到404 (ID: %d)，连续404次数: %d", currentID, consecutive404Count)
-			} else {
-				log.Errorf("爬取失败 (ID: %d): %v", currentID, err)
 			}
 			result.FailedCount++
 		} else {
@@ -208,7 +195,6 @@ func (t *AIBaseCrawlerTask) crawlSingleArticle(crawler *crawler.AIBaseCrawler, u
 		}
 
 		if retry < t.config.MaxRetries-1 {
-			log.Warnf("爬取失败，第 %d 次重试 (ID: %d): %v", retry+1, id, err)
 			time.Sleep(time.Duration(retry+1) * time.Second)
 		}
 	}

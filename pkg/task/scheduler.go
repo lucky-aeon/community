@@ -54,7 +54,6 @@ func (s *TaskScheduler) RegisterTask(task Task) error {
 // executeTaskWrapper 执行任务的包装器
 func (s *TaskScheduler) executeTaskWrapper(task Task) {
 	taskName := task.GetName()
-	log.Infof("开始执行定时任务: %s", taskName)
 
 	startTime := time.Now()
 	ctx := context.Background()
@@ -64,8 +63,6 @@ func (s *TaskScheduler) executeTaskWrapper(task Task) {
 
 	if err != nil {
 		log.Errorf("任务 %s 执行失败，耗时: %v，错误: %v", taskName, duration, err)
-	} else {
-		log.Infof("任务 %s 执行成功，耗时: %v", taskName, duration)
 	}
 }
 

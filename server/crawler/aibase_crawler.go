@@ -89,7 +89,6 @@ func (c *AIBaseCrawler) Crawl() ([]*model.AiNews, error) {
 
 // CrawlByDate 按日期爬取文章
 func (c *AIBaseCrawler) CrawlByDate() (*CrawlResult, error) {
-	fmt.Printf("开始从ID %d 向前爬取AIBase文章", c.startID)
 	if c.maxCount > 0 {
 		fmt.Printf("（限制 %d 篇）", c.maxCount)
 	}
@@ -104,20 +103,15 @@ func (c *AIBaseCrawler) CrawlByDate() (*CrawlResult, error) {
 	for {
 		// 检查是否达到最大数量限制
 		if c.maxCount > 0 && totalCount >= c.maxCount {
-			fmt.Printf("已达到最大爬取数量限制: %d\n", c.maxCount)
 			break
 		}
 
 		url := fmt.Sprintf("%s%d", c.baseURL, currentID)
-		fmt.Printf("正在爬取: %s\n", url)
 
 		article, err := c.fetchArticle(url, currentID)
 		if err != nil {
 			consecutiveErrors++
-			fmt.Printf("爬取失败 (ID: %d): %v\n", currentID, err)
-
 			if consecutiveErrors >= maxConsecutiveErrors {
-				fmt.Printf("连续 %d 次失败，停止爬取\n", maxConsecutiveErrors)
 				break
 			}
 
@@ -133,7 +127,6 @@ func (c *AIBaseCrawler) CrawlByDate() (*CrawlResult, error) {
 			dateKey := time.Time(article.PublishDate).Format("2006-01-02")
 			articlesByDate[dateKey] = append(articlesByDate[dateKey], article)
 			totalCount++
-			fmt.Printf("成功爬取文章: %s (日期: %s)\n", article.Title, dateKey)
 		}
 
 		currentID--

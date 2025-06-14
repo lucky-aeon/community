@@ -31,16 +31,12 @@ func (s *CrawlerService) InitializeData(startID int) error {
 
 	// 使用并发爬取，默认使用10个协程
 	workers := 10
-
-	log.Printf("使用 %d 个协程进行并发爬取", workers)
-
 	// 调用新的并发爬取方法（爬取直到404）
 	return s.ConcurrentCrawlUntil404(startID, workers)
 }
 
 // ScheduledCrawl 定时爬取 - 从数据库最新AIBase文章ID向后递增爬取新文章
 func (s *CrawlerService) ScheduledCrawl() error {
-	log.Println("开始定时爬取新文章")
 
 	db := mysql.GetInstance()
 
@@ -54,7 +50,6 @@ func (s *CrawlerService) ScheduledCrawl() error {
 	if result.Error != nil {
 		// 数据库为空，从默认ID开始
 		startID = 18330 // 可以根据实际情况调整
-		log.Printf("数据库中没有AIBase文章，从默认ID %d 开始爬取", startID)
 	} else {
 		// 从URL中解析出文章ID，例如：https://www.aibase.com/zh/daily/18391 -> 18391
 		urlParts := strings.Split(latestArticle.SourceURL, "/")
@@ -65,7 +60,6 @@ func (s *CrawlerService) ScheduledCrawl() error {
 				startID = 18330
 			} else {
 				startID = latestID + 1 // 从最新ID的下一个开始
-				log.Printf("从最新AIBase文章ID %d 的下一个ID %d 开始爬取", latestID, startID)
 			}
 		} else {
 			startID = 18330
@@ -79,7 +73,6 @@ func (s *CrawlerService) ScheduledCrawl() error {
 
 	for {
 		if consecutive404Count >= max404Count {
-			log.Printf("连续遇到 %d 个404，停止爬取", max404Count)
 			break
 		}
 
@@ -89,10 +82,7 @@ func (s *CrawlerService) ScheduledCrawl() error {
 		if err != nil {
 			if err.Error() == "文章不存在 (404)" {
 				consecutive404Count++
-			} else {
-				log.Printf("爬取失败 (ID: %d): %v", currentID, err)
 			}
-			log.Printf("爬取成功: %s", url)
 			currentID++ // 向后递增
 			continue
 		}
@@ -118,7 +108,6 @@ func (s *CrawlerService) ScheduledCrawl() error {
 			log.Printf("保存文章失败 (原始ID: %d): %v", currentID, err)
 		} else {
 			successCount++
-			log.Printf("成功爬取并保存新文章: %s (原始ID: %d, 数据库ID: %d)", article.Title, currentID, article.ID)
 		}
 
 		currentID++ // 向后递增
@@ -127,13 +116,11 @@ func (s *CrawlerService) ScheduledCrawl() error {
 		time.Sleep(1 * time.Second)
 	}
 
-	log.Printf("定时爬取完成，成功爬取 %d 篇新文章", successCount)
 	return nil
 }
 
 // 保留原有的并发爬取方法（用于测试或特殊场景）
 func (s *CrawlerService) ConcurrentCrawlFromID(startID, count, workers int) ([]*model.AiNews, error) {
-	log.Printf("开始并发爬取：从ID %d 向前爬取 %d 篇文章，使用 %d 个协程", startID, count, workers)
 
 	jobs := make(chan int, count)
 	results := make(chan *model.AiNews, count)
@@ -183,7 +170,6 @@ func (s *CrawlerService) ConcurrentCrawlFromID(startID, count, workers int) ([]*
 		}
 	}
 
-	log.Printf("并发爬取完成，成功: %d 篇，失败: %d 篇", len(articles), len(crawlErrors))
 	return articles, nil
 }
 
@@ -253,7 +239,6 @@ func (s *CrawlerService) ConcurrentCrawlAndSave(startID, count, workers int) err
 
 // ConcurrentCrawlUntil404 并发爬取直到遇到404
 func (s *CrawlerService) ConcurrentCrawlUntil404(startID, workers int) error {
-	log.Printf("开始并发爬取：从ID %d 向前爬取直到连续404，使用 %d 个协程", startID, workers)
 
 	db := mysql.GetInstance()
 
@@ -291,12 +276,9 @@ func (s *CrawlerService) ConcurrentCrawlUntil404(startID, workers int) error {
 					log.Printf("遇到404 (ID: %d)，连续404次数: %d", result.id, consecutive404Count)
 
 					if consecutive404Count >= max404Count {
-						log.Printf("连续遇到 %d 个404，停止爬取", max404Count)
 						close(jobs) // 停止发送新任务
 						return
 					}
-				} else {
-					log.Printf("爬取失败 (ID: %d): %v", result.id, result.error)
 				}
 				continue
 			}
@@ -322,7 +304,6 @@ func (s *CrawlerService) ConcurrentCrawlUntil404(startID, workers int) error {
 				log.Printf("保存文章失败 (原始ID: %d): %v", result.id, err)
 			} else {
 				successCount++
-				log.Printf("成功爬取并保存文章: %s (原始ID: %d, 数据库ID: %d)", result.article.Title, result.id, result.article.ID)
 			}
 		}
 	}()
@@ -348,7 +329,6 @@ func (s *CrawlerService) ConcurrentCrawlUntil404(startID, workers int) error {
 	// 等待结果处理完成
 	<-done
 
-	log.Printf("并发爬取完成，总处理: %d 篇，成功: %d 篇", totalProcessed, successCount)
 	return nil
 }
 

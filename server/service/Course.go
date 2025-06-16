@@ -370,6 +370,38 @@ func (*CourseService) PageCourseSection(page, limit, courseId int) (courses []mo
 		Order("sort").
 		Select("id", "title").
 		Find(&courses)
+
+	// 批量查询所有章节的评论数量，避免N+1查询问题
+	if len(courses) > 0 {
+		sectionIds := make([]int, len(courses))
+		for i, section := range courses {
+			sectionIds[i] = section.ID
+		}
+
+		// 批量查询评论数量
+		var commentCounts []struct {
+			BusinessId int   `json:"business_id"`
+			Count      int64 `json:"count"`
+		}
+
+		model.Comment().
+			Select("business_id, COUNT(*) as count").
+			Where("business_id IN ? AND tenant_id = ? AND deleted_at IS NULL", sectionIds, 1).
+			Group("business_id").
+			Scan(&commentCounts)
+
+		// 建立评论数量映射
+		commentCountMap := make(map[int]int64)
+		for _, cc := range commentCounts {
+			commentCountMap[cc.BusinessId] = cc.Count
+		}
+
+		// 设置每个章节的评论数量
+		for i := range courses {
+			courses[i].CommentCount = commentCountMap[courses[i].ID]
+		}
+	}
+
 	count = int64(len(courses))
 	return
 }

@@ -364,11 +364,11 @@ func (*CourseService) GetCourseSectionDetail(id int) *model.CoursesSections {
 
 // 获取课程列表
 func (*CourseService) PageCourseSection(page, limit, courseId int) (courses []model.CoursesSections, count int64) {
-	// 获取章节列表
+	// 获取章节列表，包含阅读时间
 	model.CoursesSection().
 		Where("course_id = ? ", courseId).
 		Order("sort").
-		Select("id", "title").
+		Select("id", "title", "reading_time").
 		Find(&courses)
 
 	// 批量查询所有章节的评论数量，避免N+1查询问题

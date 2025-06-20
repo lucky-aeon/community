@@ -1,8 +1,6 @@
 package routers
 
 import (
-	"net/url"
-
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
@@ -14,7 +12,7 @@ func InitSsoRouters(ctx *gin.Engine) {
 	group := ctx.Group("/sso")
 	group.GET("/login", SsoLogin)
 	group.POST("/token", SsoToken)
-	
+
 	// 兼容其他路径格式
 	apiGroup := ctx.Group("/api/sso/community")
 	apiGroup.GET("/login", SsoLogin)
@@ -31,45 +29,8 @@ func SsoLogin(c *gin.Context) {
 		return
 	}
 
-	var ssoService services.SsoService
-
-	// 验证应用
-	app, err := ssoService.GetApplicationByKey(appKey)
-	if err != nil {
-		result.Err(err.Error()).Json(c)
-		return
-	}
-
-	// 验证回调地址
-	if !ssoService.ValidateRedirectUrl(app, redirectUrl) {
-		result.Err("回调地址未授权").Json(c)
-		return
-	}
-
-	// 检查用户是否已登录
-	token := c.GetHeader("Authorization")
-	if len(token) == 0 {
-		token, _ = c.Cookie("Authorization")
-	}
-
-	claims, err := middleware.ParseToken(token)
-	if err != nil || claims.ID < 1 {
-		// 未登录，重定向到登录页面，并携带回跳参数
-		loginUrl := "/login?sso=1&app_key=" + url.QueryEscape(appKey) + "&redirect_url=" + url.QueryEscape(redirectUrl)
-		c.Redirect(302, loginUrl)
-		return
-	}
-
-	// 已登录，生成授权码
-	authCode, err := ssoService.GenerateAuthCode(appKey, claims.ID, redirectUrl)
-	if err != nil {
-		result.Err("生成授权码失败").Json(c)
-		return
-	}
-
-	// 重定向到第三方应用
-	finalUrl := redirectUrl + "?code=" + authCode
-	c.Redirect(302, finalUrl)
+	// 调用通用的SSO处理逻辑
+	handleSsoFlow(c, appKey, redirectUrl)
 }
 
 // SsoToken 获取用户信息
@@ -97,4 +58,52 @@ func SsoToken(c *gin.Context) {
 	// 返回用户基本信息
 	userInfo := ssoService.GetUserBasicInfo(user)
 	result.Ok(userInfo, "").Json(c)
+}
+
+// handleSsoFlow 通用SSO流程处理
+func handleSsoFlow(c *gin.Context, appKey, redirectUrl string) {
+	var ssoService services.SsoService
+
+	// 验证应用
+	app, err := ssoService.GetApplicationByKey(appKey)
+	if err != nil {
+		result.Err(err.Error()).Json(c)
+		return
+	}
+
+	// 验证回调地址
+	if !ssoService.ValidateRedirectUrl(app, redirectUrl) {
+		result.Err("回调地址未授权").Json(c)
+		return
+	}
+
+	// 检查用户是否已登录
+	token := c.GetHeader("Authorization")
+	if len(token) == 0 {
+		token, _ = c.Cookie("Authorization")
+	}
+
+	claims, err := middleware.ParseToken(token)
+	if err != nil || claims.ID < 1 {
+		// 用户未登录，返回登录提示
+		c.JSON(200, map[string]interface{}{
+			"needLogin":   true,
+			"sso":         true,
+			"appKey":      appKey,
+			"redirectUrl": redirectUrl,
+			"message":     "请登录以继续SSO认证",
+		})
+		return
+	}
+
+	// 用户已登录，生成授权码并跳转
+	authCode, err := ssoService.GenerateAuthCode(appKey, claims.ID, redirectUrl)
+	if err != nil {
+		result.Err("生成授权码失败").Json(c)
+		return
+	}
+
+	// 重定向到第三方应用
+	finalUrl := redirectUrl + "?code=" + authCode
+	c.Redirect(302, finalUrl)
 }

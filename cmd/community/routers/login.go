@@ -138,32 +138,8 @@ func LoginPage(c *gin.Context) {
 	if err == nil && claims.ID > 0 {
 		// 用户已登录
 		if sso == "1" && appKey != "" && redirectUrl != "" {
-			// SSO场景：用户已登录，直接生成授权码并跳转
-			var ssoService services.SsoService
-			
-			// 验证应用
-			app, err := ssoService.GetApplicationByKey(appKey)
-			if err != nil {
-				result.Err(err.Error()).Json(c)
-				return
-			}
-			
-			// 验证回调地址
-			if !ssoService.ValidateRedirectUrl(app, redirectUrl) {
-				result.Err("回调地址未授权").Json(c)
-				return
-			}
-			
-			// 生成授权码
-			authCode, err := ssoService.GenerateAuthCode(appKey, claims.ID, redirectUrl)
-			if err != nil {
-				result.Err("生成授权码失败").Json(c)
-				return
-			}
-			
-			// 重定向到第三方应用
-			finalUrl := redirectUrl + "?code=" + authCode
-			c.Redirect(302, finalUrl)
+			// SSO场景：调用通用处理逻辑
+			handleSsoFlow(c, appKey, redirectUrl)
 			return
 		}
 		

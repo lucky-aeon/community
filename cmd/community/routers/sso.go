@@ -1,6 +1,9 @@
 package routers
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
 	"xhyovo.cn/community/pkg/result"
@@ -85,14 +88,29 @@ func handleSsoFlow(c *gin.Context, appKey, redirectUrl string) {
 
 	claims, err := middleware.ParseToken(token)
 	if err != nil || claims.ID < 1 {
-		// 用户未登录，返回登录提示
-		c.JSON(200, map[string]interface{}{
-			"needLogin":   true,
-			"sso":         true,
-			"appKey":      appKey,
-			"redirectUrl": redirectUrl,
-			"message":     "请登录以继续SSO认证",
-		})
+		// 用户未登录，根据请求类型决定响应方式
+		acceptHeader := c.GetHeader("Accept")
+		contentType := c.GetHeader("Content-Type")
+		
+		// 判断是否为API请求（JSON格式）
+		isApiRequest := strings.Contains(acceptHeader, "application/json") || 
+		                strings.Contains(contentType, "application/json") ||
+		                strings.HasPrefix(c.Request.URL.Path, "/api/")
+		
+		if isApiRequest {
+			// API请求返回JSON
+			c.JSON(200, map[string]interface{}{
+				"needLogin":   true,
+				"sso":         true,
+				"appKey":      appKey,
+				"redirectUrl": redirectUrl,
+				"message":     "请登录以继续SSO认证",
+			})
+		} else {
+			// 浏览器请求重定向到前端登录页面
+			loginUrl := "https://code.xhyovo.cn/login?sso=1&app_key=" + url.QueryEscape(appKey) + "&redirect_url=" + url.QueryEscape(redirectUrl)
+			c.Redirect(302, loginUrl)
+		}
 		return
 	}
 

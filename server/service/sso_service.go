@@ -113,12 +113,21 @@ func (s *SsoService) GetUserBasicInfo(user *model.Users) map[string]interface{} 
 		avatarUrl = s.generateAvatarUrl(user.Avatar)
 	}
 	
+	// 检查是否为管理员
+	var userService UserService
+	isAdmin, err := userService.IsAdmin(user.ID)
+	if err != nil {
+		// 如果查询失败，默认为非管理员
+		isAdmin = false
+	}
+	
 	return map[string]interface{}{
-		"id":     user.ID,
-		"name":   user.Name,
-		"email":  user.Account,
-		"avatar": avatarUrl,
-		"desc":   user.Desc,
+		"id":      user.ID,
+		"name":    user.Name,
+		"email":   user.Account,
+		"avatar":  avatarUrl,
+		"desc":    user.Desc,
+		"isAdmin": isAdmin,
 	}
 }
 

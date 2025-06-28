@@ -457,9 +457,8 @@ func (s *UserService) CreateUserFromGitHub(githubUser *model.GitHubUser, inviteC
 		counter++
 	}
 	
-	// 生成随机密码（GitHub用户可能不需要密码登录）
-	randomPassword := s.generateRandomPassword()
-	hashedPassword, err := GetPwd(randomPassword)
+	// 使用邀请码作为密码（方便用户使用邮箱+邀请码登录）
+	hashedPassword, err := GetPwd(inviteCode)
 	if err != nil {
 		return nil, fmt.Errorf("密码加密失败: %v", err)
 	}

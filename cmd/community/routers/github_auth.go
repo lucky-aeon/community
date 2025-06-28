@@ -271,12 +271,17 @@ func GitHubActivate(c *gin.Context) {
 
 		// 返回注册成功结果
 		result.Ok(gin.H{
-			"message": "账号注册成功",
+			"message": "账号注册成功！您可以使用邮箱和邀请码作为密码登录",
 			"token":   token,
 			"user": gin.H{
 				"id":     newUser.ID,
 				"name":   newUser.Name,
 				"avatar": newUser.Avatar,
+			},
+			"login_info": gin.H{
+				"email":    newUser.Account,
+				"password": "您的邀请码",
+				"note":     "密码为您刚才输入的邀请码",
 			},
 		}, "").Json(c)
 	}

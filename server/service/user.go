@@ -25,16 +25,16 @@ type UserService struct {
 func (s UserService) DeleteUser(id int) {
 	var user model.Users
 	model.User().Where("id = ?", id).Find(&user)
-	
+
 	// 删除用户的 GitHub 绑定（如果存在）
 	var githubAuthService GitHubAuthService
 	githubAuthService.UnbindGitHubAccount(id)
-	
+
 	// 删除用户
 	mysql.GetInstance().Where("id = ?", id).Delete(&model.Users{})
-	
+
 	// 删除邀请码
-	mysql.GetInstance().Delete(&model.InviteCodes{}, user.InviteCode)
+	mysql.GetInstance().Where("code = ?", user.InviteCode).Delete(&model.InviteCodes{})
 }
 
 func (s UserService) ActiveUsers(page, limit int) (users []*model.UserSimple, count int64) {
@@ -387,7 +387,7 @@ func (s *UserService) IsBlack(userId int) bool {
 
 func (s *UserService) BanByUserId(id int) {
 	model.User().Where("id = ?", id).Update("state", 2)
-	
+
 	// 可选：禁用用户时同时解绑 GitHub 账号（防止通过 GitHub 登录绕过禁用）
 	var githubAuthService GitHubAuthService
 	githubAuthService.UnbindGitHubAccount(id)
@@ -398,10 +398,10 @@ func (s *UserService) BanByUserAccount(account string) {
 	// 先获取用户ID
 	var user model.Users
 	model.User().Where("account = ?", account).First(&user)
-	
+
 	// 更新状态
 	model.User().Where("account = ?", account).Update("state", 2)
-	
+
 	// 解绑 GitHub 账号
 	if user.ID > 0 {
 		var githubAuthService GitHubAuthService
@@ -426,25 +426,25 @@ func (s *UserService) CreateUserFromGitHub(githubUser *model.GitHubUser, inviteC
 	if !codeService.Exist(inviteCode) {
 		return nil, errors.New("邀请码不存在或已失效")
 	}
-	
+
 	// 生成用户账号，优先使用GitHub邮箱，如果没有则生成唯一账号
 	account := githubUser.Email
 	if account == "" {
 		account = fmt.Sprintf("github_%s_%d@github.local", githubUser.Login, githubUser.ID)
 	}
-	
+
 	// 检查账号是否已存在
 	existingUser := userDao.QueryUser(&model.Users{Account: account})
 	if existingUser.ID > 0 {
 		return nil, errors.New("该邮箱已被注册")
 	}
-	
+
 	// 生成用户昵称，如果GitHub有name则使用，否则使用login
 	name := githubUser.Name
 	if name == "" {
 		name = githubUser.Login
 	}
-	
+
 	// 检查昵称是否已存在，如果存在则添加后缀
 	originalName := name
 	counter := 1
@@ -456,34 +456,34 @@ func (s *UserService) CreateUserFromGitHub(githubUser *model.GitHubUser, inviteC
 		name = fmt.Sprintf("%s_%d", originalName, counter)
 		counter++
 	}
-	
+
 	// 使用邀请码作为密码（方便用户使用邮箱+邀请码登录）
 	hashedPassword, err := GetPwd(inviteCode)
 	if err != nil {
 		return nil, fmt.Errorf("密码加密失败: %v", err)
 	}
-	
+
 	// 创建用户
 	userID := userDao.CreateUser(account, name, string(hashedPassword), inviteCode)
 	if userID == 0 {
 		return nil, errors.New("用户创建失败")
 	}
-	
+
 	// 获取创建的用户
 	user := userDao.QueryUser(&model.Users{ID: userID})
-	
+
 	// 如果有头像URL，更新用户头像
 	if githubUser.AvatarURL != "" {
 		user.Avatar = githubUser.AvatarURL
 		userDao.UpdateUser(user)
 	}
-	
+
 	// 修改邀请码状态
 	codeService.SetState(inviteCode)
-	
+
 	// 自动订阅默认事件（复用现有逻辑）
 	s.autoSubscribeEvents(userID, inviteCode)
-	
+
 	return user, nil
 }
 
@@ -497,7 +497,7 @@ func (s *UserService) GetGitHubBinding(userID int) (*model.UserGitHubBinding, er
 func (s *UserService) generateRandomPassword() string {
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	const length = 16
-	
+
 	bytes := make([]byte, length)
 	for i := range bytes {
 		bytes[i] = charset[rand.Intn(len(charset))]

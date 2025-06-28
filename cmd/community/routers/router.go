@@ -27,6 +27,7 @@ func InitFrontedRouter(r *gin.Engine) {
 	InitLoginRegisterRouters(r)
 	InitIndexRouters(r)
 	InitSsoRouters(r)
+	InitGitHubAuthRouters(r)
 	frontend.InitShareRouter(r)
 	frontend.InitFileRouters(r)
 	r.Use(middleware.Auth)

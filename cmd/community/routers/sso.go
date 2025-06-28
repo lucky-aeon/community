@@ -1,11 +1,11 @@
 package routers
 
 import (
+	"github.com/gin-gonic/gin"
 	"net/url"
 	"strings"
-
-	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	services "xhyovo.cn/community/server/service"
 )
@@ -26,6 +26,7 @@ func InitSsoRouters(ctx *gin.Engine) {
 func SsoLogin(c *gin.Context) {
 	appKey := c.Query("app_key")
 	redirectUrl := c.Query("redirect_url")
+	log.Info("触发 sso")
 
 	if appKey == "" || redirectUrl == "" {
 		result.Err("缺少必要参数").Json(c)
@@ -88,16 +89,20 @@ func handleSsoFlow(c *gin.Context, appKey, redirectUrl string) {
 
 	claims, err := middleware.ParseToken(token)
 	if err != nil || claims.ID < 1 {
+		log.Info("用户没有登录")
+
 		// 用户未登录，根据请求类型决定响应方式
 		acceptHeader := c.GetHeader("Accept")
 		contentType := c.GetHeader("Content-Type")
-		
+
 		// 判断是否为API请求（JSON格式）
-		isApiRequest := strings.Contains(acceptHeader, "application/json") || 
-		                strings.Contains(contentType, "application/json") ||
-		                strings.HasPrefix(c.Request.URL.Path, "/api/")
-		
+		isApiRequest := strings.Contains(acceptHeader, "application/json") ||
+			strings.Contains(contentType, "application/json") ||
+			strings.HasPrefix(c.Request.URL.Path, "/api/")
+		log.Info("判断是否为API请求")
+
 		if isApiRequest {
+			log.Info("是 api 请求")
 			// API请求返回JSON
 			c.JSON(200, map[string]interface{}{
 				"needLogin":   true,
@@ -108,7 +113,8 @@ func handleSsoFlow(c *gin.Context, appKey, redirectUrl string) {
 			})
 		} else {
 			// 浏览器请求重定向到前端登录页面
-			loginUrl := "https://code.xhyovo.cn/login?sso=1&app_key=" + url.QueryEscape(appKey) + "&redirect_url=" + url.QueryEscape(redirectUrl)
+			loginUrl := "http://127.0.0.1:5173/login?sso=1&app_key=" + url.QueryEscape(appKey) + "&redirect_url=" + url.QueryEscape(redirectUrl)
+			log.Info("重定向地址社区登录地址：" + loginUrl)
 			c.Redirect(302, loginUrl)
 		}
 		return

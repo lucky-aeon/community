@@ -35,9 +35,9 @@ func (*LogServices) GetPageOperLog(page, limit int, logSearch model.LogSearch, f
 		db.Where("user_id in ?", ids)
 	}
 	if flag {
-		db.Where("request_info != '/community/file/singUrl'")
+		db.Where("request_info NOT LIKE '/community/file/singUrl%'")
 	} else {
-		db.Where("request_info = '/community/file/singUrl'")
+		db.Where("request_info LIKE '/community/file/singUrl%'")
 	}
 	db.Count(&count)
 	if count == 0 {

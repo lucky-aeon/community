@@ -24,6 +24,9 @@ func InitLoginRegisterRouters(ctx *gin.Engine) {
 	group := ctx.Group("/community")
 	group.POST("/login", Login)
 	group.POST("/register", Register)
+	
+	// 添加登录页面路由（支持SSO参数）
+	ctx.GET("/login", LoginPage)
 }
 
 func Login(c *gin.Context) {
@@ -117,4 +120,50 @@ func Register(c *gin.Context) {
 	c.SetCookie(middleware.AUTHORIZATION, token, int(constant.Token_TTl.Seconds()), "/", c.Request.Host, false, true)
 
 	result.OkWithMsg(map[string]string{"token": token}, "注册成功").Json(c)
+}
+
+// LoginPage 登录页面（支持SSO参数）
+func LoginPage(c *gin.Context) {
+	sso := c.Query("sso")
+	appKey := c.Query("app_key")
+	redirectUrl := c.Query("redirect_url")
+	
+	// 检查用户是否已经登录
+	token := c.GetHeader("Authorization")
+	if len(token) == 0 {
+		token, _ = c.Cookie("Authorization")
+	}
+	
+	claims, err := middleware.ParseToken(token)
+	if err == nil && claims.ID > 0 {
+		// 用户已登录
+		if sso == "1" && appKey != "" && redirectUrl != "" {
+			// SSO场景：调用通用处理逻辑
+			handleSsoFlow(c, appKey, redirectUrl)
+			return
+		}
+		
+		// 普通登录场景：用户已登录，重定向到首页
+		c.Redirect(302, "/")
+		return
+	}
+	
+	// 用户未登录，显示登录页面
+	if sso == "1" {
+		// SSO登录页面，可以传递SSO参数到前端
+		c.JSON(200, map[string]interface{}{
+			"needLogin": true,
+			"sso":       true,
+			"appKey":    appKey,
+			"redirectUrl": redirectUrl,
+			"message":   "请登录以继续SSO认证",
+		})
+	} else {
+		// 普通登录页面
+		c.JSON(200, map[string]interface{}{
+			"needLogin": true,
+			"sso":       false,
+			"message":   "请登录",
+		})
+	}
 }

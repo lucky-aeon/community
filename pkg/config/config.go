@@ -8,19 +8,26 @@ import (
 )
 
 type AppConfig struct {
-	ServerBind      string      `yaml:"serverBind" default:":8080"`
-	DbConfig        DbConfig    `yaml:"db"`
-	PGDbConfig      PGDbConfig  `yaml:"pgdb"`
-	OssConfig       OssConfig   `yaml:"oss"`
-	EmailConfig     EmailConfig `yaml:"email"`
+	ServerBind      string          `yaml:"serverBind" default:":8080"`
+	DbConfig        DbConfig        `yaml:"db"`
+	PGDbConfig      PGDbConfig      `yaml:"pgdb"`
+	OssConfig       OssConfig       `yaml:"oss"`
+	EmailConfig     EmailConfig     `yaml:"email"`
 	LLMConfig       LLMConfig
 	EmbeddingConfig EmbeddingConfig
+	GitHubConfig    GitHubConfig    `yaml:"github"`
 }
 
 type EmbeddingConfig struct {
 	ApiKey string `yaml:"apikey"`
 	Model  string `yaml:"model"`
 	Url    string `yaml:"url"`
+}
+
+type GitHubConfig struct {
+	ClientID     string `yaml:"clientId"`
+	ClientSecret string `yaml:"clientSecret"`
+	RedirectURL  string `yaml:"redirectUrl"`
 }
 
 type LLMConfig struct {
@@ -108,6 +115,11 @@ func Init() {
 			ApiKey: os.Getenv("EMBEDDING_API_KEY"),
 			Model:  os.Getenv("EMBEDDING_LLM_MODEL"),
 			Url:    os.Getenv("EMBEDDING_LLM_URL"),
+		},
+		GitHubConfig: GitHubConfig{
+			ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
+			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
+			RedirectURL:  os.Getenv("GITHUB_REDIRECT_URL"),
 		},
 	}
 	instance = appConfig

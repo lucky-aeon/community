@@ -364,12 +364,44 @@ func (*CourseService) GetCourseSectionDetail(id int) *model.CoursesSections {
 
 // 获取课程列表
 func (*CourseService) PageCourseSection(page, limit, courseId int) (courses []model.CoursesSections, count int64) {
-	// 获取章节列表
+	// 获取章节列表，包含阅读时间
 	model.CoursesSection().
 		Where("course_id = ? ", courseId).
 		Order("sort").
-		Select("id", "title").
+		Select("id", "title", "reading_time").
 		Find(&courses)
+
+	// 批量查询所有章节的评论数量，避免N+1查询问题
+	if len(courses) > 0 {
+		sectionIds := make([]int, len(courses))
+		for i, section := range courses {
+			sectionIds[i] = section.ID
+		}
+
+		// 批量查询评论数量
+		var commentCounts []struct {
+			BusinessId int   `json:"business_id"`
+			Count      int64 `json:"count"`
+		}
+
+		model.Comment().
+			Select("business_id, COUNT(*) as count").
+			Where("business_id IN ? AND tenant_id = ? AND deleted_at IS NULL", sectionIds, 1).
+			Group("business_id").
+			Scan(&commentCounts)
+
+		// 建立评论数量映射
+		commentCountMap := make(map[int]int64)
+		for _, cc := range commentCounts {
+			commentCountMap[cc.BusinessId] = cc.Count
+		}
+
+		// 设置每个章节的评论数量
+		for i := range courses {
+			courses[i].CommentCount = commentCountMap[courses[i].ID]
+		}
+	}
+
 	count = int64(len(courses))
 	return
 }

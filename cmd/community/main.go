@@ -62,6 +62,7 @@ func main() {
 		log.Errorf("启动定时任务管理器失败: %v", err)
 		return
 	}
+	log.Info("启动了")
 
 	routers.InitFrontedRouter(r)
 	cache.Init()

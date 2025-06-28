@@ -72,7 +72,7 @@ func (s *TaskScheduler) Start() error {
 	defer s.mu.Unlock()
 
 	s.cron.Start()
-	log.Info("任务调度器已启动")
+	log.Info("任务调度器已启动2222")
 	return nil
 }
 

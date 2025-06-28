@@ -88,3 +88,21 @@ func (s *CodeService) GetByCode(code string) (codeObject model.InviteCodes) {
 	model.InviteCode().Where("code = ?", code).Find(&codeObject)
 	return
 }
+
+func (s *CodeService) Exist(code string) bool {
+	return codeDao.Exist(code)
+}
+
+// IsCodeUsed 检查邀请码是否已被使用
+func (s *CodeService) IsCodeUsed(code string) bool {
+	var count int64
+	model.User().Where("invite_code = ?", code).Count(&count)
+	return count > 0
+}
+
+// FindUserByInviteCode 根据邀请码查找用户
+func (s *CodeService) FindUserByInviteCode(code string) (*model.Users, error) {
+	var user model.Users
+	err := model.User().Where("invite_code = ?", code).First(&user).Error
+	return &user, err
+}

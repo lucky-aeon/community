@@ -138,7 +138,7 @@ func (s *GitHubAuthService) validateState(state string) bool {
 	return false
 }
 
-// getAccessToken 使用授权码获取访问令牌
+// getAccessToken 使用授权码获取访问令牌（带重试机制）
 func (s *GitHubAuthService) getAccessToken(code string) (string, error) {
 	githubConfig := config.GetInstance().GitHubConfig
 	
@@ -147,36 +147,59 @@ func (s *GitHubAuthService) getAccessToken(code string) (string, error) {
 	data.Set("client_secret", githubConfig.ClientSecret)
 	data.Set("code", code)
 	
-	req, err := http.NewRequest("POST", "https://github.com/login/oauth/access_token", strings.NewReader(data.Encode()))
-	if err != nil {
-		return "", err
+	// 重试3次
+	maxRetries := 3
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		req, err := http.NewRequest("POST", "https://github.com/login/oauth/access_token", strings.NewReader(data.Encode()))
+		if err != nil {
+			return "", err
+		}
+		
+		req.Header.Set("Accept", "application/json")
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		
+		client := &http.Client{Timeout: 30 * time.Second}
+		resp, err := client.Do(req)
+		if err != nil {
+			if attempt < maxRetries {
+				// 等待后重试
+				time.Sleep(time.Duration(attempt) * time.Second)
+				continue
+			}
+			return "", fmt.Errorf("获取访问令牌失败，已重试%d次: %v", maxRetries, err)
+		}
+		defer resp.Body.Close()
+		
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			if attempt < maxRetries {
+				time.Sleep(time.Duration(attempt) * time.Second)
+				continue
+			}
+			return "", err
+		}
+		
+		var tokenResp model.GitHubOAuthResponse
+		if err := json.Unmarshal(body, &tokenResp); err != nil {
+			if attempt < maxRetries {
+				time.Sleep(time.Duration(attempt) * time.Second)
+				continue
+			}
+			return "", err
+		}
+		
+		if tokenResp.AccessToken == "" {
+			if attempt < maxRetries {
+				time.Sleep(time.Duration(attempt) * time.Second)
+				continue
+			}
+			return "", errors.New("获取访问令牌失败：响应中无访问令牌")
+		}
+		
+		return tokenResp.AccessToken, nil
 	}
 	
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	
-	var tokenResp model.GitHubOAuthResponse
-	if err := json.Unmarshal(body, &tokenResp); err != nil {
-		return "", err
-	}
-	
-	if tokenResp.AccessToken == "" {
-		return "", errors.New("获取访问令牌失败")
-	}
-	
-	return tokenResp.AccessToken, nil
+	return "", errors.New("获取访问令牌失败：超过最大重试次数")
 }
 
 // getGitHubUserInfo 使用访问令牌获取GitHub用户信息
@@ -189,7 +212,7 @@ func (s *GitHubAuthService) getGitHubUserInfo(accessToken string) (*model.GitHub
 	req.Header.Set("Authorization", "token "+accessToken)
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
@@ -224,7 +247,7 @@ func (s *GitHubAuthService) getGitHubUserEmail(accessToken string) (string, erro
 	req.Header.Set("Authorization", "token "+accessToken)
 	req.Header.Set("Accept", "application/vnd.github.v3+json")
 	
-	client := &http.Client{Timeout: 10 * time.Second}
+	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", err

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"xhyovo.cn/community/cmd/community/middleware"
+	"xhyovo.cn/community/pkg/constant"
 	"xhyovo.cn/community/pkg/log"
 	"xhyovo.cn/community/pkg/result"
 	"xhyovo.cn/community/server/model"
@@ -125,6 +126,9 @@ func GitHubCallback(c *gin.Context) {
 
 		log.Info("GitHub用户 " + githubUser.Login + " 登录成功")
 
+		// 设置认证 cookie
+		c.SetCookie(middleware.AUTHORIZATION, token, int(constant.Token_TTl.Seconds()), "/", c.Request.Host, false, true)
+
 		// 返回登录成功结果
 		c.JSON(http.StatusOK, gin.H{
 			"success": true,
@@ -231,6 +235,9 @@ func GitHubActivate(c *gin.Context) {
 
 		log.Info("用户 " + existingUser.Name + " 成功绑定GitHub账号")
 
+		// 设置认证 cookie
+		c.SetCookie(middleware.AUTHORIZATION, token, int(constant.Token_TTl.Seconds()), "/", c.Request.Host, false, true)
+
 		// 返回绑定成功结果
 		result.Ok(gin.H{
 			"message": "GitHub账号绑定成功",
@@ -268,6 +275,9 @@ func GitHubActivate(c *gin.Context) {
 		}
 
 		log.Info("GitHub新用户注册成功: " + newUser.Name)
+
+		// 设置认证 cookie
+		c.SetCookie(middleware.AUTHORIZATION, token, int(constant.Token_TTl.Seconds()), "/", c.Request.Host, false, true)
 
 		// 返回注册成功结果
 		result.Ok(gin.H{

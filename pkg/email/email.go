@@ -25,13 +25,71 @@ func Init(username, password, host string) {
 	log.Infof("邮件服务初始化完成，SMTP服务器: %s, 用户名: %s", smtpHost, smtpUsername)
 }
 
-// Send 发送邮件
+// Send 发送邮件，支持大量收件人的分批发送
 func Send(to []string, content, subject string) error {
 	// 检查收件人列表
 	if len(to) == 0 {
 		return fmt.Errorf("收件人列表为空")
 	}
 
+	// 如果收件人数量超过20个，则分批发送
+	const batchSize = 20
+	if len(to) > batchSize {
+		return sendInBatches(to, content, subject, batchSize)
+	}
+
+	// 少于等于20个收件人，正常发送
+	return sendSingleBatch(to, content, subject)
+}
+
+// sendInBatches 分批发送邮件
+func sendInBatches(to []string, content, subject string, batchSize int) error {
+	log.Infof("开始分批发送邮件，总收件人: %d，每批: %d", len(to), batchSize)
+	
+	var errors []error
+	successfulBatches := 0
+	totalBatches := (len(to) + batchSize - 1) / batchSize
+	
+	for i := 0; i < len(to); i += batchSize {
+		end := i + batchSize
+		if end > len(to) {
+			end = len(to)
+		}
+		
+		batch := to[i:end]
+		batchNum := i/batchSize + 1
+		
+		log.Infof("发送第 %d/%d 批，收件人数: %d", batchNum, totalBatches, len(batch))
+		
+		err := sendSingleBatch(batch, content, subject)
+		if err != nil {
+			log.Warnf("第 %d 批发送失败: %s", batchNum, err.Error())
+			errors = append(errors, fmt.Errorf("第 %d 批发送失败: %s", batchNum, err.Error()))
+		} else {
+			successfulBatches++
+			log.Infof("第 %d 批发送成功", batchNum)
+		}
+		
+		// 批次间添加延迟，避免频率限制
+		if i+batchSize < len(to) {
+			time.Sleep(2 * time.Second)
+		}
+	}
+	
+	if len(errors) == 0 {
+		log.Infof("所有批次发送成功，总计: %d 批", totalBatches)
+		return nil
+	} else if successfulBatches > 0 {
+		log.Warnf("部分批次发送成功: %d/%d", successfulBatches, totalBatches)
+		return fmt.Errorf("部分批次发送失败，成功: %d/%d", successfulBatches, totalBatches)
+	} else {
+		log.Errorf("所有批次发送失败")
+		return fmt.Errorf("所有批次发送失败")
+	}
+}
+
+// sendSingleBatch 发送单个批次的邮件
+func sendSingleBatch(to []string, content, subject string) error {
 	// 构建邮件内容
 	date := fmt.Sprintf("%s", time.Now().Format(time.RFC1123Z))
 	toAddress := strings.Join(to, ";")
@@ -59,7 +117,7 @@ func Send(to []string, content, subject string) error {
 	)
 
 	if err == nil {
-		log.Infof("邮件批量发送成功，收件人: %v", to)
+		log.Infof("邮件批量发送成功，收件人数: %d", len(to))
 		return nil
 	}
 

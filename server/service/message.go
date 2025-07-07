@@ -419,6 +419,16 @@ func (m *MessageService) generateCommentReplyHTML(b SubscribeData) string {
 		user.Name = "用户"
 	}
 
+	// 获取被回复的原始评论内容
+	originalComment := "你的评论"
+	if comment.ParentId > 0 {
+		var parentComment model.Comments
+		err = mysql.GetInstance().Table("comments").Where("id = ?", comment.ParentId).First(&parentComment).Error
+		if err == nil {
+			originalComment = markdownToHTML(parentComment.Content)
+		}
+	}
+
 	// 获取文章信息
 	var article model.Articles
 	articleURL := ""
@@ -440,7 +450,7 @@ func (m *MessageService) generateCommentReplyHTML(b SubscribeData) string {
 		UserName:        user.Name,
 		UserAvatar:      "",                              // 不设置头像，避免防盗链问题
 		ReplyContent:    markdownToHTML(comment.Content), // 转换 Markdown 为 HTML
-		OriginalComment: "你的评论",                          // 这里需要获取原始评论，暂时使用占位符
+		OriginalComment: originalComment,                 // 获取实际的被回复评论内容
 		ArticleTitle:    article.Title,
 		ArticleURL:      articleURL,
 		ReplyTime:       replyTime,

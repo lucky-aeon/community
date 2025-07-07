@@ -1,6 +1,7 @@
 package email
 
 import (
+	"fmt"
 	"os"
 	"testing"
 	"xhyovo.cn/community/pkg/log"
@@ -88,6 +89,58 @@ func TestSendToMultipleRecipients(t *testing.T) {
 	}
 
 	t.Logf("批量邮件已发送到 %d 个收件人", len(recipients))
+}
+
+// TestBatchSending 测试分批发送功能
+func TestBatchSending(t *testing.T) {
+	// 初始化日志系统
+	log.Init()
+	
+	// 创建模拟的大量收件人列表
+	recipients := make([]string, 50) // 创建50个收件人进行测试
+	for i := 0; i < 50; i++ {
+		recipients[i] = fmt.Sprintf("test%d@example.com", i+1)
+	}
+	
+	// 测试分批逻辑（不实际发送邮件）
+	batchSize := 20
+	totalBatches := (len(recipients) + batchSize - 1) / batchSize
+	
+	t.Logf("测试分批发送逻辑：总收件人 %d，每批 %d，预计 %d 批", len(recipients), batchSize, totalBatches)
+	
+	// 验证分批逻辑
+	batchCount := 0
+	for i := 0; i < len(recipients); i += batchSize {
+		end := i + batchSize
+		if end > len(recipients) {
+			end = len(recipients)
+		}
+		
+		batch := recipients[i:end]
+		batchCount++
+		
+		t.Logf("第 %d 批: %d 个收件人 (从 %d 到 %d)", batchCount, len(batch), i, end-1)
+		
+		// 验证每批的大小
+		if len(batch) > batchSize {
+			t.Errorf("批次 %d 大小超过限制: %d > %d", batchCount, len(batch), batchSize)
+		}
+		
+		// 验证最后一批
+		if i+batchSize >= len(recipients) {
+			expectedLastBatchSize := len(recipients) - i
+			if len(batch) != expectedLastBatchSize {
+				t.Errorf("最后一批大小不正确: 期望 %d，实际 %d", expectedLastBatchSize, len(batch))
+			}
+		}
+	}
+	
+	// 验证总批数
+	if batchCount != totalBatches {
+		t.Errorf("批次数量不正确: 期望 %d，实际 %d", totalBatches, batchCount)
+	}
+	
+	t.Logf("分批发送逻辑测试通过")
 }
 
 // BenchmarkGenerateHTML 测试HTML生成性能

@@ -41,7 +41,7 @@ func Send(to []string, content, subject string) error {
 	header["To"] = toAddress
 	header["Subject"] = subject
 	header["Date"] = date
-	header["Content-Type"] = "text/plain; charset=UTF-8"
+	header["Content-Type"] = "text/html; charset=UTF-8"
 
 	message := ""
 	for k, v := range header {
@@ -88,7 +88,7 @@ func sendIndividually(to []string, content, subject string) error {
 		header["To"] = recipient
 		header["Subject"] = subject
 		header["Date"] = date
-		header["Content-Type"] = "text/plain; charset=UTF-8"
+		header["Content-Type"] = "text/html; charset=UTF-8"
 
 		message := ""
 		for k, v := range header {

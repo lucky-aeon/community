@@ -69,14 +69,6 @@ func (*CourseService) Publish(course model.Courses) {
 
 	if course.ID == 0 {
 		model.Course().Create(&course)
-		var subscriptionService SubscriptionService
-		var b SubscribeData
-		b.UserId = course.UserId
-		b.CurrentBusinessId = course.ID
-		b.CourseId = course.ID
-		b.SubscribeId = course.UserId
-		var messageTemp = "你关注的用户 ${user.name} 发布了最新课程: ${course.title}"
-		subscriptionService.DoWithMessageTempl(event.UserFollowingEvent, b, messageTemp)
 	} else {
 		model.Course().Where("id = ?", course.ID).Select("*").Updates(&course)
 	}

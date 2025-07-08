@@ -272,12 +272,12 @@ func (m *MessageService) generateArticlePublishHTML(b SubscribeData) string {
 		publishTime = createdTime.Format("2006年01月02日 15:04")
 	}
 
-	// 准备模板数据
+	// 准备模板数据 - 只显示标题，移除内容
 	templateData := email.ArticleData{
 		UserName:       user.Name,
 		UserAvatar:     "", // 不设置头像，避免防盗链问题
 		ArticleTitle:   article.Title,
-		ArticleContent: getArticlePreview(article),
+		ArticleContent: "", // 不显示内容，只显示标题
 		ArticleURL:     articleURL,
 		PublishTime:    publishTime,
 	}
@@ -323,13 +323,13 @@ func (m *MessageService) generateSectionPublishHTML(b SubscribeData) string {
 		publishTime = createdTime.Format("2006年01月02日 15:04")
 	}
 
-	// 准备章节发布邮件模板数据
+	// 准备章节发布邮件模板数据 - 只显示标题，移除内容
 	templateData := email.SectionPublishData{
 		UserName:       user.Name,
 		UserAvatar:     "", // 不设置头像，避免防盗链问题
 		CourseTitle:    course.Title,
 		SectionTitle:   section.Title,
-		SectionContent: getSectionPreview(section),
+		SectionContent: "", // 不显示内容，只显示标题
 		SectionURL:     sectionURL,
 		PublishTime:    publishTime,
 	}
@@ -449,8 +449,8 @@ func (m *MessageService) generateCommentReplyHTML(b SubscribeData) string {
 	templateData := email.CommentReplyData{
 		UserName:        user.Name,
 		UserAvatar:      "",                              // 不设置头像，避免防盗链问题
-		ReplyContent:    markdownToHTML(comment.Content), // 转换 Markdown 为 HTML
-		OriginalComment: originalComment,                 // 获取实际的被回复评论内容
+		ReplyContent:    markdownToHTML(comment.Content), // 显示回复内容
+		OriginalComment: originalComment,                 // 显示被回复的评论内容
 		ArticleTitle:    article.Title,
 		ArticleURL:      articleURL,
 		ReplyTime:       replyTime,
@@ -458,6 +458,7 @@ func (m *MessageService) generateCommentReplyHTML(b SubscribeData) string {
 
 	return email.GenerateCommentReplyHTML(templateData)
 }
+
 
 // generateAdoptionHTML 生成采纳HTML邮件内容
 func (m *MessageService) generateAdoptionHTML(b SubscribeData) string {
@@ -489,7 +490,7 @@ func (m *MessageService) generateAdoptionHTML(b SubscribeData) string {
 
 	templateData := email.AdoptionData{
 		ArticleTitle:   article.Title,
-		CommentContent: markdownToHTML(comment.Content), // 转换 Markdown 为 HTML
+		CommentContent: markdownToHTML(comment.Content), // 显示被采纳的评论内容
 		ArticleURL:     articleURL,
 		AdoptionTime:   adoptionTime,
 	}
@@ -571,7 +572,7 @@ func (m *MessageService) generateCommentUpdateHTML(b SubscribeData) string {
 	templateData := email.ArticleCommentData{
 		UserName:       user.Name,
 		UserAvatar:     "",                              // 不设置头像，避免防盗链问题
-		CommentContent: markdownToHTML(comment.Content), // 转换 Markdown 为 HTML
+		CommentContent: markdownToHTML(comment.Content), // 显示评论内容
 		ArticleTitle:   article.Title,
 		ArticleURL:     articleURL,
 		CommentTime:    commentTime,
@@ -631,7 +632,7 @@ func (m *MessageService) generateSectionCommentHTML(b SubscribeData) string {
 	templateData := email.SectionCommentData{
 		UserName:       user.Name,
 		UserAvatar:     "",                              // 不设置头像，避免防盗链问题
-		CommentContent: markdownToHTML(comment.Content), // 转换 Markdown 为 HTML
+		CommentContent: markdownToHTML(comment.Content), // 显示评论内容
 		SectionTitle:   section.Title,
 		CourseTitle:    course.Title,
 		SectionURL:     sectionURL,
@@ -677,7 +678,7 @@ func (m *MessageService) generateCourseCommentHTML(b SubscribeData) string {
 	templateData := email.CourseCommentData{
 		UserName:       user.Name,
 		UserAvatar:     "",                              // 不设置头像，避免防盗链问题
-		CommentContent: markdownToHTML(comment.Content), // 转换 Markdown 为 HTML
+		CommentContent: markdownToHTML(comment.Content), // 显示评论内容
 		CourseTitle:    course.Title,
 		CourseURL:      courseURL,
 		CommentTime:    commentTime,
@@ -696,7 +697,7 @@ func (m *MessageService) generateMeetingHTML(b SubscribeData) string {
 		UserName:       "系统",
 		UserAvatar:     "", // 不设置头像，避免防盗链问题
 		ArticleTitle:   "敲鸭社区 - 会议通知",
-		ArticleContent: "<p>您有新的会议通知，请及时查看。</p>",
+		ArticleContent: "", // 不显示会议内容，只显示通知
 		ArticleURL:     "https://code.xhyovo.cn/meeting",
 		PublishTime:    time.Now().Format("2006年01月02日 15:04"),
 	}

@@ -355,13 +355,11 @@ func IsCourseUpdateEvent(template string) bool {
 // GenerateCommentReplyHTML 生成评论回复邮件HTML模板
 func GenerateCommentReplyHTML(data CommentReplyData) string {
 	userName := html.EscapeString(data.UserName)
-	replyContent := data.ReplyContent       // 直接使用，不转义（假设已经是安全的HTML）
-	originalComment := data.OriginalComment // 直接使用，不转义（假设已经是安全的HTML）
+	replyContent := data.ReplyContent       // 回复内容（HTML格式）
+	originalComment := data.OriginalComment // 被回复的评论内容（HTML格式）
 	articleTitle := html.EscapeString(data.ArticleTitle)
 	articleURL := html.EscapeString(data.ArticleURL)
 	replyTime := html.EscapeString(data.ReplyTime)
-
-	// 不再处理头像
 
 	htmlTemplate := `<!DOCTYPE html>
 <html lang="zh-CN">
@@ -373,7 +371,6 @@ func GenerateCommentReplyHTML(data CommentReplyData) string {
         .header { background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; padding: 20px; text-align: center; }
         .content { padding: 30px; }
         .reply-info { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .original-comment { background: #e9ecef; padding: 10px; border-left: 3px solid #667eea; margin: 10px 0; }
         .cta-button { display: inline-block; padding: 12px 30px; background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); color: white; text-decoration: none; border-radius: 25px; }
     </style>
 </head>
@@ -384,18 +381,25 @@ func GenerateCommentReplyHTML(data CommentReplyData) string {
         </div>
         <div class="content">
             <div class="reply-info">
-                <h3>💬 %s 回复了你的评论</h3>
-                <p><strong>在文章：</strong>%s</p>
+                <h3>💬 %s 回复了你在《%s》中的评论</h3>
                 <p><strong>回复时间：</strong>%s</p>
             </div>
-            <div class="original-comment">
-                <p><strong>你的评论：</strong>%s</p>
+            
+            <!-- 显示被回复的评论 -->
+            <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 3px solid #667eea;">
+                <h4 style="margin-top: 0; color: #495057;">你的评论：</h4>
+                <div style="color: #6c757d;">%s</div>
             </div>
-            <div style="margin: 20px 0;">
-                <p><strong>%s 的回复：</strong></p>
-                <p>%s</p>
+            
+            <!-- 显示回复内容 -->
+            <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 3px solid #ffc107;">
+                <h4 style="margin-top: 0; color: #856404;">%s 的回复：</h4>
+                <div style="color: #856404;">%s</div>
             </div>
-            <a href="%s" class="cta-button">💬 查看完整对话</a>
+            
+            <div style="text-align: center;">
+                <a href="%s" class="cta-button">💬 查看完整对话</a>
+            </div>
         </div>
     </div>
 </body>

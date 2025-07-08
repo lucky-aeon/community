@@ -173,6 +173,7 @@ func send(userIds []int, eventId, eventType, sendId int, b SubscribeData, messag
 	if messageTemp == "" {
 		messageTemp = messageDao.GetMessageTemplate(eventId)
 	}
+	
 	msg := m.GetMsgWithEventId(messageTemp, b, eventId)
 	m.SendMessages(sendId, eventType, eventId, b.CurrentBusinessId, ids, msg)
 	email.Send(emails, msg, "敲鸭社区")

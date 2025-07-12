@@ -26,6 +26,7 @@ func InitCommentRouters(g *gin.Engine) {
 	group.GET("/adaptions", adaptions)
 	group.GET("/byArticleId", listCommentsByArticleIdNoTree)
 	group.GET("/latest", listLatestComments)
+	group.GET("/summary/:businessId", getCommentSummary)
 	group.Use(middleware.OperLogger())
 	group.POST("/comment", comment)
 	group.DELETE("/:id", deleteComment)
@@ -227,4 +228,37 @@ func listLatestComments(ctx *gin.Context) {
 	var c services.CommentsService
 	comments, count := c.ListLatestComments()
 	result.Page(comments, count, nil).Json(ctx)
+}
+
+// 获取评论总结
+func getCommentSummary(ctx *gin.Context) {
+	businessId, err := strconv.Atoi(ctx.Param("businessId"))
+	if err != nil {
+		log.Warnf("获取评论总结参数解析失败,err: %s", err.Error())
+		result.Err("业务ID参数错误").Json(ctx)
+		return
+	}
+	
+	tenantId, err := strconv.Atoi(ctx.Query("tenantId"))
+	if err != nil {
+		log.Warnf("获取评论总结租户ID解析失败,err: %s", err.Error())
+		result.Err("租户ID参数错误").Json(ctx)
+		return
+	}
+	
+	summaryService := services.NewCommentSummaryService(ctx)
+	summary, err := summaryService.GetSummary(businessId, tenantId)
+	if err != nil {
+		log.Warnf("获取评论总结失败,err: %s", err.Error())
+		result.Err("获取总结失败").Json(ctx)
+		return
+	}
+	
+	// 如果没有评论，返回空结果
+	if summary == nil {
+		result.Ok(nil, "暂无评论总结").Json(ctx)
+		return
+	}
+	
+	result.Ok(summary, "获取成功").Json(ctx)
 }

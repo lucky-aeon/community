@@ -81,6 +81,13 @@ func (a *CommentsService) Comment(comment *model.Comments) error {
 	subscriptionService.Send(eventId, constant.NOTICE, comment.FromUserId, userId, b)
 	jsonBody, _ := json.Marshal(comment)
 	log.Infof("用户id: %d,发布评论: %s", comment.FromUserId, jsonBody)
+	
+	// 异步更新评论总结
+	go func() {
+		summaryService := NewCommentSummaryService(a.ctx)
+		summaryService.UpdateSummaryIfNeeded(comment.BusinessId, comment.TenantId)
+	}()
+	
 	return nil
 }
 

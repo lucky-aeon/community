@@ -97,14 +97,15 @@ func deleteComment(ctx *gin.Context) {
 func listCommentsByArticleId(ctx *gin.Context) {
 	articleId, err := strconv.Atoi(ctx.Param("articleId"))
 	p, limit := page.GetPage(ctx)
+	currentUserId := middleware.GetUserId(ctx)
 
 	if err != nil {
-		log.Warnf("用户id: %d 获取文章下的评论失败,err: %s", middleware.GetUserId(ctx), err.Error())
+		log.Warnf("用户id: %d 获取文章下的评论失败,err: %s", currentUserId, err.Error())
 		result.Err(err.Error()).Json(ctx)
 		return
 	}
 	var commentsService services.CommentsService
-	comments, count := commentsService.GetCommentsByArticleID(p, limit, articleId)
+	comments, count := commentsService.GetCommentsByArticleID(p, limit, articleId, currentUserId)
 	var adS services.QAAdoption
 	adS.SetAdoptionComment(comments)
 	result.Ok(page.New(comments, count), "").Json(ctx)
@@ -216,8 +217,9 @@ func listCommentsByArticleIdNoTree(ctx *gin.Context) {
 		return
 	}
 
-	var cS services.CommentsService
-	comments := cS.ListCommentsByArticleIdNoTree(businessId, tenantId)
+	currentUserId := middleware.GetUserId(ctx)
+	cS := services.NewCommentService(ctx)
+	comments := cS.ListCommentsByArticleIdNoTree(businessId, tenantId, currentUserId)
 	var adS services.QAAdoption
 	adS.SetAdoptionComment(comments)
 	result.Ok(comments, "").Json(ctx)

@@ -42,12 +42,6 @@ type CommentReactionSummary struct {
 	Users        []ReactionUser `json:"users" gorm:"-"` // 回复此表情的用户列表
 }
 
-// ReactionUser 表情回复用户信息
-type ReactionUser struct {
-	UserId   int    `json:"userId"`
-	UserName string `json:"userName"`
-	UserAvatar string `json:"userAvatar"`
-}
 
 // CommentReactionDetail 评论表情详情（包含用户信息）
 type CommentReactionDetail struct {

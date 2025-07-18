@@ -255,6 +255,9 @@ func (a *CommentsService) ListLatestComments() ([]*model.Comments, int64) {
 	// 设置评论信息
 	setLatestCommentsInfo(comments)
 
+	// 为最新评论添加表情统计信息（不需要用户ID，因为只是展示）
+	a.setCommentReactions(comments, 0)
+
 	return comments, count
 }
 

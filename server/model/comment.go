@@ -28,7 +28,7 @@ type Comments struct {
 	FromUserAvatar     string         `json:"fromUserAvatar" gorm:"-"`
 	ToUserAvatar       string         `json:"toUserAvatar" gorm:"-"`
 	AdoptionState      bool           `json:"adoptionState" gorm:"-"`
-	Reactions          []CommentReactionSummary `json:"reactions" gorm:"-"`
+	Reactions          []ReactionSummary `json:"reactions" gorm:"-"`
 }
 
 type ChildCommentNumber struct {

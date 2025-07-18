@@ -115,3 +115,22 @@ func (s *ReactionService) ValidateReactionType(reactionType string) bool {
 	
 	return count > 0
 }
+
+// GetAllExpressionTypes 获取所有表情类型
+func (s *ReactionService) GetAllExpressionTypes() ([]model.ExpressionType, error) {
+	log.Info("获取所有表情类型")
+	
+	var types []model.ExpressionType
+	err := model.ReactionDB().
+		Where("is_active = ?", true).
+		Order("sort_order ASC, id ASC").
+		Find(&types).Error
+	
+	if err != nil {
+		log.Errorf("获取表情类型失败: %v", err)
+		return nil, err
+	}
+	
+	log.Infof("获取表情类型成功，返回 %d 个表情类型", len(types))
+	return types, nil
+}

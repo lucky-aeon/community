@@ -35,6 +35,23 @@ type ReactionUser struct {
 	UserAvatar string `json:"userAvatar"`
 }
 
+// ExpressionType 表情类型模型
+type ExpressionType struct {
+	ID        int       `json:"id" gorm:"primaryKey;autoIncrement"`
+	Code      string    `json:"code" gorm:"type:varchar(50);not null;uniqueIndex;comment:表情代码"`
+	Name      string    `json:"name" gorm:"type:varchar(100);not null;comment:表情名称"`
+	ImagePath string    `json:"imagePath" gorm:"type:varchar(255);not null;comment:表情图片路径"`
+	IsActive  bool      `json:"isActive" gorm:"default:true;comment:是否启用"`
+	SortOrder int       `json:"sortOrder" gorm:"default:0;comment:排序"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// TableName 指定表名
+func (ExpressionType) TableName() string {
+	return "expression_types"
+}
+
 // 业务类型常量
 const (
 	BusinessTypeArticle = 0 // 文章

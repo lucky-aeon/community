@@ -13,6 +13,11 @@ import (
 
 func InitReactionRouters(g *gin.Engine) {
 	group := g.Group("/community/reactions")
+	
+	// 获取表情类型列表（无需登录）
+	group.GET("/types", getExpressionTypes)
+	
+	// 需要登录的接口
 	group.Use(middleware.OperLogger())
 
 	// 切换表情回复状态
@@ -23,6 +28,19 @@ func InitReactionRouters(g *gin.Engine) {
 
 	// 批量获取多个业务的表情统计
 	group.GET("/:businessType/batch", getReactionSummaryBatch)
+}
+
+// getExpressionTypes 获取所有表情类型
+func getExpressionTypes(ctx *gin.Context) {
+	reactionService := services.NewReactionService(ctx)
+	types, err := reactionService.GetAllExpressionTypes()
+	if err != nil {
+		log.Errorf("获取表情类型失败: %v", err)
+		result.Err("获取表情类型失败").Json(ctx)
+		return
+	}
+	
+	result.Ok(types, "获取成功").Json(ctx)
 }
 
 // toggleUniversalReaction 切换通用表情回复状态

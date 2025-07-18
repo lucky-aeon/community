@@ -381,22 +381,22 @@ func (a *CommentsService) setCommentReactions(comments []*model.Comments, curren
 	}
 	log.Infof("收集到评论ID列表: %v", commentIds)
 	
-	// 批量获取表情统计
-	reactionService := NewCommentReactionService(a.ctx)
-	reactionMap, err := reactionService.GetReactionSummaryBatch(commentIds, currentUserId)
+	// 批量获取表情统计（使用通用表情系统）
+	reactionService := NewReactionService(a.ctx)
+	universalReactionMap, err := reactionService.GetReactionSummaryBatch(model.BusinessTypeComment, commentIds, currentUserId)
 	if err != nil {
 		log.Errorf("获取评论表情统计失败: %v", err)
 		return
 	}
-	log.Infof("获取到表情统计数据，包含 %d 个评论的表情信息", len(reactionMap))
+	log.Infof("获取到表情统计数据，包含 %d 个评论的表情信息", len(universalReactionMap))
 	
-	// 为每个评论设置表情统计
+	// 设置表情统计
 	for _, comment := range comments {
-		if reactions, exists := reactionMap[comment.ID]; exists {
+		if reactions, exists := universalReactionMap[comment.ID]; exists {
 			comment.Reactions = reactions
 			log.Infof("评论ID %d 设置表情统计: %d 个表情", comment.ID, len(reactions))
 		} else {
-			comment.Reactions = []model.CommentReactionSummary{}
+			comment.Reactions = []model.ReactionSummary{}
 			log.Infof("评论ID %d 没有表情统计数据", comment.ID)
 		}
 	}

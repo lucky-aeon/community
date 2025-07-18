@@ -39,6 +39,7 @@ func InitFrontedRouter(r *gin.Engine) {
 	frontend.InitSubscriptionRouters(r)
 	frontend.InitMessageRouters(r)
 	frontend.InitCommentRouters(r)
+	frontend.InitReactionRouters(r)
 	frontend.InitArticleTagRouter(r)
 	frontend.InitDraftRouters(r)
 	frontend.InitCourseRouters(r)
